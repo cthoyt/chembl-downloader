@@ -1,13 +1,14 @@
 # -*- coding: utf-8 -*-
 
 """CLI for :mod:`chembl_downloader`."""
+
 from typing import Optional
 
 import click
 from more_click import verbose_option
 from tabulate import tabulate
 
-from .api import get_cursor
+from .api import cursor
 
 __all__ = [
     'main',
@@ -29,11 +30,11 @@ LIMIT 5
 @click.option('--version')
 def main(version: Optional[str]):
     """Test the connection."""
-    with get_cursor(version=version) as cursor:
-        click.echo(f"using cursor {cursor}")
-        cursor.execute(QUERY)
+    with cursor(version=version) as c:
+        click.echo(f"using cursor {c}")
+        c.execute(QUERY)
         click.echo(tabulate(
-            cursor.fetchall(),
+            c.fetchall(),
             headers=['chembl_id', 'name'],
         ))
 

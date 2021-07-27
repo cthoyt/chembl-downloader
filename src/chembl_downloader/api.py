@@ -6,44 +6,43 @@ import sqlite3
 import tarfile
 from contextlib import closing, contextmanager
 from pathlib import Path
-from typing import Optional
+from typing import Optional, Sequence
 
 import pystow
-import requests_ftp
 
 __all__ = [
-    'ensure',
-    'ensure_extract',
-    'get_connection',
-    'get_cursor',
+    'download',
+    'connect',
+    'cursor',
 ]
 
-requests_ftp.monkeypatch_session()
 PYSTOW_PARTS = 'pyobo', 'raw', 'chembl.compound'
 
 
-def ensure(version: Optional[str] = None) -> Path:
+def _download_helper(version: Optional[str] = None, prefix: Optional[Sequence[str]] = None) -> Path:
     """Ensure the latest ChEMBL SQLite dump is downloaded.
 
     :param version: The version number of ChEMBL to get. If none specified, uses
         :func:`bioversions.get_version` to look up the latest.
+    :param prefix: The directory inside :mod:`pystow` to use
     :return: The path to the downloaded tar.gz file
     """
     if version is None:
         import bioversions
         version = bioversions.get_version('chembl')
     url = f'ftp://ftp.ebi.ac.uk/pub/databases/chembl/ChEMBLdb/releases/chembl_{version}/chembl_{version}_sqlite.tar.gz'
-    return pystow.ensure(*PYSTOW_PARTS, version, url=url)
+    return pystow.ensure(*(prefix or PYSTOW_PARTS), version, url=url)
 
 
-def ensure_extract(version: Optional[str] = None):
+def download(version: Optional[str] = None, prefix: Optional[Sequence[str]] = None):
     """Get a connection as a context to the ChEMBL database.
 
     :param version: The version number of ChEMBL to get. If none specified, uses
         :func:`bioversions.get_version` to look up the latest.
+    :param prefix: The directory inside :mod:`pystow` to use
     :return: The path to the extract ChEMBL SQLite database file
     """
-    path = ensure(version=version)
+    path = _download_helper(version=version, prefix=prefix)
     directory = path.parent.joinpath(f'chembl_{version}')
     rv = directory.joinpath(f"chembl_{version}_sqlite", f"chembl_{version}.db")
     if path.parent.joinpath(f'chembl_{version}').is_dir():
@@ -56,45 +55,47 @@ def ensure_extract(version: Optional[str] = None):
 
 
 @contextmanager
-def get_connection(version: Optional[str] = None):
+def connect(version: Optional[str] = None, prefix: Optional[Sequence[str]] = None):
     """Ensure and connect to the database.
 
     :param version: The version number of ChEMBL to get. If none specified, uses
         :func:`bioversions.get_version` to look up the latest.
+    :param prefix: The directory inside :mod:`pystow` to use
     :yields: The SQLite connection object.
 
     Example:
 
     .. code-block:: python
 
-        from chembl_downloader import get_connection
+        import chembl_downloader
 
-        with get_connection() as conn:
+        with chembl_downloader.connect() as conn:
             with closing(conn.cursor()) as cursor:
                 cursor.execute(...)
     """
-    path = ensure_extract(version=version)
+    path = download(version=version, prefix=prefix)
     with closing(sqlite3.connect(path.as_posix())) as conn:
         yield conn
 
 
 @contextmanager
-def get_cursor(version: Optional[str] = None):
+def cursor(version: Optional[str] = None, prefix: Optional[Sequence[str]] = None):
     """Ensure, connect, and get a cursor from the database to the database.
 
     :param version: The version number of ChEMBL to get. If none specified, uses
         :func:`bioversions.get_version` to look up the latest.
+    :param prefix: The directory inside :mod:`pystow` to use
     :yields: The SQLite cursor object.
 
     Example:
 
     .. code-block:: python
 
-        from chembl_downloader import cursor
+        import chembl_downloader
 
-        with get_cursor() as cursor:
+        with chembl_downloader.cursor() as cursor:
             cursor.execute(...)
     """
-    with get_connection(version=version) as conn:
-        with closing(conn.cursor()) as cursor:
-            yield cursor
+    with connect(version=version, prefix=prefix) as conn:
+        with closing(conn.cursor()) as yv:
+            yield yv
