@@ -58,8 +58,8 @@ import chembl_downloader
 path = chembl_downloader.download()
 ```
 
-The `version` keyword argument is available for all functions in this package, but like the username and password will
-be omitted for brevity.
+The `version` keyword argument is available for all functions in this package (e.g., including
+`connect()` and `cursor()`), but will be omitted below for brevity.
 
 ### Automate Connection
 
@@ -70,7 +70,7 @@ Instead, the file can be downloaded and a connection can be opened automatically
 ```python
 import chembl_downloader
 
-with chembl_downloader.cursor(version='28') as cursor:
+with chembl_downloader.cursor() as cursor:
     cursor.execute(...)  # run your query string
     rows = cursor.fetchall()  # get your results
 ```
