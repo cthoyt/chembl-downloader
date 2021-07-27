@@ -3,6 +3,7 @@
 """API for :mod:`chembl_downloader`."""
 
 import logging
+import os
 import sqlite3
 import tarfile
 from contextlib import closing, contextmanager
@@ -23,7 +24,9 @@ logger = logging.getLogger(__name__)
 PYSTOW_PARTS = ["chembl"]
 
 
-def _download_helper(version: Optional[str] = None, prefix: Optional[Sequence[str]] = None) -> Tuple[str, Path]:
+def _download_helper(
+    version: Optional[str] = None, prefix: Optional[Sequence[str]] = None
+) -> Tuple[str, Path]:
     """Ensure the latest ChEMBL SQLite dump is downloaded.
 
     :param version: The version number of ChEMBL to get. If none specified, uses
@@ -39,25 +42,38 @@ def _download_helper(version: Optional[str] = None, prefix: Optional[Sequence[st
     return version, pystow.ensure(*(prefix or PYSTOW_PARTS), version, url=url)
 
 
-def download(version: Optional[str] = None, prefix: Optional[Sequence[str]] = None):
+def download(version: Optional[str] = None, prefix: Optional[Sequence[str]] = None) -> Path:
     """Get a connection as a context to the ChEMBL database.
 
     :param version: The version number of ChEMBL to get. If none specified, uses
         :func:`bioversions.get_version` to look up the latest.
     :param prefix: The directory inside :mod:`pystow` to use
     :return: The path to the extract ChEMBL SQLite database file
+    :raises FileNotFoundError: If no database file could be found in the
+        extracted directories
     """
     version, path = _download_helper(version=version, prefix=prefix)
-    directory = path.parent.joinpath(f"chembl_{version}")
-    rv = directory.joinpath(f"chembl_{version}_sqlite", f"chembl_{version}.db")
-    if path.parent.joinpath(f"chembl_{version}").is_dir():
-        return rv
-    logger.info('unarchiving %s to %s', path, directory)
-    with tarfile.open(path, mode="r", encoding="utf-8") as tar_file:
-        tar_file.extractall(path.parent)
-    if not rv.is_file():
-        raise FileNotFoundError(rv.as_posix())
-    return rv
+
+    # Extraction will be done in the same directory as the download.
+    # All ChEMBL SQLite dumps have the same internal folder structure,
+    # so assume there's going to be a directory here
+    directory = path.parent.joinpath("data")
+    if not directory.is_dir():
+        logger.info("unarchiving %s to %s", path, directory)
+        with tarfile.open(path, mode="r", encoding="utf-8") as tar_file:
+            tar_file.extractall(directory)
+    else:
+        logger.debug("did not re-unarchive %s to %s", path, directory)
+
+    # Since the structure of the zip changes from version to version,
+    # it's better to just walk through the unarchived folders recursively
+    # and find the DB file
+    for root, _dirs, files in os.walk(directory):
+        for file in files:
+            if file.endswith(".db"):
+                return Path(root).joinpath(file)
+
+    raise FileNotFoundError("could not find a .db file in the ChEMBL archive")
 
 
 @contextmanager
