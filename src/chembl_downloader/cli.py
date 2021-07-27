@@ -6,9 +6,8 @@ from typing import Optional
 
 import click
 from more_click import verbose_option
-from tabulate import tabulate
 
-from .api import cursor
+from .api import query
 from .queries import ID_NAME_QUERY_EXAMPLE
 
 __all__ = [
@@ -21,14 +20,8 @@ __all__ = [
 @click.option("--version")
 def main(version: Optional[str]):
     """Test the connection."""
-    with cursor(version=version) as c:
-        c.execute(ID_NAME_QUERY_EXAMPLE)
-        click.echo(
-            tabulate(
-                c.fetchall(),
-                headers=["chembl_id", "name"],
-            )
-        )
+    df = query(ID_NAME_QUERY_EXAMPLE, columns=["chembl_id", "name"], version=version)
+    click.echo(df.to_markdown())
 
 
 if __name__ == "__main__":
