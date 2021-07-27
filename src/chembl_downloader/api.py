@@ -16,7 +16,8 @@ __all__ = [
     "cursor",
 ]
 
-PYSTOW_PARTS = "pyobo", "raw", "chembl.compound"
+#: The default path inside the :mod:`pystow` directory
+PYSTOW_PARTS = ["chembl"]
 
 
 def _download_helper(version: Optional[str] = None, prefix: Optional[Sequence[str]] = None) -> Path:
