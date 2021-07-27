@@ -2,6 +2,7 @@
 
 """API for :mod:`chembl_downloader`."""
 
+import logging
 import sqlite3
 import tarfile
 from contextlib import closing, contextmanager
@@ -15,6 +16,8 @@ __all__ = [
     "connect",
     "cursor",
 ]
+
+logger = logging.getLogger(__name__)
 
 #: The default path inside the :mod:`pystow` directory
 PYSTOW_PARTS = ["chembl"]
@@ -49,6 +52,7 @@ def download(version: Optional[str] = None, prefix: Optional[Sequence[str]] = No
     rv = directory.joinpath(f"chembl_{version}_sqlite", f"chembl_{version}.db")
     if path.parent.joinpath(f"chembl_{version}").is_dir():
         return rv
+    logger.info('unarchiving %s to %s', path, directory)
     with tarfile.open(path, mode="r", encoding="utf-8") as tar_file:
         tar_file.extractall(path.parent)
     if not rv.is_file():
