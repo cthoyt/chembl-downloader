@@ -75,7 +75,35 @@ with chembl_downloader.cursor() as cursor:
     rows = cursor.fetchall()  # get your results
 ```
 
-You now know everything I can teach you. Please use these tools to do re-usable, reproducible science!
+### Run a query and get a pandas DataFrame
+
+The most powerful function is `query()` which builds on the previous `cursor()` function,
+but then loads the results into a pandas DataFrame for any downstream use.
+
+```python
+import chembl_downloader
+
+q = """
+SELECT
+    MOLECULE_DICTIONARY.chembl_id,
+    MOLECULE_DICTIONARY.pref_name
+FROM MOLECULE_DICTIONARY
+JOIN COMPOUND_STRUCTURES ON MOLECULE_DICTIONARY.molregno == COMPOUND_STRUCTURES.molregno
+WHERE molecule_dictionary.pref_name IS NOT NULL
+LIMIT 5
+"""
+
+df = chembl_downloader.query(q, columns=['chembl_id', 'name'])
+df.to_csv(..., sep='\t', index=False)
+```
+
+Suggestion 1: use `pystow` to make a reproducible file path that's portable to other people's machines
+(e.g., it doesn't have your username in the path).
+
+Suggestion 2: RDKit is now pip-installable with `pip install rdkit-pypi`, which means most users don't hav
+to muck  around with complicated conda environments and configurations. One of the powerful but understated
+tools in RDKit is the [rdkit.Chem.PandasTools](https://rdkit.org/docs/source/rdkit.Chem.PandasTools.html)
+module.
 
 ### Store in a Different Place
 

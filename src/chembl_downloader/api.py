@@ -8,14 +8,18 @@ import sqlite3
 import tarfile
 from contextlib import closing, contextmanager
 from pathlib import Path
-from typing import Optional, Sequence, Tuple
+from typing import Optional, Sequence, TYPE_CHECKING, Tuple
 
 import pystow
+
+if TYPE_CHECKING:
+    import pandas
 
 __all__ = [
     "download",
     "connect",
     "cursor",
+    "query",
 ]
 
 logger = logging.getLogger(__name__)
@@ -119,3 +123,31 @@ def cursor(version: Optional[str] = None, prefix: Optional[Sequence[str]] = None
     with connect(version=version, prefix=prefix) as conn:
         with closing(conn.cursor()) as yv:
             yield yv
+
+
+def query(
+    q: str, version: Optional[str] = None, prefix: Optional[Sequence[str]] = None, **kwargs
+) -> "pandas.DataFrame":
+    """Ensure the data is available, run the query, then put the results in a dataframe.
+
+    :param q: A SQL query string
+    :param version: The version number of ChEMBL to get. If none specified, uses
+        :func:`bioversions.get_version` to look up the latest.
+    :param prefix: The directory inside :mod:`pystow` to use
+    :param kwargs: keyword arguments to pass through to :class:`pandas.DataFrame`, such as
+        ``columns`` or ``index``.
+    :return: A dataframe
+
+    Example:
+    .. code-block:: python
+
+        import chembl_downloader
+        from chembl_downloader.queries import ID_NAME_QUERY_EXAMPLE
+
+        df = chembl_downloader.query(ID_NAME_QUERY_EXAMPLE, columns=['chembl_id', 'name'])
+    """
+    import pandas as pd
+
+    with cursor(version=version, prefix=prefix) as _cursor:
+        _cursor.execute(q)
+        return pd.DataFrame(_cursor.fetchall(), **kwargs)

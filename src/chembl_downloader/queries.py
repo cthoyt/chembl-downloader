@@ -3,7 +3,7 @@
 """A collection of query strings for ChEBML."""
 
 #: This query yields tuples of ChEMBL identifiers and their preferred names, omitting
-#: pairs where there is no name.
+#: pairs where there is no name or if there's no structure
 ID_NAME_QUERY = """
 SELECT
     MOLECULE_DICTIONARY.chembl_id,
