@@ -2,4 +2,4 @@
 
 """Download, open, and query ChEMBL through SQLite."""
 
-from .api import connect, ensure
+from .api import ensure, ensure_extract, get_connection, get_cursor
