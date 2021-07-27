@@ -7,7 +7,7 @@ import sqlite3
 import tarfile
 from contextlib import closing, contextmanager
 from pathlib import Path
-from typing import Optional, Sequence
+from typing import Optional, Sequence, Tuple
 
 import pystow
 
@@ -23,20 +23,20 @@ logger = logging.getLogger(__name__)
 PYSTOW_PARTS = ["chembl"]
 
 
-def _download_helper(version: Optional[str] = None, prefix: Optional[Sequence[str]] = None) -> Path:
+def _download_helper(version: Optional[str] = None, prefix: Optional[Sequence[str]] = None) -> Tuple[str, Path]:
     """Ensure the latest ChEMBL SQLite dump is downloaded.
 
     :param version: The version number of ChEMBL to get. If none specified, uses
         :func:`bioversions.get_version` to look up the latest.
     :param prefix: The directory inside :mod:`pystow` to use
-    :return: The path to the downloaded tar.gz file
+    :return: A pair of the version and the path to the downloaded tar.gz file
     """
     if version is None:
         import bioversions
 
         version = bioversions.get_version("chembl")
     url = f"ftp://ftp.ebi.ac.uk/pub/databases/chembl/ChEMBLdb/releases/chembl_{version}/chembl_{version}_sqlite.tar.gz"
-    return pystow.ensure(*(prefix or PYSTOW_PARTS), version, url=url)
+    return version, pystow.ensure(*(prefix or PYSTOW_PARTS), version, url=url)
 
 
 def download(version: Optional[str] = None, prefix: Optional[Sequence[str]] = None):
@@ -47,7 +47,7 @@ def download(version: Optional[str] = None, prefix: Optional[Sequence[str]] = No
     :param prefix: The directory inside :mod:`pystow` to use
     :return: The path to the extract ChEMBL SQLite database file
     """
-    path = _download_helper(version=version, prefix=prefix)
+    version, path = _download_helper(version=version, prefix=prefix)
     directory = path.parent.joinpath(f"chembl_{version}")
     rv = directory.joinpath(f"chembl_{version}_sqlite", f"chembl_{version}.db")
     if path.parent.joinpath(f"chembl_{version}").is_dir():
