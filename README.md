@@ -12,9 +12,9 @@
     <a href="https://github.com/cthoyt/chembl_downloader/blob/main/LICENSE">
         <img alt="PyPI - License" src="https://img.shields.io/pypi/l/chembl_downloader" />
     </a>
-    <!--<a href="https://zenodo.org/badge/latestdoi/XXXX">
-        <img src="https://zenodo.org/badge/XXXX.svg" alt="DOI" />
-    </a>-->
+    <a href="https://zenodo.org/badge/latestdoi/390113187">
+        <img src="https://zenodo.org/badge/390113187.svg" alt="DOI" />
+    </a>
 </p>
 
 Don't worry about downloading/extracting ChEMBL or versioning - just use ``chembl_downloader`` to write code that knows
