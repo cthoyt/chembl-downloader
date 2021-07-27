@@ -100,7 +100,7 @@ df.to_csv(..., sep='\t', index=False)
 Suggestion 1: use `pystow` to make a reproducible file path that's portable to other people's machines
 (e.g., it doesn't have your username in the path).
 
-Suggestion 2: RDKit is now pip-installable with `pip install rdkit-pypi`, which means most users don't hav
+Suggestion 2: RDKit is now pip-installable with `pip install rdkit-pypi`, which means most users don't have
 to muck  around with complicated conda environments and configurations. One of the powerful but understated
 tools in RDKit is the [rdkit.Chem.PandasTools](https://rdkit.org/docs/source/rdkit.Chem.PandasTools.html)
 module.
