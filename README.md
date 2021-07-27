@@ -29,7 +29,9 @@ how to download it and use it automatically.
 $ pip install chembl-downloader
 ```
 
-## Download A Specific Version
+## Usage
+
+### Download A Specific Version
 
 ```python
 import chembl_downloader
@@ -44,7 +46,7 @@ directory.
 We'd like to implement something such that it could load directly into SQLite from the archive, but it appears this is
 a [paid feature](https://sqlite.org/purchase/zipvfs).
 
-## Download the Latest Version
+### Download the Latest Version
 
 First, you'll have to install [`bioversions`](https://github.com/cthoyt/bioversions)
 with `pip install bioversions`, whose job it is to look up the latest version of many databases. Then, you can modify
@@ -59,7 +61,7 @@ path = chembl_downloader.download()
 The `version` keyword argument is available for all functions in this package, but like the username and password will
 be omitted for brevity.
 
-## Automate Connection
+### Automate Connection
 
 Inside the archive is a single SQLite database file. Normally, people manually untar this folder then do something with
 the resulting file. Don't do this, it's not reproducible!
@@ -75,7 +77,7 @@ with chembl_downloader.cursor(version='28') as cursor:
 
 You now know everything I can teach you. Please use these tools to do re-usable, reproducible science!
 
-## Store in a Different Place
+### Store in a Different Place
 
 If you want to store the data elsewhere using `pystow` (e.g., in [`pyobo`](https://github.com/pyobo/pyobo)
 I also keep a copy of this file), you can use the `prefix` argument.
@@ -91,10 +93,16 @@ path = chembl_downloader.download(prefix=['pyobo', 'raw', 'chembl'])
 See the `pystow` [documentation](https://github.com/cthoyt/pystow#%EF%B8%8F-configuration) on configuring the storage
 location further.
 
-## Download via CLI
+### Download via CLI
 
 After installing, run the following CLI command to ensure it and send the path to stdout
 
 ```bash
 $ chembl_downloader
 ```
+
+## Contributing
+
+If you'd like to contribute, there's a submodule called `chembl_downloader.queries`
+where you can add a SQL query along with a description of what it does for easy
+importing.
