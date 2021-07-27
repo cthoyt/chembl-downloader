@@ -12,9 +12,9 @@
     <a href="https://github.com/cthoyt/chembl_downloader/blob/main/LICENSE">
         <img alt="PyPI - License" src="https://img.shields.io/pypi/l/chembl_downloader" />
     </a>
-    <a href="https://zenodo.org/badge/latestdoi/321374043">
-        <img src="https://zenodo.org/badge/321374043.svg" alt="DOI" />
-    </a>
+    <!--<a href="https://zenodo.org/badge/latestdoi/XXXX">
+        <img src="https://zenodo.org/badge/XXXX.svg" alt="DOI" />
+    </a>-->
 </p>
 
 Don't worry about downloading/extracting ChEMBL or versioning - just use ``chembl_downloader`` to write code that knows
@@ -38,8 +38,8 @@ After it's been downloaded and extracted once, it's smart and doesn't need to do
 using [`pystow`](https://github.com/cthoyt/pystow) automatically in the `~/.data/chembl`
 directory.
 
-We'd like to implement something such that it could load directly into SQLite from the archive, but
-it appears this is a [paid feature](https://sqlite.org/purchase/zipvfs).
+We'd like to implement something such that it could load directly into SQLite from the archive, but it appears this is
+a [paid feature](https://sqlite.org/purchase/zipvfs).
 
 ## Download the Latest Version
 
@@ -58,8 +58,8 @@ be omitted for brevity.
 
 ## Automate Connection
 
-Inside the archive is a single SQLite database file.  Normally, people manually untar
-this folder then do something with the resulting file. Don't do this, it's not reproducible!
+Inside the archive is a single SQLite database file. Normally, people manually untar this folder then do something with
+the resulting file. Don't do this, it's not reproducible!
 Instead, the file can be downloaded and a connection can be opened automatically with:
 
 ```python
@@ -70,8 +70,7 @@ with chembl_downloader.cursor(version='28') as cursor:
     rows = cursor.fetchall()  # get your results
 ```
 
-You now know everything I can teach you. Please use these tools to do re-usable, reproducible
-science!
+You now know everything I can teach you. Please use these tools to do re-usable, reproducible science!
 
 ## Store in a Different Place
 

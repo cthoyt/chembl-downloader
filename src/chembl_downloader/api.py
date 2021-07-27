@@ -11,12 +11,12 @@ from typing import Optional, Sequence
 import pystow
 
 __all__ = [
-    'download',
-    'connect',
-    'cursor',
+    "download",
+    "connect",
+    "cursor",
 ]
 
-PYSTOW_PARTS = 'pyobo', 'raw', 'chembl.compound'
+PYSTOW_PARTS = "pyobo", "raw", "chembl.compound"
 
 
 def _download_helper(version: Optional[str] = None, prefix: Optional[Sequence[str]] = None) -> Path:
@@ -29,8 +29,9 @@ def _download_helper(version: Optional[str] = None, prefix: Optional[Sequence[st
     """
     if version is None:
         import bioversions
-        version = bioversions.get_version('chembl')
-    url = f'ftp://ftp.ebi.ac.uk/pub/databases/chembl/ChEMBLdb/releases/chembl_{version}/chembl_{version}_sqlite.tar.gz'
+
+        version = bioversions.get_version("chembl")
+    url = f"ftp://ftp.ebi.ac.uk/pub/databases/chembl/ChEMBLdb/releases/chembl_{version}/chembl_{version}_sqlite.tar.gz"
     return pystow.ensure(*(prefix or PYSTOW_PARTS), version, url=url)
 
 
@@ -43,9 +44,9 @@ def download(version: Optional[str] = None, prefix: Optional[Sequence[str]] = No
     :return: The path to the extract ChEMBL SQLite database file
     """
     path = _download_helper(version=version, prefix=prefix)
-    directory = path.parent.joinpath(f'chembl_{version}')
+    directory = path.parent.joinpath(f"chembl_{version}")
     rv = directory.joinpath(f"chembl_{version}_sqlite", f"chembl_{version}.db")
-    if path.parent.joinpath(f'chembl_{version}').is_dir():
+    if path.parent.joinpath(f"chembl_{version}").is_dir():
         return rv
     with tarfile.open(path, mode="r", encoding="utf-8") as tar_file:
         tar_file.extractall(path.parent)
@@ -64,7 +65,6 @@ def connect(version: Optional[str] = None, prefix: Optional[Sequence[str]] = Non
     :yields: The SQLite connection object.
 
     Example:
-
     .. code-block:: python
 
         import chembl_downloader
@@ -88,7 +88,6 @@ def cursor(version: Optional[str] = None, prefix: Optional[Sequence[str]] = None
     :yields: The SQLite cursor object.
 
     Example:
-
     .. code-block:: python
 
         import chembl_downloader

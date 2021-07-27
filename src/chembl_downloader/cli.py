@@ -11,7 +11,7 @@ from tabulate import tabulate
 from .api import cursor
 
 __all__ = [
-    'main',
+    "main",
 ]
 
 QUERY = """
@@ -27,17 +27,19 @@ LIMIT 5
 
 @click.command()
 @verbose_option
-@click.option('--version')
+@click.option("--version")
 def main(version: Optional[str]):
     """Test the connection."""
     with cursor(version=version) as c:
         click.echo(f"using cursor {c}")
         c.execute(QUERY)
-        click.echo(tabulate(
-            c.fetchall(),
-            headers=['chembl_id', 'name'],
-        ))
+        click.echo(
+            tabulate(
+                c.fetchall(),
+                headers=["chembl_id", "name"],
+            )
+        )
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

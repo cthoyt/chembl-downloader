@@ -1,0 +1,38 @@
+#########################
+# Flake8 Configuration  #
+# (.flake8)             #
+# (formerly in tox.ini) #
+#########################
+
+[flake8]
+ignore =
+    S310
+    # line break before binary operator
+    W503
+    # XML stuff
+    S405
+    S314
+    # Whitespace stuff
+    E203
+    # Pickle stuff
+    S301
+    S403
+exclude =
+    .tox,
+    .git,
+    __pycache__,
+    docs/source/conf.py,
+    build,
+    dist,
+    tests/fixtures/*,
+    *.pyc,
+    *.egg-info,
+    .cache,
+    .eggs
+max-complexity = 25
+max-line-length = 120
+import-order-style = pycharm
+application-import-names =
+    chembl_downloader
+    tests
+format = ${cyan}%(path)s${reset}:${yellow_bold}%(row)d${reset}:${green_bold}%(col)d${reset}: ${red_bold}%(code)s${reset} %(text)s
