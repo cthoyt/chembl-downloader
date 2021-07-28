@@ -144,7 +144,7 @@ def query(
         import chembl_downloader
         from chembl_downloader.queries import ID_NAME_QUERY_EXAMPLE
 
-        df = chembl_downloader.query(ID_NAME_QUERY_EXAMPLE, columns=['chembl_id', 'name'])
+        df = chembl_downloader.query(ID_NAME_QUERY_EXAMPLE)
     """
     import pandas as pd
 

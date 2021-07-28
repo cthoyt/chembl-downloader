@@ -95,7 +95,7 @@ to make a query and load the results into a pandas DataFrame for any downstream 
 ```python
 import chembl_downloader
 
-q = """
+sql = """
 SELECT
     MOLECULE_DICTIONARY.chembl_id,
     MOLECULE_DICTIONARY.pref_name
@@ -105,7 +105,7 @@ WHERE molecule_dictionary.pref_name IS NOT NULL
 LIMIT 5
 """
 
-df = chembl_downloader.query(q)
+df = chembl_downloader.query(sql)
 df.to_csv(..., sep='\t', index=False)
 ```
 
