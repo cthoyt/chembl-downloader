@@ -59,7 +59,7 @@ path = chembl_downloader.download()
 ```
 
 The `version` keyword argument is available for all functions in this package (e.g., including
-`connect()` and `cursor()`), but will be omitted below for brevity.
+`connect()`, `cursor()`, and `query()`), but will be omitted below for brevity.
 
 ### Automate Connection
 
@@ -132,6 +132,9 @@ path = chembl_downloader.download(prefix=['pyobo', 'raw', 'chembl'])
 
 See the `pystow` [documentation](https://github.com/cthoyt/pystow#%EF%B8%8F-configuration) on configuring the storage
 location further.
+
+The `prefix` keyword argument is available for all functions in this package (e.g., including
+`connect()`, `cursor()`, and `query()`).
 
 ### Download via CLI
 
