@@ -126,16 +126,16 @@ def cursor(version: Optional[str] = None, prefix: Optional[Sequence[str]] = None
 
 
 def query(
-    q: str, version: Optional[str] = None, prefix: Optional[Sequence[str]] = None, **kwargs
+    sql: str, version: Optional[str] = None, prefix: Optional[Sequence[str]] = None, **kwargs
 ) -> "pandas.DataFrame":
     """Ensure the data is available, run the query, then put the results in a dataframe.
 
-    :param q: A SQL query string
+    :param sql: A SQL query string or table name
     :param version: The version number of ChEMBL to get. If none specified, uses
         :func:`bioversions.get_version` to look up the latest.
     :param prefix: The directory inside :mod:`pystow` to use
-    :param kwargs: keyword arguments to pass through to :class:`pandas.DataFrame`, such as
-        ``columns`` or ``index``.
+    :param kwargs: keyword arguments to pass through to :func:`pandas.read_sql`, such as
+        ``index_col``.
     :return: A dataframe
 
     Example:
@@ -148,6 +148,5 @@ def query(
     """
     import pandas as pd
 
-    with cursor(version=version, prefix=prefix) as _cursor:
-        _cursor.execute(q)
-        return pd.DataFrame(_cursor.fetchall(), **kwargs)
+    with connect(version=version, prefix=prefix) as con:
+        return pd.read_sql(sql, con=con, **kwargs)

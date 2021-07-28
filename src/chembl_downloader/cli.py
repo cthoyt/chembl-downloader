@@ -8,7 +8,7 @@ import click
 from more_click import verbose_option
 
 from .api import query
-from .queries import ID_NAME_QUERY_EXAMPLE
+from .queries import ID_NAME_QUERY
 
 __all__ = [
     "main",
@@ -20,8 +20,9 @@ __all__ = [
 @click.option("--version")
 def main(version: Optional[str]):
     """Test the connection."""
-    df = query(ID_NAME_QUERY_EXAMPLE, columns=["chembl_id", "name"], version=version)
-    click.echo(df.to_markdown())
+    click.secho("ID to Name Query\n", fg='green')
+    df = query(ID_NAME_QUERY + "\nLIMIT 5", version=version)
+    click.echo(df.to_markdown(index=False))
 
 
 if __name__ == "__main__":

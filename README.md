@@ -77,8 +77,9 @@ with chembl_downloader.cursor() as cursor:
 
 ### Run a query and get a pandas DataFrame
 
-The most powerful function is `query()` which builds on the previous `cursor()` function,
-but then loads the results into a pandas DataFrame for any downstream use.
+The most powerful function is `query()` which builds on the previous `connect()` function
+in combination with [`pandas.read_sql`](https://pandas.pydata.org/docs/reference/api/pandas.read_sql.html)
+to make a query and load the results into a pandas DataFrame for any downstream use.
 
 ```python
 import chembl_downloader
