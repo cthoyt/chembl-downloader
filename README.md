@@ -105,7 +105,7 @@ WHERE molecule_dictionary.pref_name IS NOT NULL
 LIMIT 5
 """
 
-df = chembl_downloader.query(q, columns=['chembl_id', 'name'])
+df = chembl_downloader.query(q)
 df.to_csv(..., sep='\t', index=False)
 ```
 
