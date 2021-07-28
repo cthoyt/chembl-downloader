@@ -39,7 +39,7 @@ import chembl_downloader
 path = chembl_downloader.download(version='28')
 ```
 
-After it's been downloaded and extracted once, it's smart and doesn't need to download again. It gets stored
+After it's been downloaded and extracted once, it's smart and does not need to download again. It gets stored
 using [`pystow`](https://github.com/cthoyt/pystow) automatically in the `~/.data/chembl`
 directory.
 
@@ -63,9 +63,20 @@ The `version` keyword argument is available for all functions in this package (e
 
 ### Automate Connection
 
-Inside the archive is a single SQLite database file. Normally, people manually untar this folder then do something with
-the resulting file. Don't do this, it's not reproducible!
+Inside the archive is a single SQLite database file. Normally, people manually untar this folder then
+do something with the resulting file. Don't do this, it's not reproducible!
 Instead, the file can be downloaded and a connection can be opened automatically with:
+
+```python
+import chembl_downloader
+
+with chembl_downloader.connect() as conn:
+    with conn.cursor() as cursor:
+        cursor.execute(...)  # run your query string
+        rows = cursor.fetchall()  # get your results
+```
+
+The `cursor()` function provides a convenient wrapper around this operation:
 
 ```python
 import chembl_downloader
@@ -130,8 +141,14 @@ After installing, run the following CLI command to ensure it and send the path t
 $ chembl_downloader
 ```
 
+Use `--test` to show two example queries
+
+```bash
+$ chembl_downloader --test
+```
+
 ## Contributing
 
 If you'd like to contribute, there's a submodule called `chembl_downloader.queries`
-where you can add a SQL query along with a description of what it does for easy
+where you can add an SQL query along with a description of what it does for easy
 importing.
