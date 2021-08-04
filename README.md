@@ -63,8 +63,8 @@ The `version` keyword argument is available for all functions in this package (e
 
 ### Automate Connection
 
-Inside the archive is a single SQLite database file. Normally, people manually untar this folder then
-do something with the resulting file. Don't do this, it's not reproducible!
+Inside the archive is a single SQLite database file. Normally, people manually untar this folder then do something with
+the resulting file. Don't do this, it's not reproducible!
 Instead, the file can be downloaded and a connection can be opened automatically with:
 
 ```python
@@ -88,8 +88,8 @@ with chembl_downloader.cursor() as cursor:
 
 ### Run a query and get a pandas DataFrame
 
-The most powerful function is `query()` which builds on the previous `connect()` function
-in combination with [`pandas.read_sql`](https://pandas.pydata.org/docs/reference/api/pandas.read_sql.html)
+The most powerful function is `query()` which builds on the previous `connect()` function in combination
+with [`pandas.read_sql`](https://pandas.pydata.org/docs/reference/api/pandas.read_sql.html)
 to make a query and load the results into a pandas DataFrame for any downstream use.
 
 ```python
@@ -112,9 +112,9 @@ df.to_csv(..., sep='\t', index=False)
 Suggestion 1: use `pystow` to make a reproducible file path that's portable to other people's machines
 (e.g., it doesn't have your username in the path).
 
-Suggestion 2: RDKit is now pip-installable with `pip install rdkit-pypi`, which means most users don't have
-to muck  around with complicated conda environments and configurations. One of the powerful but understated
-tools in RDKit is the [rdkit.Chem.PandasTools](https://rdkit.org/docs/source/rdkit.Chem.PandasTools.html)
+Suggestion 2: RDKit is now pip-installable with `pip install rdkit-pypi`, which means most users don't have to muck
+around with complicated conda environments and configurations. One of the powerful but understated tools in RDKit is
+the [rdkit.Chem.PandasTools](https://rdkit.org/docs/source/rdkit.Chem.PandasTools.html)
 module.
 
 ### Access an RDKit supplier over entries in the SDF dump
@@ -129,8 +129,8 @@ from rdkit import Chem
 
 import chembl_downloader
 
-data = []
 with chembl_downloader.supplier() as suppl:
+    data = []
     for i, mol in enumerate(suppl):
         if mol is None or mol.GetNumAtoms() > 50:
             continue
@@ -139,8 +139,8 @@ with chembl_downloader.supplier() as suppl:
         data.append((smi, fp))
 ```
 
-This example was adapted from Greg Landrum's RDKit blog post on [generalized substructure
-search](https://greglandrum.github.io/rdkit-blog/tutorial/substructure/2021/08/03/generalized-substructure-search.html).
+This example was adapted from Greg Landrum's RDKit blog post
+on [generalized substructure search](https://greglandrum.github.io/rdkit-blog/tutorial/substructure/2021/08/03/generalized-substructure-search.html).
 
 ### Store in a Different Place
 
