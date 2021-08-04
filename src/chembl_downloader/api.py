@@ -18,6 +18,8 @@ if TYPE_CHECKING:
 
 __all__ = [
     "latest",
+    "download_sqlite",
+    "download_sdf",
     "download_extract_sqlite",
     "connect",
     "cursor",
