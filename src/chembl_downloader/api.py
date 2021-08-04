@@ -29,10 +29,11 @@ PYSTOW_PARTS = ["chembl"]
 
 
 def _download_helper(
-    version: Optional[str] = None, prefix: Optional[Sequence[str]] = None
+    suffix: str, version: Optional[str] = None, prefix: Optional[Sequence[str]] = None
 ) -> Tuple[str, Path]:
     """Ensure the latest ChEMBL SQLite dump is downloaded.
 
+    :param suffix: The suffix of the file
     :param version: The version number of ChEMBL to get. If none specified, uses
         :func:`bioversions.get_version` to look up the latest.
     :param prefix: The directory inside :mod:`pystow` to use
@@ -42,8 +43,21 @@ def _download_helper(
         import bioversions
 
         version = bioversions.get_version("chembl")
-    url = f"ftp://ftp.ebi.ac.uk/pub/databases/chembl/ChEMBLdb/releases/chembl_{version}/chembl_{version}_sqlite.tar.gz"
+    url = f"ftp://ftp.ebi.ac.uk/pub/databases/chembl/ChEMBLdb/releases/chembl_{version}/chembl_{version}{suffix}"
     return version, pystow.ensure(*(prefix or PYSTOW_PARTS), version, url=url)
+
+
+def _download_sqlite(
+    version: Optional[str] = None, prefix: Optional[Sequence[str]] = None
+) -> Tuple[str, Path]:
+    """Ensure the latest ChEMBL SQLite dump is downloaded.
+
+    :param version: The version number of ChEMBL to get. If none specified, uses
+        :func:`bioversions.get_version` to look up the latest.
+    :param prefix: The directory inside :mod:`pystow` to use
+    :return: A pair of the version and the path to the downloaded *.tar.gz file
+    """
+    return _download_helper(suffix="_sqlite.tar.gz", version=version, prefix=prefix)
 
 
 def download(version: Optional[str] = None, prefix: Optional[Sequence[str]] = None) -> Path:
@@ -56,7 +70,7 @@ def download(version: Optional[str] = None, prefix: Optional[Sequence[str]] = No
     :raises FileNotFoundError: If no database file could be found in the
         extracted directories
     """
-    version, path = _download_helper(version=version, prefix=prefix)
+    version, path = _download_sqlite(version=version, prefix=prefix)
 
     # Extraction will be done in the same directory as the download.
     # All ChEMBL SQLite dumps have the same internal folder structure,
