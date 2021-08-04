@@ -2,6 +2,7 @@
 
 """API for :mod:`chembl_downloader`."""
 
+import gzip
 import logging
 import os
 import sqlite3
@@ -21,6 +22,7 @@ __all__ = [
     "connect",
     "cursor",
     "query",
+    "supplier",
 ]
 
 logger = logging.getLogger(__name__)
@@ -177,3 +179,53 @@ def query(
 
     with connect(version=version, prefix=prefix) as con:
         return pd.read_sql(sql, con=con, **kwargs)
+
+
+def _download_sdf(
+    version: Optional[str] = None, prefix: Optional[Sequence[str]] = None
+) -> Tuple[str, Path]:
+    """Ensure the latest ChEMBL SDF dump is downloaded.
+
+    :param version: The version number of ChEMBL to get. If none specified, uses
+        :func:`bioversions.get_version` to look up the latest.
+    :param prefix: The directory inside :mod:`pystow` to use
+    :return: A pair of the version and the path to the downloaded *.sdf.gz file
+    """
+    return _download_helper(suffix=".sdf.gz", version=version, prefix=prefix)
+
+
+@contextmanager
+def supplier(
+    version: Optional[str] = None,
+    prefix: Optional[Sequence[str]] = None,
+    **kwargs,
+):
+    """Get a :class:`rdkit.Chem.ForwardSDMolSupplier` for the given version of ChEMBL.
+
+    :param version: The version number of ChEMBL to get. If none specified, uses
+        :func:`bioversions.get_version` to look up the latest.
+    :param prefix: The directory inside :mod:`pystow` to use
+    :param kwargs: keyword arguments to pass through to :class:`rdkit.Chem.ForwardSDMolSupplier`, such as
+        ``sanitize`` and ``removeHs``.
+
+    Example:
+    .. code-block:: python
+
+        from rdkit import Chem
+
+        import chembl_downloader
+
+        data = []
+        with chembl_downloader.supplier() as suppl:
+            for i, mol in enumerate(suppl):
+                if mol is None or mol.GetNumAtoms() > 50:
+                    continue
+                fp = Chem.PatternFingerprint(mol, fpSize=1024, tautomerFingerprints=True)
+                smi = Chem.MolToSmiles(mol)
+                data.append((smi, fp))
+    """
+    from rdkit import Chem
+
+    _, path = _download_sdf(version=version, prefix=prefix)
+    with gzip.open(path) as file:
+        yield Chem.ForwardSDMolSupplier(file, **kwargs)

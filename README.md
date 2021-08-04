@@ -117,6 +117,31 @@ to muck  around with complicated conda environments and configurations. One of t
 tools in RDKit is the [rdkit.Chem.PandasTools](https://rdkit.org/docs/source/rdkit.Chem.PandasTools.html)
 module.
 
+### Access an RDKit supplier over entries in the SDF dump
+
+This example is a bit more fit-for-purpose than the last two. The `supplier()` function makes sure that the latest SDF
+dump is downloaded and loads it from the gzip file into a `rdkit.Chem.ForwardSDMolSupplier`
+using a context manager to make sure the file doesn't get closed until after parsing is done. Like the previous
+examples, it can also explicitly take a `version`.
+
+```python
+from rdkit import Chem
+
+import chembl_downloader
+
+data = []
+with chembl_downloader.supplier() as suppl:
+    for i, mol in enumerate(suppl):
+        if mol is None or mol.GetNumAtoms() > 50:
+            continue
+        fp = Chem.PatternFingerprint(mol, fpSize=1024, tautomerFingerprints=True)
+        smi = Chem.MolToSmiles(mol)
+        data.append((smi, fp))
+```
+
+This example was adapted from Greg Landrum's RDKit blog post on [generalized substructure
+search](https://greglandrum.github.io/rdkit-blog/tutorial/substructure/2021/08/03/generalized-substructure-search.html).
+
 ### Store in a Different Place
 
 If you want to store the data elsewhere using `pystow` (e.g., in [`pyobo`](https://github.com/pyobo/pyobo)
@@ -153,5 +178,4 @@ $ chembl_downloader --test
 ## Contributing
 
 If you'd like to contribute, there's a submodule called `chembl_downloader.queries`
-where you can add an SQL query along with a description of what it does for easy
-importing.
+where you can add an SQL query along with a description of what it does for easy importing.
