@@ -8,7 +8,7 @@ from typing import Optional
 import click
 from more_click import verbose_option
 
-from .api import download, query
+from .api import download_extract_sqlite, query
 from .queries import ACTIVITIES_QUERY, ID_NAME_QUERY
 
 __all__ = [
@@ -23,7 +23,7 @@ __all__ = [
 def main(version: Optional[str], test: bool):
     """Test the connection."""
     if not test:
-        click.echo(download(version=version))
+        click.echo(download_extract_sqlite(version=version))
         sys.exit(0)
 
     click.secho("ID to Name Query\n", fg="green")

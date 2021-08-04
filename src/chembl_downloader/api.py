@@ -18,7 +18,7 @@ if TYPE_CHECKING:
 
 __all__ = [
     "latest",
-    "download",
+    "download_extract_sqlite",
     "connect",
     "cursor",
     "query",
@@ -48,7 +48,7 @@ def latest() -> str:
 def _download_helper(
     suffix: str, version: Optional[str] = None, prefix: Optional[Sequence[str]] = None
 ) -> Tuple[str, Path]:
-    """Ensure the latest ChEMBL SQLite dump is downloaded.
+    """Ensure the latest ChEMBL file with the given suffix is downloaded.
 
     :param suffix: The suffix of the file
     :param version: The version number of ChEMBL to get. If none specified, uses
@@ -62,7 +62,7 @@ def _download_helper(
     return version, pystow.ensure(*(prefix or PYSTOW_PARTS), version, url=url)
 
 
-def _download_sqlite(
+def download_sqlite(
     version: Optional[str] = None, prefix: Optional[Sequence[str]] = None
 ) -> Tuple[str, Path]:
     """Ensure the latest ChEMBL SQLite dump is downloaded.
@@ -70,13 +70,15 @@ def _download_sqlite(
     :param version: The version number of ChEMBL to get. If none specified, uses
         :func:`bioversions.get_version` to look up the latest.
     :param prefix: The directory inside :mod:`pystow` to use
-    :return: A pair of the version and the path to the downloaded *.tar.gz file
+    :return: A pair of the version and the local file path to the downloaded *.tar.gz file
     """
     return _download_helper(suffix="_sqlite.tar.gz", version=version, prefix=prefix)
 
 
-def download(version: Optional[str] = None, prefix: Optional[Sequence[str]] = None) -> Path:
-    """Get a connection as a context to the ChEMBL database.
+def download_extract_sqlite(
+    version: Optional[str] = None, prefix: Optional[Sequence[str]] = None
+) -> Path:
+    """Ensure the latest ChEMBL SQLite dump is downloaded and extracted.
 
     :param version: The version number of ChEMBL to get. If none specified, uses
         :func:`bioversions.get_version` to look up the latest.
@@ -85,7 +87,7 @@ def download(version: Optional[str] = None, prefix: Optional[Sequence[str]] = No
     :raises FileNotFoundError: If no database file could be found in the
         extracted directories
     """
-    version, path = _download_sqlite(version=version, prefix=prefix)
+    version, path = download_sqlite(version=version, prefix=prefix)
 
     # Extraction will be done in the same directory as the download.
     # All ChEMBL SQLite dumps have the same internal folder structure,
@@ -127,7 +129,7 @@ def connect(version: Optional[str] = None, prefix: Optional[Sequence[str]] = Non
             with closing(conn.cursor()) as cursor:
                 cursor.execute(...)
     """
-    path = download(version=version, prefix=prefix)
+    path = download_extract_sqlite(version=version, prefix=prefix)
     with closing(sqlite3.connect(path.as_posix())) as conn:
         yield conn
 
@@ -181,7 +183,7 @@ def query(
         return pd.read_sql(sql, con=con, **kwargs)
 
 
-def _download_sdf(
+def download_sdf(
     version: Optional[str] = None, prefix: Optional[Sequence[str]] = None
 ) -> Tuple[str, Path]:
     """Ensure the latest ChEMBL SDF dump is downloaded.
@@ -189,7 +191,7 @@ def _download_sdf(
     :param version: The version number of ChEMBL to get. If none specified, uses
         :func:`bioversions.get_version` to look up the latest.
     :param prefix: The directory inside :mod:`pystow` to use
-    :return: A pair of the version and the path to the downloaded *.sdf.gz file
+    :return: A pair of the version and the local file path to the downloaded *.sdf.gz file
     """
     return _download_helper(suffix=".sdf.gz", version=version, prefix=prefix)
 
@@ -226,6 +228,6 @@ def supplier(
     """
     from rdkit import Chem
 
-    _, path = _download_sdf(version=version, prefix=prefix)
+    _, path = download_sdf(version=version, prefix=prefix)
     with gzip.open(path) as file:
         yield Chem.ForwardSDMolSupplier(file, **kwargs)

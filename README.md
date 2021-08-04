@@ -36,7 +36,7 @@ $ pip install chembl-downloader
 ```python
 import chembl_downloader
 
-path = chembl_downloader.download(version='28')
+path = chembl_downloader.download_extract_sqlite(version='28')
 ```
 
 After it's been downloaded and extracted once, it's smart and does not need to download again. It gets stored
@@ -55,7 +55,7 @@ the previous code slightly by omitting the `version` keyword argument:
 ```python
 import chembl_downloader
 
-path = chembl_downloader.download()
+path = chembl_downloader.download_extract_sqlite()
 ```
 
 The `version` keyword argument is available for all functions in this package (e.g., including
@@ -152,7 +152,7 @@ import chembl_downloader
 
 # It gets downloaded/extracted to 
 # ~/.data/pyobo/raw/chembl/29/chembl_29/chembl_29_sqlite/chembl_29.db
-path = chembl_downloader.download(prefix=['pyobo', 'raw', 'chembl'])
+path = chembl_downloader.download_extract_sqlite(prefix=['pyobo', 'raw', 'chembl'])
 ```
 
 See the `pystow` [documentation](https://github.com/cthoyt/pystow#%EF%B8%8F-configuration) on configuring the storage
