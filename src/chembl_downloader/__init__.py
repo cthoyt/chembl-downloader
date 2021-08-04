@@ -2,4 +2,4 @@
 
 """Download, open, and query ChEMBL through SQLite."""
 
-from .api import connect, cursor, download, query  # noqa:F401
+from .api import connect, cursor, download, latest, query  # noqa:F401

@@ -16,6 +16,7 @@ if TYPE_CHECKING:
     import pandas
 
 __all__ = [
+    "latest",
     "download",
     "connect",
     "cursor",
@@ -26,6 +27,20 @@ logger = logging.getLogger(__name__)
 
 #: The default path inside the :mod:`pystow` directory
 PYSTOW_PARTS = ["chembl"]
+
+
+def latest() -> str:
+    """Get the latest version of ChEBML as a string.
+
+    :returns: The latest version string of ChEBML
+    :raises ImportError: If :mod:`bioversions` is not installed.
+    """
+    try:
+        import bioversions
+    except ImportError:
+        raise ImportError("Could not import `bioversions`. Install with `pip install bioversions`.")
+    else:
+        return bioversions.get_version("chembl")
 
 
 def _download_helper(
@@ -40,9 +55,7 @@ def _download_helper(
     :return: A pair of the version and the path to the downloaded tar.gz file
     """
     if version is None:
-        import bioversions
-
-        version = bioversions.get_version("chembl")
+        version = latest()
     url = f"ftp://ftp.ebi.ac.uk/pub/databases/chembl/ChEMBLdb/releases/chembl_{version}/chembl_{version}{suffix}"
     return version, pystow.ensure(*(prefix or PYSTOW_PARTS), version, url=url)
 
