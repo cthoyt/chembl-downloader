@@ -2,6 +2,8 @@
 
 """A collection of query strings for ChEBML."""
 
+from textwrap import dedent
+
 #: This query yields tuples of ChEMBL identifiers and their preferred names, omitting
 #: pairs where there is no name or if there's no structure
 ID_NAME_QUERY = """
@@ -42,3 +44,27 @@ WHERE
     and ACTIVITIES.standard_type = 'IC50'
     and ACTIVITIES.standard_relation = '='
 """
+
+
+def get_assay_sql(assay_chembl_id: str) -> str:
+    """Get the SQL for the given assay."""
+    return dedent(
+        f"""\
+        SELECT
+            COMPOUND_STRUCTURES.canonical_smiles,
+            MOLECULE_DICTIONARY.chembl_id,
+            ACTIVITIES.STANDARD_TYPE,
+            ACTIVITIES.STANDARD_RELATION,
+            ACTIVITIES.STANDARD_VALUE,
+            ACTIVITIES.STANDARD_UNITS
+        FROM MOLECULE_DICTIONARY
+        JOIN COMPOUND_STRUCTURES ON MOLECULE_DICTIONARY.molregno == COMPOUND_STRUCTURES.molregno
+        JOIN ACTIVITIES ON MOLECULE_DICTIONARY.molregno == ACTIVITIES.molregno
+        JOIN ASSAYS ON ACTIVITIES.ASSAY_ID == ASSAYS.ASSAY_ID
+        WHERE
+            ASSAYS.chembl_id = '{assay_chembl_id}'
+            and ACTIVITIES.standard_value is not null
+            and ACTIVITIES.standard_relation is not null
+            and ACTIVITIES.standard_relation = '='
+    """  # noqa: S608
+    )
