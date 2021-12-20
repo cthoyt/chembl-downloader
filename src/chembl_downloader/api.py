@@ -5,6 +5,7 @@
 import gzip
 import logging
 import os
+import pickle
 import sqlite3
 import tarfile
 from contextlib import closing, contextmanager
@@ -12,6 +13,7 @@ from pathlib import Path
 from typing import Optional, Sequence, TYPE_CHECKING, Tuple
 
 import pystow
+from tqdm import tqdm
 
 if TYPE_CHECKING:
     import pandas
@@ -25,6 +27,7 @@ __all__ = [
     "cursor",
     "query",
     "supplier",
+    "get_substructure_library",
 ]
 
 logger = logging.getLogger(__name__)
@@ -233,3 +236,59 @@ def supplier(
     _, path = download_sdf(version=version, prefix=prefix)
     with gzip.open(path) as file:
         yield Chem.ForwardSDMolSupplier(file, **kwargs)
+
+
+def get_substructure_library(
+    version: Optional[str] = None,
+    prefix: Optional[Sequence[str]] = None,
+    max_heavy: int = 75,
+    **kwargs,
+):
+    """Get the ChEMBL substructure library.
+
+    :param version: The version number of ChEMBL to get. If none specified, uses
+        :func:`bioversions.get_version` to look up the latest.
+    :param prefix: The directory inside :mod:`pystow` to use
+    :param max_heavy: The largest number of heavy atoms that are considered before skipping the molecule.
+    :param kwargs: keyword arguments to pass through to :class:`rdkit.Chem.ForwardSDMolSupplier`, such as
+        ``sanitize`` and ``removeHs`` via :func:`supplier`.
+    :returns: A substructure library object
+    :rtype: rdkit.Chem.rdSubstructLibrary.SubstructLibrary
+
+    .. seealso::
+
+        https://greglandrum.github.io/rdkit-blog/tutorial/substructure/2021/12/20/substructlibrary-search-order.html
+    """
+    # Requires minimum version of v2021.09
+    from rdkit.Chem.rdSubstructLibrary import (
+        CachedTrustedSmilesMolHolder,
+        TautomerPatternHolder,
+        KeyFromPropHolder,
+        SubstructLibrary,
+    )
+
+    if version is None:
+        version = latest()
+
+    path = pystow.join(*(prefix or PYSTOW_PARTS), version, name="ssslib.pkl")
+    if path.is_file():
+        logger.info("loading substructure library from pickle: %s", path)
+        with path.open("rb") as file:
+            return pickle.load(file)
+
+    molecule_holder = CachedTrustedSmilesMolHolder()
+    tautomer_pattern_holder = TautomerPatternHolder()
+    key_from_prop_holder = KeyFromPropHolder()
+    library = SubstructLibrary(molecule_holder, tautomer_pattern_holder, key_from_prop_holder)
+    with supplier(version=version, prefix=prefix, **kwargs) as suppl:
+        for mol in tqdm(
+            suppl, unit="molecule", unit_scale=True, desc="Building substructure library"
+        ):
+            if mol is None:
+                continue
+            if mol.GetNumHeavyAtoms() > max_heavy:  # skip huge molecules
+                continue
+            library.AddMol(mol)
+    with path.open("wb") as file:
+        pickle.dump(library, file, protocol=pickle.HIGHEST_PROTOCOL)
+    return library

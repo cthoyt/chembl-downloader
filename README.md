@@ -142,6 +142,29 @@ with chembl_downloader.supplier() as suppl:
 This example was adapted from Greg Landrum's RDKit blog post
 on [generalized substructure search](https://greglandrum.github.io/rdkit-blog/tutorial/substructure/2021/08/03/generalized-substructure-search.html).
 
+### Get an RDKit substructure library
+
+Building on the `supplier()` function, the `get_substructure_library()`
+makes the preparation of a [substructure library](https://www.rdkit.org/docs/cppapi/classRDKit_1_1SubstructLibrary.html)
+automated and reproducible. Additionally, it caches the results of the build,
+which takes on the order of tens of minutes, only has to be done once and future
+loading from a pickle object takes on the order of seconds.
+
+The implementation was inspired by Greg Landrum's RDKit blog post,
+[Some new features in the SubstructLibrary](https://greglandrum.github.io/rdkit-blog/tutorial/substructure/2021/12/20/substructlibrary-search-order.html).
+The following example shows how it can be used to accomplish some of the first
+tasks presented in the post:
+
+```python
+from rdkit import Chem
+
+import chembl_downloader
+
+library = chembl_downloader.get_substructure_library()
+query = Chem.MolFromSmarts('[O,N]=C-c:1:c:c:n:c:c:1')
+matches = library.GetMatches(query)
+```
+
 ### Store in a Different Place
 
 If you want to store the data elsewhere using `pystow` (e.g., in [`pyobo`](https://github.com/pyobo/pyobo)

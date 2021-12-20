@@ -10,5 +10,6 @@ from .api import (  # noqa:F401
     download_sqlite,
     latest,
     query,
+    get_substructure_library,
     supplier,
 )
