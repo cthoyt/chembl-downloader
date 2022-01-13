@@ -10,7 +10,7 @@ import sqlite3
 import tarfile
 from contextlib import closing, contextmanager
 from pathlib import Path
-from typing import Optional, Sequence, TYPE_CHECKING, Tuple
+from typing import TYPE_CHECKING, Optional, Sequence, Tuple
 
 import pystow
 from tqdm import tqdm
@@ -20,12 +20,14 @@ if TYPE_CHECKING:
 
 __all__ = [
     "latest",
+    # Database functions
     "download_sqlite",
-    "download_sdf",
     "download_extract_sqlite",
     "connect",
     "cursor",
     "query",
+    # SDF functions
+    "download_sdf",
     "supplier",
     "get_substructure_library",
 ]
@@ -51,7 +53,9 @@ def latest() -> str:
 
 
 def _download_helper(
-    suffix: str, version: Optional[str] = None, prefix: Optional[Sequence[str]] = None
+    suffix: str,
+    version: Optional[str] = None,
+    prefix: Optional[Sequence[str]] = None,
 ) -> Tuple[str, Path]:
     """Ensure the latest ChEMBL file with the given suffix is downloaded.
 
@@ -75,7 +79,7 @@ def download_sqlite(
     :param version: The version number of ChEMBL to get. If none specified, uses
         :func:`bioversions.get_version` to look up the latest.
     :param prefix: The directory inside :mod:`pystow` to use
-    :return: A pair of the version and the local file path to the downloaded *.tar.gz file
+    :return: A pair of the version and the local file path to the downloaded ``*.tar.gz`` file
     """
     return _download_helper(suffix="_sqlite.tar.gz", version=version, prefix=prefix)
 
@@ -196,7 +200,7 @@ def download_sdf(
     :param version: The version number of ChEMBL to get. If none specified, uses
         :func:`bioversions.get_version` to look up the latest.
     :param prefix: The directory inside :mod:`pystow` to use
-    :return: A pair of the version and the local file path to the downloaded *.sdf.gz file
+    :return: A pair of the version and the local file path to the downloaded ``*.sdf.gz`` file
     """
     return _download_helper(suffix=".sdf.gz", version=version, prefix=prefix)
 
@@ -262,9 +266,9 @@ def get_substructure_library(
     # Requires minimum version of v2021.09
     from rdkit.Chem.rdSubstructLibrary import (
         CachedTrustedSmilesMolHolder,
-        TautomerPatternHolder,
         KeyFromPropHolder,
         SubstructLibrary,
+        TautomerPatternHolder,
     )
 
     if version is None:

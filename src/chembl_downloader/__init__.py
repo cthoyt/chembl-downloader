@@ -5,11 +5,14 @@
 from .api import (  # noqa:F401
     connect,
     cursor,
+    download_chemreps,
     download_extract_sqlite,
+    download_fps,
     download_sdf,
     download_sqlite,
+    get_chemreps_df,
+    get_substructure_library,
     latest,
     query,
-    get_substructure_library,
     supplier,
 )
