@@ -20,16 +20,21 @@ if TYPE_CHECKING:
 
 __all__ = [
     "latest",
-    # Database functions
+    # Database
     "download_sqlite",
     "download_extract_sqlite",
     "connect",
     "cursor",
     "query",
-    # SDF functions
+    # SDF
     "download_sdf",
     "supplier",
     "get_substructure_library",
+    # Chemreps
+    "download_chemreps",
+    "get_chemreps_df",
+    # Fingerprints
+    "download_fps",
 ]
 
 logger = logging.getLogger(__name__)
@@ -190,6 +195,64 @@ def query(
 
     with connect(version=version, prefix=prefix) as con:
         return pd.read_sql(sql, con=con, **kwargs)
+
+
+def download_fps(
+    version: Optional[str] = None, prefix: Optional[Sequence[str]] = None
+) -> Tuple[str, Path]:
+    """Ensure the latest ChEMBL fingerprints file is downloaded.
+
+    This file contains 2048 bit radius 2 morgan fingerprints.
+
+    :param version: The version number of ChEMBL to get. If none specified, uses
+        :func:`bioversions.get_version` to look up the latest.
+    :param prefix: The directory inside :mod:`pystow` to use
+    :return: A pair of the version and the local file path to the downloaded ``*.fps.gz`` file
+    """
+    return _download_helper(suffix=".fps.gz", version=version, prefix=prefix)
+
+
+def download_chemreps(
+    version: Optional[str] = None, prefix: Optional[Sequence[str]] = None
+) -> Tuple[str, Path]:
+    """Ensure the latest ChEMBL chemical representations file is downloaded.
+
+    This file is tab-separated and has four columns:
+
+    1. ``chembl_id``
+    2. ``canonical_smiles``
+    3. ``standard_inchi``
+    4. ``standard_inchi_key``
+
+    If you want to directly parse it with :mod:`pandas`, use :func:`get_chemreps_df`.
+
+    :param version: The version number of ChEMBL to get. If none specified, uses
+        :func:`bioversions.get_version` to look up the latest.
+    :param prefix: The directory inside :mod:`pystow` to use
+    :return: A pair of the version and the local file path to the downloaded *_chemreps.txt.gz file
+    """
+    return _download_helper(suffix="_chemreps.txt.gz ", version=version, prefix=prefix)
+
+
+def get_chemreps_df(
+    version: Optional[str] = None, prefix: Optional[Sequence[str]] = None
+) -> "pandas.DataFrame":
+    """Download and parse the latest ChEMBL chemical representations file.
+
+    :param version: The version number of ChEMBL to get. If none specified, uses
+        :func:`bioversions.get_version` to look up the latest.
+    :param prefix: The directory inside :mod:`pystow` to use
+    :return: A dataframe with four columns:
+        1. ``chembl_id``
+        2. ``canonical_smiles``
+        3. ``standard_inchi``
+        4. ``standard_inchi_key``
+    """
+    import pandas
+
+    _version, path = download_chemreps(version=version, prefix=prefix)
+    df = pandas.read_csv(path, sep="\t", compression="gzip")
+    return df
 
 
 def download_sdf(
