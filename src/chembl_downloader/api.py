@@ -10,7 +10,7 @@ import sqlite3
 import tarfile
 from contextlib import closing, contextmanager
 from pathlib import Path
-from typing import TYPE_CHECKING, Optional, Sequence, Tuple
+from typing import TYPE_CHECKING, Optional, Sequence, Tuple, Union, cast
 
 import pystow
 from tqdm import tqdm
@@ -61,47 +61,72 @@ def _download_helper(
     suffix: str,
     version: Optional[str] = None,
     prefix: Optional[Sequence[str]] = None,
-) -> Tuple[str, Path]:
+    *,
+    return_version: bool,
+) -> Union[Path, Tuple[str, Path]]:
     """Ensure the latest ChEMBL file with the given suffix is downloaded.
 
     :param suffix: The suffix of the file
     :param version: The version number of ChEMBL to get. If none specified, uses
         :func:`bioversions.get_version` to look up the latest.
     :param prefix: The directory inside :mod:`pystow` to use
-    :return: A pair of the version and the path to the downloaded tar.gz file
+    :param return_version: Should the version get returned? Turn this to true
+        if you're looking up the latest version and want to reduce redundant code.
+    :return: If ``return_version`` is true, return a pair of the version and the
+        local file path to the downloaded file. Otherwise, just return the path.
     """
     if version is None:
         version = latest()
     url = f"ftp://ftp.ebi.ac.uk/pub/databases/chembl/ChEMBLdb/releases/chembl_{version}/chembl_{version}{suffix}"
-    return version, pystow.ensure(*(prefix or PYSTOW_PARTS), version, url=url)
+    path = pystow.ensure(*(prefix or PYSTOW_PARTS), version, url=url)
+    if return_version:
+        return version, path
+    else:
+        return path
 
 
 def download_sqlite(
-    version: Optional[str] = None, prefix: Optional[Sequence[str]] = None
-) -> Tuple[str, Path]:
+    version: Optional[str] = None,
+    prefix: Optional[Sequence[str]] = None,
+    return_version: bool = False,
+) -> Union[Path, Tuple[str, Path]]:
     """Ensure the latest ChEMBL SQLite dump is downloaded.
 
     :param version: The version number of ChEMBL to get. If none specified, uses
         :func:`bioversions.get_version` to look up the latest.
     :param prefix: The directory inside :mod:`pystow` to use
-    :return: A pair of the version and the local file path to the downloaded ``*.tar.gz`` file
+    :param return_version: Should the version get returned? Turn this to true
+        if you're looking up the latest version and want to reduce redundant code.
+    :return: If ``return_version`` is true, return a pair of the version and the
+        local file path to the downloaded ``*.tar.gz`` file. Otherwise, just
+        return the path.
     """
-    return _download_helper(suffix="_sqlite.tar.gz", version=version, prefix=prefix)
+    return _download_helper(
+        suffix="_sqlite.tar.gz", version=version, prefix=prefix, return_version=return_version
+    )
 
 
 def download_extract_sqlite(
-    version: Optional[str] = None, prefix: Optional[Sequence[str]] = None
-) -> Path:
+    version: Optional[str] = None,
+    prefix: Optional[Sequence[str]] = None,
+    return_version: bool = False,
+) -> Union[Path, Tuple[str, Path]]:
     """Ensure the latest ChEMBL SQLite dump is downloaded and extracted.
 
     :param version: The version number of ChEMBL to get. If none specified, uses
         :func:`bioversions.get_version` to look up the latest.
     :param prefix: The directory inside :mod:`pystow` to use
-    :return: The path to the extract ChEMBL SQLite database file
+    :param return_version: Should the version get returned? Turn this to true
+        if you're looking up the latest version and want to reduce redundant code.
+    :return: If ``return_version`` is true, return a pair of the version and the
+        local file path to the downloaded ChEMBLSQLite database file. Otherwise,
+        just return the path.
     :raises FileNotFoundError: If no database file could be found in the
         extracted directories
     """
-    version, path = download_sqlite(version=version, prefix=prefix)
+    version, path = cast(
+        Tuple[str, Path], download_sqlite(version=version, prefix=prefix, return_version=True)
+    )
 
     # Extraction will be done in the same directory as the download.
     # All ChEMBL SQLite dumps have the same internal folder structure,
@@ -119,8 +144,13 @@ def download_extract_sqlite(
     # and find the DB file
     for root, _dirs, files in os.walk(directory):
         for file in files:
-            if file.endswith(".db"):
-                return Path(root).joinpath(file)
+            if not file.endswith(".db"):
+                continue
+            rv = Path(root).joinpath(file)
+            if return_version:
+                return version, rv
+            else:
+                return rv
 
     raise FileNotFoundError("could not find a .db file in the ChEMBL archive")
 
@@ -143,7 +173,7 @@ def connect(version: Optional[str] = None, prefix: Optional[Sequence[str]] = Non
             with closing(conn.cursor()) as cursor:
                 cursor.execute(...)
     """
-    path = download_extract_sqlite(version=version, prefix=prefix)
+    path = cast(Path, download_extract_sqlite(version=version, prefix=prefix, return_version=False))
     with closing(sqlite3.connect(path.as_posix())) as conn:
         yield conn
 
@@ -198,8 +228,10 @@ def query(
 
 
 def download_fps(
-    version: Optional[str] = None, prefix: Optional[Sequence[str]] = None
-) -> Tuple[str, Path]:
+    version: Optional[str] = None,
+    prefix: Optional[Sequence[str]] = None,
+    return_version: bool = False,
+) -> Union[Path, Tuple[str, Path]]:
     """Ensure the latest ChEMBL fingerprints file is downloaded.
 
     This file contains 2048 bit radius 2 morgan fingerprints.
@@ -207,14 +239,22 @@ def download_fps(
     :param version: The version number of ChEMBL to get. If none specified, uses
         :func:`bioversions.get_version` to look up the latest.
     :param prefix: The directory inside :mod:`pystow` to use
-    :return: A pair of the version and the local file path to the downloaded ``*.fps.gz`` file
+    :param return_version: Should the version get returned? Turn this to true
+        if you're looking up the latest version and want to reduce redundant code.
+    :return: If ``return_version`` is true, return a pair of the version and the
+        local file path to the downloaded ``*.fps.gz`` file. Otherwise,
+        just return the path.
     """
-    return _download_helper(suffix=".fps.gz", version=version, prefix=prefix)
+    return _download_helper(
+        suffix=".fps.gz", version=version, prefix=prefix, return_version=return_version
+    )
 
 
 def download_chemreps(
-    version: Optional[str] = None, prefix: Optional[Sequence[str]] = None
-) -> Tuple[str, Path]:
+    version: Optional[str] = None,
+    prefix: Optional[Sequence[str]] = None,
+    return_version: bool = False,
+) -> Union[Path, Tuple[str, Path]]:
     """Ensure the latest ChEMBL chemical representations file is downloaded.
 
     This file is tab-separated and has four columns:
@@ -229,9 +269,15 @@ def download_chemreps(
     :param version: The version number of ChEMBL to get. If none specified, uses
         :func:`bioversions.get_version` to look up the latest.
     :param prefix: The directory inside :mod:`pystow` to use
-    :return: A pair of the version and the local file path to the downloaded *_chemreps.txt.gz file
+    :param return_version: Should the version get returned? Turn this to true
+        if you're looking up the latest version and want to reduce redundant code.
+    :return: If ``return_version`` is true, return a pair of the version and the
+        local file path to the downloaded ``*_chemreps.txt.gz`` file. Otherwise,
+        just return the path.
     """
-    return _download_helper(suffix="_chemreps.txt.gz ", version=version, prefix=prefix)
+    return _download_helper(
+        suffix="_chemreps.txt.gz ", version=version, prefix=prefix, return_version=return_version
+    )
 
 
 def get_chemreps_df(
@@ -250,22 +296,30 @@ def get_chemreps_df(
     """
     import pandas
 
-    _version, path = download_chemreps(version=version, prefix=prefix)
+    path = cast(Path, download_chemreps(version=version, prefix=prefix, return_version=False))
     df = pandas.read_csv(path, sep="\t", compression="gzip")
     return df
 
 
 def download_sdf(
-    version: Optional[str] = None, prefix: Optional[Sequence[str]] = None
-) -> Tuple[str, Path]:
+    version: Optional[str] = None,
+    prefix: Optional[Sequence[str]] = None,
+    return_version: bool = False,
+) -> Union[Path, Tuple[str, Path]]:
     """Ensure the latest ChEMBL SDF dump is downloaded.
 
     :param version: The version number of ChEMBL to get. If none specified, uses
         :func:`bioversions.get_version` to look up the latest.
     :param prefix: The directory inside :mod:`pystow` to use
-    :return: A pair of the version and the local file path to the downloaded ``*.sdf.gz`` file
+    :param return_version: Should the version get returned? Turn this to true
+        if you're looking up the latest version and want to reduce redundant code.
+    :return: If ``return_version`` is true, return a pair of the version and the
+        local file path to the downloaded ``*.sdf.gz`` file. Otherwise,
+        just return the path.
     """
-    return _download_helper(suffix=".sdf.gz", version=version, prefix=prefix)
+    return _download_helper(
+        suffix=".sdf.gz", version=version, prefix=prefix, return_version=return_version
+    )
 
 
 @contextmanager
@@ -300,7 +354,7 @@ def supplier(
     """
     from rdkit import Chem
 
-    _, path = download_sdf(version=version, prefix=prefix)
+    path = cast(Path, download_sdf(version=version, prefix=prefix, return_version=False))
     with gzip.open(path) as file:
         yield Chem.ForwardSDMolSupplier(file, **kwargs)
 

@@ -29,7 +29,7 @@ how to download it and use it automatically.
 $ pip install chembl-downloader
 ```
 
-## Usage
+## Database Usage
 
 ### Download A Specific Version
 
@@ -142,6 +142,8 @@ with chembl_downloader.supplier() as suppl:
 This example was adapted from Greg Landrum's RDKit blog post
 on [generalized substructure search](https://greglandrum.github.io/rdkit-blog/tutorial/substructure/2021/08/03/generalized-substructure-search.html).
 
+## SDF Usage
+
 ### Get an RDKit substructure library
 
 Building on the `supplier()` function, the `get_substructure_library()`
@@ -164,6 +166,23 @@ library = chembl_downloader.get_substructure_library()
 query = Chem.MolFromSmarts('[O,N]=C-c:1:c:c:n:c:c:1')
 matches = library.GetMatches(query)
 ```
+
+## Morgan Fingerprints Usage
+
+### Get the Morgan Fingerprint file
+
+ChEMBL makes a file containing pre-computed 2048 bit radius 2 morgan
+fingerprints for each molecule available. It can be downloaded using:
+
+```python
+import chembl_downloader
+
+path = chembl_downloader.download_fps()
+```
+
+The `version` and other keyword arguments are also valid for this function.
+
+## Extras
 
 ### Store in a Different Place
 
