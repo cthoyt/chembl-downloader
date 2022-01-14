@@ -182,6 +182,21 @@ path = chembl_downloader.download_fps()
 
 The `version` and other keyword arguments are also valid for this function.
 
+### Load fingerprints with [`chemfp`](https://chemfp.com/)
+
+The following wraps the `download_fps` function with `chemfp`'s fingerprint
+loader:
+
+```python
+import chembl_downloader
+
+arena = chembl_downloader.chemfp_load_fps()
+```
+
+The `version` and other keyword arguments are also valid for this function.
+More information on working with the `arena` object can be found
+[here](https://chemfp.readthedocs.io/en/latest/using-api.html#working-with-a-fingerprintarena).
+
 ## Extras
 
 ### Store in a Different Place

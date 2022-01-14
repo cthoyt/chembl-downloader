@@ -3,6 +3,7 @@
 """Download, open, and query ChEMBL through SQLite."""
 
 from .api import (  # noqa:F401
+    chemfp_load_fps,
     connect,
     cursor,
     download_chemreps,

@@ -35,6 +35,7 @@ __all__ = [
     "get_chemreps_df",
     # Fingerprints
     "download_fps",
+    "chemfp_load_fps",
 ]
 
 logger = logging.getLogger(__name__)
@@ -248,6 +249,23 @@ def download_fps(
     return _download_helper(
         suffix=".fps.gz", version=version, prefix=prefix, return_version=return_version
     )
+
+
+def chemfp_load_fps(
+    version: Optional[str] = None, prefix: Optional[Sequence[str]] = None, **kwargs
+):
+    """Ensure the ChEMBL fingerprints file is downloaded and open with :func:`chemfp.load_fingerprints`.
+
+    :param version: The version number of ChEMBL to get. If none specified, uses
+        :func:`bioversions.get_version` to look up the latest.
+    :param prefix: The directory inside :mod:`pystow` to use
+    :param kwargs: Remaining keyword arguments are passed into :func:`chemfp.load_fingerprints`.
+    :rtype: chemfp.arena.FingerprintArena
+    """
+    import chemfp
+
+    path = download_fps(version=version, prefix=prefix, return_version=False)
+    return chemfp.load_fingerprints(path, **kwargs)
 
 
 def download_chemreps(
