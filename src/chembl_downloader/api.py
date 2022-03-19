@@ -11,6 +11,7 @@ import tarfile
 from contextlib import closing, contextmanager
 from pathlib import Path
 from typing import TYPE_CHECKING, Optional, Sequence, Tuple, Union, cast
+from xml.etree import ElementTree
 
 import pystow
 from tqdm import tqdm
@@ -36,6 +37,9 @@ __all__ = [
     # Fingerprints
     "download_fps",
     "chemfp_load_fps",
+    # Monomers
+    "download_monomer_library",
+    "get_monomer_library_root",
 ]
 
 logger = logging.getLogger(__name__)
@@ -338,6 +342,43 @@ def download_sdf(
     return _download_helper(
         suffix=".sdf.gz", version=version, prefix=prefix, return_version=return_version
     )
+
+
+def download_monomer_library(
+    version: Optional[str] = None,
+    prefix: Optional[Sequence[str]] = None,
+    return_version: bool = False,
+) -> Union[Path, Tuple[str, Path]]:
+    """Ensure the latest ChEMBL monomer library is downloaded.
+
+    :param version: The version number of ChEMBL to get. If none specified, uses
+        :func:`bioversions.get_version` to look up the latest.
+    :param prefix: The directory inside :mod:`pystow` to use
+    :param return_version: Should the version get returned? Turn this to true
+        if you're looking up the latest version and want to reduce redundant code.
+    :return: If ``return_version`` is true, return a pair of the version and the
+        local file path to the downloaded ``*_monomer_library.xml`` file. Otherwise,
+        just return the path.
+    """
+    return _download_helper(
+        suffix="_monomer_library.xml", version=version, prefix=prefix, return_version=return_version
+    )
+
+
+def get_monomer_library_root(
+    version: Optional[str] = None,
+    prefix: Optional[Sequence[str]] = None,
+) -> ElementTree.Element:
+    """Ensure the latest ChEMBL monomer library is downloaded and parse its root with :mod:`xml`.
+
+    :param version: The version number of ChEMBL to get. If none specified, uses
+        :func:`bioversions.get_version` to look up the latest.
+    :param prefix: The directory inside :mod:`pystow` to use
+    :return: Return the root of the monomers XML tree, parsed
+    """
+    monomers_path = cast(Path, download_monomer_library(version=version, prefix=prefix, return_version=False))
+    tree = ElementTree.parse(monomers_path)
+    return tree.getroot()
 
 
 @contextmanager
