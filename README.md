@@ -23,7 +23,7 @@
 Don't worry about downloading/extracting ChEMBL or versioning - just use ``chembl_downloader`` to write code that knows
 how to download it and use it automatically.
 
-## Installation
+Install with:
 
 ```bash
 $ pip install chembl-downloader
@@ -234,5 +234,8 @@ $ chembl_downloader --test
 
 ## Contributing
 
+Please read the contribution guidelines in [CONTRIBUTING.md](.github/CONTRIBUTING.md).
+
 If you'd like to contribute, there's a submodule called `chembl_downloader.queries`
-where you can add an SQL query along with a description of what it does for easy importing.
+where you can add a useful SQL queries along with a description of what it does for easy
+importing and reuse.
