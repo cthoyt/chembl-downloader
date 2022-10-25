@@ -234,3 +234,47 @@ $ chembl_downloader --test
 
 If you'd like to contribute, there's a submodule called `chembl_downloader.queries`
 where you can add an SQL query along with a description of what it does for easy importing.
+
+ 
+
+## ChEMBL Downloader Status
+
+ 
+
+|   ChEMBL Version | Downloader working   | Error                                                                                           |
+|-----------------:|:---------------------|:------------------------------------------------------------------------------------------------|
+|              1   | No                   | <urlopen error ftp error: URLError("ftp error: error_perm('550 Failed to change directory.')")> |
+|              2   | No                   | <urlopen error ftp error: URLError("ftp error: error_perm('550 Failed to change directory.')")> |
+|              3   | No                   | <urlopen error ftp error: URLError("ftp error: error_perm('550 Failed to change directory.')")> |
+|              4   | No                   | <urlopen error ftp error: URLError("ftp error: error_perm('550 Failed to change directory.')")> |
+|              5   | No                   | <urlopen error ftp error: URLError("ftp error: error_perm('550 Failed to change directory.')")> |
+|              6   | No                   | <urlopen error ftp error: URLError("ftp error: error_perm('550 Failed to change directory.')")> |
+|              7   | No                   | <urlopen error ftp error: URLError("ftp error: error_perm('550 Failed to change directory.')")> |
+|              8   | No                   | <urlopen error ftp error: URLError("ftp error: error_perm('550 Failed to change directory.')")> |
+|              9   | No                   | <urlopen error ftp error: URLError("ftp error: error_perm('550 Failed to change directory.')")> |
+|             10   | No                   | <urlopen error ftp error: URLError("ftp error: error_perm('550 Failed to change directory.')")> |
+|             11   | No                   | <urlopen error ftp error: URLError("ftp error: error_perm('550 Failed to change directory.')")> |
+|             12   | No                   | <urlopen error ftp error: URLError("ftp error: error_perm('550 Failed to change directory.')")> |
+|             13   | No                   | <urlopen error ftp error: URLError("ftp error: error_perm('550 Failed to change directory.')")> |
+|             14   | No                   | <urlopen error ftp error: URLError("ftp error: error_perm('550 Failed to change directory.')")> |
+|             15   | No                   | <urlopen error ftp error: URLError("ftp error: error_perm('550 Failed to change directory.')")> |
+|             16   | No                   | <urlopen error ftp error: URLError("ftp error: error_perm('550 Failed to change directory.')")> |
+|             17   | No                   | <urlopen error ftp error: URLError("ftp error: error_perm('550 Failed to change directory.')")> |
+|             18   | No                   | <urlopen error ftp error: URLError("ftp error: error_perm('550 Failed to change directory.')")> |
+|             19   | No                   | <urlopen error ftp error: URLError("ftp error: error_perm('550 Failed to change directory.')")> |
+|             20   | No                   | <urlopen error ftp error: URLError("ftp error: error_perm('550 Failed to change directory.')")> |
+|             21   | Yes                  |                                                                                                 |
+|             22   | No                   | <urlopen error ftp error: URLError("ftp error: error_perm('550 Failed to change directory.')")> |
+|             22.1 | No                   | <urlopen error ftp error: error_perm('550 Failed to change directory.')>                        |
+|             23   | Yes                  |                                                                                                 |
+|             24   | No                   | <urlopen error ftp error: URLError("ftp error: error_perm('550 Failed to change directory.')")> |
+|             24.1 | No                   | <urlopen error ftp error: error_perm('550 Failed to change directory.')>                        |
+|             25   | Yes                  |                                                                                                 |
+|             26   | Yes                  |                                                                                                 |
+|             27   | Yes                  |                                                                                                 |
+|             28   | Yes                  |                                                                                                 |
+|             29   | Yes                  |                                                                                                 |
+|             30   | Yes                  |                                                                                                 |
+|             31   | Yes                  |                                                                                                 |
+
+
