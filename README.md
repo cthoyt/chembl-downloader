@@ -29,10 +29,6 @@ how to download it and use it automatically.
 $ pip install chembl-downloader
 ```
 
-## Database Usage
-
-The code base has been tested on the ChEBML v.28 - ChEMBL v.31.
-
 ### Download A Specific Version
 
 ```python
