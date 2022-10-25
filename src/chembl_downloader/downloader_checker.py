@@ -20,14 +20,13 @@ def get_version() -> List[str]:
         latest_chembl_version = 31
 
     version_list = [
-        str(i).zfill(2)
-        for i in (range(1, int(latest_chembl_version) + 1))
+        str(i)
+        for i in range(1, int(latest_chembl_version) + 1)
     ]
 
     # Side version in ChEMBL
     version_list.extend(['22.1', '24.1'])
-    version_list.sort()
-    return version_list
+    return sorted(version_list, reverse=True)
 
 
 def check_downloader(version_name: str) -> Tuple[str, str, str]:
@@ -36,12 +35,12 @@ def check_downloader(version_name: str) -> Tuple[str, str, str]:
     except Exception as e:
         return version_name, 'No', str(e)
 
-    _count_sql = """
-    SELECT COUNT( MOLECULE_DICTIONARY.chembl_id)
-    FROM MOLECULE_DICTIONARY
-    JOIN COMPOUND_STRUCTURES ON MOLECULE_DICTIONARY.molregno == COMPOUND_STRUCTURES.molregno
-    WHERE molecule_dictionary.pref_name IS NOT NULL
-"""
+    _count_sql = """\
+        SELECT COUNT( MOLECULE_DICTIONARY.chembl_id)
+        FROM MOLECULE_DICTIONARY
+        JOIN COMPOUND_STRUCTURES ON MOLECULE_DICTIONARY.molregno == COMPOUND_STRUCTURES.molregno
+        WHERE molecule_dictionary.pref_name IS NOT NULL
+    """
     total_compound = chembl_downloader.query(_count_sql)
     return version_name, 'Yes', ''
 
@@ -49,19 +48,16 @@ def check_downloader(version_name: str) -> Tuple[str, str, str]:
 def main():
     chembl_versions = get_version()
 
+    headers = ['ChEMBL Version', 'Downloader working', 'Error']
     table = [
-        ['ChEMBL Version', 'Downloader working', 'Error']
+        check_downloader(version_name=version)
+        for version in tqdm(chembl_versions)
     ]
-
-    for version in tqdm(chembl_versions):
-        data = check_downloader(version_name=version)
-        table.append(list(data))
-
     with open('../README.md', 'a') as file:
         print('\n \n', file=file)
         print('## ChEMBL Downloader Status', file=file)
         print('\n \n', file=file)
-        print(tabulate(table, headers="firstrow", tablefmt='pipe'), file=file)
+        print(tabulate(table, headers=headers, tablefmt='github'), file=file)
         print('\n', file=file)
 
 
