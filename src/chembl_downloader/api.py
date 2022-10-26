@@ -10,7 +10,7 @@ import sqlite3
 import tarfile
 from contextlib import closing, contextmanager
 from pathlib import Path
-from typing import TYPE_CHECKING, Optional, Sequence, Tuple, Union, cast
+from typing import TYPE_CHECKING, List, Optional, Sequence, Tuple, Union, cast
 from xml.etree import ElementTree
 
 import pystow
@@ -21,6 +21,8 @@ if TYPE_CHECKING:
 
 __all__ = [
     "latest",
+    "versions",
+    "download_readme",
     # Database
     "download_sqlite",
     "download_extract_sqlite",
@@ -62,12 +64,21 @@ def latest() -> str:
         return bioversions.get_version("chembl")
 
 
+def versions() -> List[str]:
+    """Get all versions of ChEMBL."""
+    version_list = [str(i).zfill(2) for i in range(1, int(latest()) + 1)]
+    # Side version in ChEMBL
+    version_list.extend(["22_1", "24_1"])
+    return sorted(version_list, reverse=True)
+
+
 def _download_helper(
     suffix: str,
     version: Optional[str] = None,
     prefix: Optional[Sequence[str]] = None,
     *,
     return_version: bool,
+    filename_repeats_version: bool = True,
 ) -> Union[Path, Tuple[str, Path]]:
     """Ensure the latest ChEMBL file with the given suffix is downloaded.
 
@@ -77,17 +88,37 @@ def _download_helper(
     :param prefix: The directory inside :mod:`pystow` to use
     :param return_version: Should the version get returned? Turn this to true
         if you're looking up the latest version and want to reduce redundant code.
+    :param filename_repeats_version:
+        True if filename contains ``chembl_<version>`` in the beginning. Set to false
+        to allow downloading arbitrarily named files.
     :return: If ``return_version`` is true, return a pair of the version and the
         local file path to the downloaded file. Otherwise, just return the path.
     """
     if version is None:
         version = latest()
-    url = f"ftp://ftp.ebi.ac.uk/pub/databases/chembl/ChEMBLdb/releases/chembl_{version}/chembl_{version}{suffix}"
-    path = pystow.ensure(*(prefix or PYSTOW_PARTS), version, url=url)
-    if return_version:
-        return version, path
+
+    # for versions 22.1 and 24.1, it's important to canonicalize the version number
+    # for versions < 10 it's important to left pad with a zero
+    fmt_version = version.replace(".", "_").zfill(2)
+
+    base = f"https://ftp.ebi.ac.uk/pub/databases/chembl/ChEMBLdb/releases/chembl_{fmt_version}"
+    if filename_repeats_version:
+        filename = f"chembl_{fmt_version}{suffix}"
     else:
-        return path
+        filename = suffix
+    for url in [
+        f"{base}/{filename}",
+        f"{base}/archived/{filename}",
+    ]:
+        try:
+            path = pystow.ensure(*(prefix or PYSTOW_PARTS), fmt_version, url=url)
+        except IOError:
+            continue
+        if return_version:
+            return version, path
+        else:
+            return path
+    raise ValueError(f"could not find {filename} in data for ChEMBL {fmt_version} in {base}")
 
 
 def download_sqlite(
@@ -376,7 +407,9 @@ def get_monomer_library_root(
     :param prefix: The directory inside :mod:`pystow` to use
     :return: Return the root of the monomers XML tree, parsed
     """
-    monomers_path = cast(Path, download_monomer_library(version=version, prefix=prefix, return_version=False))
+    monomers_path = cast(
+        Path, download_monomer_library(version=version, prefix=prefix, return_version=False)
+    )
     tree = ElementTree.parse(monomers_path)
     return tree.getroot()
 
@@ -472,3 +505,28 @@ def get_substructure_library(
     with path.open("wb") as file:
         pickle.dump(library, file, protocol=pickle.HIGHEST_PROTOCOL)
     return library
+
+
+def download_readme(
+    version: Optional[str] = None,
+    prefix: Optional[Sequence[str]] = None,
+    return_version: bool = False,
+) -> Union[Path, Tuple[str, Path]]:
+    """Ensure the latest ChEMBL README.
+
+    :param version: The version number of ChEMBL to get. If none specified, uses
+        :func:`bioversions.get_version` to look up the latest.
+    :param prefix: The directory inside :mod:`pystow` to use
+    :param return_version: Should the version get returned? Turn this to true
+        if you're looking up the latest version and want to reduce redundant code.
+    :return: If ``return_version`` is true, return a pair of the version and the
+        local file path to the downloaded ``*.sdf.gz`` file. Otherwise,
+        just return the path.
+    """
+    return _download_helper(
+        "README",
+        version=version,
+        prefix=prefix,
+        return_version=return_version,
+        filename_repeats_version=False,
+    )

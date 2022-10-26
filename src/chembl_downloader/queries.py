@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-"""A collection of query strings for ChEBML."""
+"""A collection of query strings for ChEMBL."""
 
 from textwrap import dedent
 
