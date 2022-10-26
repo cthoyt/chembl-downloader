@@ -29,6 +29,8 @@ Install with:
 $ pip install chembl-downloader
 ```
 
+## Database Usage
+
 ### Download A Specific Version
 
 ```python
