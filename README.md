@@ -23,7 +23,7 @@
 Don't worry about downloading/extracting ChEMBL or versioning - just use ``chembl_downloader`` to write code that knows
 how to download it and use it automatically.
 
-## Installation
+Install with:
 
 ```bash
 $ pip install chembl-downloader
@@ -232,14 +232,51 @@ $ chembl_downloader --test
 
 ## Contributing
 
-If you'd like to contribute, there's a submodule called `chembl_downloader.queries`
-where you can add an SQL query along with a description of what it does for easy importing.
+Please read the contribution guidelines in [CONTRIBUTING.md](.github/CONTRIBUTING.md).
 
- 
+If you'd like to contribute, there's a submodule called `chembl_downloader.queries`
+where you can add a useful SQL queries along with a description of what it does for easy
+importing and reuse.
+
+## Statistics
+
+|   ChEMBL Version | Release Date   |
+|------------------|----------------|
+|               31 | 2022-07-12     |
+|               30 | 2022-02-22     |
+|               29 | 2021-07-01     |
+|               28 | 2021-01-15     |
+|               27 | 2020-05-18     |
+|               26 | 2020-02-14     |
+|               25 | 2019-02-01     |
+|             24_1 | 2018-05-01     |
+|               24 |                |
+|               23 | 2017-05-18     |
+|             22_1 | 2016-11-17     |
+|               22 |                |
+|               21 | 2015-02-12     |
+|               20 | 2015-02-03     |
+|               19 | 2014-07-2333   |
+|               18 | 2014-04-02     |
+|               17 | 2013-09-16     |
+|               16 | 2013-055555-15 |
+|               15 | 2013-01-30     |
+|               14 | 2012 -07-18    |
+|               13 | 2012-02-29     |
+|               12 | 2011-11-30     |
+|               11 | 2011-06-07     |
+|               10 | 2011-06-07     |
+|               09 | 2011-01-04     |
+|               08 | 2010-11-05     |
+|               07 | 2010-09-03     |
+|               06 | 2010-09-03     |
+|               05 | 2010-06-07     |
+|               04 | 2010-05-26     |
+|               03 | 2010-04-30     |
+|               02 | 2009-12-07     |
+|               01 | 2009-10-28     |
 
 ## ChEMBL Downloader Status
-
- 
 
 |   ChEMBL Version | Downloader working   | Error                                                                                           |
 |-----------------:|:---------------------|:------------------------------------------------------------------------------------------------|
@@ -276,5 +313,3 @@ where you can add an SQL query along with a description of what it does for easy
 |             29   | Yes                  |                                                                                                 |
 |             30   | Yes                  |                                                                                                 |
 |             31   | Yes                  |                                                                                                 |
-
-

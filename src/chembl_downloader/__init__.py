@@ -10,6 +10,7 @@ from .api import (  # noqa:F401
     download_extract_sqlite,
     download_fps,
     download_monomer_library,
+    download_readme,
     download_sdf,
     download_sqlite,
     get_chemreps_df,
@@ -18,4 +19,5 @@ from .api import (  # noqa:F401
     latest,
     query,
     supplier,
+    versions,
 )
