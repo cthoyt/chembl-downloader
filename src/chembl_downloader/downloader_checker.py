@@ -9,6 +9,7 @@ import bioversions
 import ftplib
 
 from tabulate import tabulate
+from chembl_downloader.queries import COUNT_QUERY
 
 
 def get_version() -> List[str]:
@@ -35,13 +36,7 @@ def check_downloader(version_name: str) -> Tuple[str, str, str]:
     except Exception as e:
         return version_name, 'No', str(e)
 
-    _count_sql = """\
-        SELECT COUNT( MOLECULE_DICTIONARY.chembl_id)
-        FROM MOLECULE_DICTIONARY
-        JOIN COMPOUND_STRUCTURES ON MOLECULE_DICTIONARY.molregno == COMPOUND_STRUCTURES.molregno
-        WHERE molecule_dictionary.pref_name IS NOT NULL
-    """
-    total_compound = chembl_downloader.query(_count_sql)
+    total_compound = chembl_downloader.query(COUNT_QUERY)
     return version_name, 'Yes', ''
 
 

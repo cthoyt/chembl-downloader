@@ -68,3 +68,12 @@ def get_assay_sql(assay_chembl_id: str) -> str:
             and ACTIVITIES.standard_relation = '='
     """  # noqa: S608
     )
+
+
+#: Return the count of molecules
+COUNT_QUERY = """\
+SELECT COUNT(MOLECULE_DICTIONARY.chembl_id)
+FROM MOLECULE_DICTIONARY
+JOIN COMPOUND_STRUCTURES ON MOLECULE_DICTIONARY.molregno == COMPOUND_STRUCTURES.molregno
+WHERE molecule_dictionary.pref_name IS NOT NULL
+"""
