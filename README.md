@@ -315,3 +315,47 @@ importing and reuse.
 |             29   | Yes                  |                                                                                                 |
 |             30   | Yes                  |                                                                                                 |
 |             31   | Yes                  |                                                                                                 |
+
+ 
+
+## ChEMBL Downloader Status
+
+ 
+
+|   ChEMBL Version | Downloader working   | Error                                                                                                                                        |
+|------------------|----------------------|----------------------------------------------------------------------------------------------------------------------------------------------|
+|               31 | Yes                  |                                                                                                                                              |
+|               30 | Yes                  |                                                                                                                                              |
+|               29 | Yes                  |                                                                                                                                              |
+|               28 | Yes                  |                                                                                                                                              |
+|               27 | Yes                  |                                                                                                                                              |
+|               26 | Yes                  |                                                                                                                                              |
+|               25 | Yes                  |                                                                                                                                              |
+|             24_1 | No                   | could not find chembl_24_1_sqlite.tar.gz in data for ChEMBL 24_1 in https://ftp.ebi.ac.uk/pub/databases/chembl/ChEMBLdb/releases/chembl_24_1 |
+|               24 | No                   | could not find chembl_24_sqlite.tar.gz in data for ChEMBL 24 in https://ftp.ebi.ac.uk/pub/databases/chembl/ChEMBLdb/releases/chembl_24       |
+|               23 | Yes                  |                                                                                                                                              |
+|             22_1 | No                   | could not find chembl_22_1_sqlite.tar.gz in data for ChEMBL 22_1 in https://ftp.ebi.ac.uk/pub/databases/chembl/ChEMBLdb/releases/chembl_22_1 |
+|               22 | No                   | could not find chembl_22_sqlite.tar.gz in data for ChEMBL 22 in https://ftp.ebi.ac.uk/pub/databases/chembl/ChEMBLdb/releases/chembl_22       |
+|               21 | Yes                  |                                                                                                                                              |
+|               20 | No                   | could not find chembl_20_sqlite.tar.gz in data for ChEMBL 20 in https://ftp.ebi.ac.uk/pub/databases/chembl/ChEMBLdb/releases/chembl_20       |
+|               19 | No                   | could not find chembl_19_sqlite.tar.gz in data for ChEMBL 19 in https://ftp.ebi.ac.uk/pub/databases/chembl/ChEMBLdb/releases/chembl_19       |
+|               18 | No                   | could not find chembl_18_sqlite.tar.gz in data for ChEMBL 18 in https://ftp.ebi.ac.uk/pub/databases/chembl/ChEMBLdb/releases/chembl_18       |
+|               17 | No                   | could not find chembl_17_sqlite.tar.gz in data for ChEMBL 17 in https://ftp.ebi.ac.uk/pub/databases/chembl/ChEMBLdb/releases/chembl_17       |
+|               16 | No                   | could not find chembl_16_sqlite.tar.gz in data for ChEMBL 16 in https://ftp.ebi.ac.uk/pub/databases/chembl/ChEMBLdb/releases/chembl_16       |
+|               15 | No                   | could not find chembl_15_sqlite.tar.gz in data for ChEMBL 15 in https://ftp.ebi.ac.uk/pub/databases/chembl/ChEMBLdb/releases/chembl_15       |
+|               14 | No                   | could not find chembl_14_sqlite.tar.gz in data for ChEMBL 14 in https://ftp.ebi.ac.uk/pub/databases/chembl/ChEMBLdb/releases/chembl_14       |
+|               13 | No                   | could not find chembl_13_sqlite.tar.gz in data for ChEMBL 13 in https://ftp.ebi.ac.uk/pub/databases/chembl/ChEMBLdb/releases/chembl_13       |
+|               12 | No                   | could not find chembl_12_sqlite.tar.gz in data for ChEMBL 12 in https://ftp.ebi.ac.uk/pub/databases/chembl/ChEMBLdb/releases/chembl_12       |
+|               11 | No                   | could not find chembl_11_sqlite.tar.gz in data for ChEMBL 11 in https://ftp.ebi.ac.uk/pub/databases/chembl/ChEMBLdb/releases/chembl_11       |
+|               10 | No                   | could not find chembl_10_sqlite.tar.gz in data for ChEMBL 10 in https://ftp.ebi.ac.uk/pub/databases/chembl/ChEMBLdb/releases/chembl_10       |
+|               09 | No                   | could not find chembl_09_sqlite.tar.gz in data for ChEMBL 09 in https://ftp.ebi.ac.uk/pub/databases/chembl/ChEMBLdb/releases/chembl_09       |
+|               08 | No                   | could not find chembl_08_sqlite.tar.gz in data for ChEMBL 08 in https://ftp.ebi.ac.uk/pub/databases/chembl/ChEMBLdb/releases/chembl_08       |
+|               07 | No                   | could not find chembl_07_sqlite.tar.gz in data for ChEMBL 07 in https://ftp.ebi.ac.uk/pub/databases/chembl/ChEMBLdb/releases/chembl_07       |
+|               06 | No                   | could not find chembl_06_sqlite.tar.gz in data for ChEMBL 06 in https://ftp.ebi.ac.uk/pub/databases/chembl/ChEMBLdb/releases/chembl_06       |
+|               05 | No                   | could not find chembl_05_sqlite.tar.gz in data for ChEMBL 05 in https://ftp.ebi.ac.uk/pub/databases/chembl/ChEMBLdb/releases/chembl_05       |
+|               04 | No                   | could not find chembl_04_sqlite.tar.gz in data for ChEMBL 04 in https://ftp.ebi.ac.uk/pub/databases/chembl/ChEMBLdb/releases/chembl_04       |
+|               03 | No                   | could not find chembl_03_sqlite.tar.gz in data for ChEMBL 03 in https://ftp.ebi.ac.uk/pub/databases/chembl/ChEMBLdb/releases/chembl_03       |
+|               02 | No                   | could not find chembl_02_sqlite.tar.gz in data for ChEMBL 02 in https://ftp.ebi.ac.uk/pub/databases/chembl/ChEMBLdb/releases/chembl_02       |
+|               01 | No                   | could not find chembl_01_sqlite.tar.gz in data for ChEMBL 01 in https://ftp.ebi.ac.uk/pub/databases/chembl/ChEMBLdb/releases/chembl_01       |
+
+
