@@ -72,7 +72,7 @@ def get_assay_sql(assay_chembl_id: str) -> str:
 
 #: Return the count of molecules
 COUNT_QUERY = """\
-SELECT COUNT(MOLECULE_DICTIONARY.chembl_id)
+SELECT COUNT(MOLECULE_DICTIONARY.chembl_id) as count
 FROM MOLECULE_DICTIONARY
 JOIN COMPOUND_STRUCTURES ON MOLECULE_DICTIONARY.molregno == COMPOUND_STRUCTURES.molregno
 WHERE molecule_dictionary.pref_name IS NOT NULL
