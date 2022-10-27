@@ -11,20 +11,20 @@ from chembl_downloader.queries import COUNT_QUERY
 from chembl_downloader import versions
 
 
-def check_downloader(version_name: str) -> Tuple[str, str, str]:
+def check_downloader(version_name: str) -> Tuple[str, str, str, str]:
     try:
         path = chembl_downloader.download_extract_sqlite(version=version_name)
     except Exception as e:
-        return version_name, 'No', str(e)
+        return version_name, 'No', str(e), '-'
 
-    total_compound = chembl_downloader.query(COUNT_QUERY)
-    return version_name, 'Yes', ''
+    total_compounds = chembl_downloader.query(COUNT_QUERY)['count'][0]
+    return version_name, 'Yes', '',  total_compounds
 
 
 def main():
     chembl_versions = versions()
 
-    headers = ['ChEMBL Version', 'Downloader working', 'Error']
+    headers = ['ChEMBL Version', 'Downloader working', 'Error', 'Total compounds']
     table = [
         check_downloader(version_name=version)
         for version in tqdm(chembl_versions)
