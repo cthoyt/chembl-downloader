@@ -4,6 +4,14 @@
 
 from textwrap import dedent
 
+__all__ = [
+    "ID_NAME_QUERY",
+    "ACTIVITIES_QUERY",
+    "get_assay_sql",
+    "DRUG_INDICATIONS_SQL",
+    "CHEBI_UNMAPPED_SQL",
+]
+
 
 def markdown(s: str):
     """Get a markdown object for pretty display in Jupyter."""
@@ -90,4 +98,15 @@ SELECT
     DRUG_INDICATION.max_phase_for_ind
 FROM MOLECULE_DICTIONARY
 JOIN DRUG_INDICATION ON MOLECULE_DICTIONARY.molregno == DRUG_INDICATION.molregno
+"""
+
+#: A query for ChEMBL molecules that are unmapped to ChEBI
+CHEBI_UNMAPPED_SQL = """\
+SELECT
+    chembl_id,
+    pref_name
+FROM MOLECULE_DICTIONARY
+WHERE
+    chebi_par_id IS NULL
+    AND pref_name IS NOT NULL
 """
