@@ -468,7 +468,7 @@ def supplier(
         ``sanitize`` and ``removeHs``.
     :yields: A supplier to be used in a context manager
 
-    Example:
+    In the following example, a supplier is used to get fingerprints and SMILES.
 
     .. code-block:: python
 
