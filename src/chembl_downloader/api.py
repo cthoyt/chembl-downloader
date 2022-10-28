@@ -25,6 +25,7 @@ __all__ = [
     "latest",
     "versions",
     "download_readme",
+    "get_date",
     # Database
     "download_sqlite",
     "download_extract_sqlite",
@@ -113,7 +114,7 @@ def _download_helper(
     # for versions < 10 it's important to left pad with a zero
     fmt_version = version.replace(".", "_").zfill(2)
 
-    base = f"https://ftp.ebi.ac.uk/pub/databases/chembl/ChEMBLdb/releases/chembl_{fmt_version}"
+    base = f"ftp://ftp.ebi.ac.uk/pub/databases/chembl/ChEMBLdb/releases/chembl_{fmt_version}"
     if filename_repeats_version:
         filename = f"chembl_{fmt_version}{suffix}"
     else:
@@ -542,3 +543,19 @@ def download_readme(
         return_version=return_version,
         filename_repeats_version=False,
     )
+
+
+def get_date(version: str, **kwargs) -> str:
+    """Get the date of a given version."""
+    path = download_readme(version=version, **kwargs)
+    try:
+        date_p = (
+            next(line for line in path.read_text().splitlines() if line.startswith("* Date:"))
+            .removeprefix("* Date:")
+            .lstrip()
+        )
+    except StopIteration:
+        return ""  # happens on 22.1 and 24.1
+    else:
+        day, month, year = date_p.split("/")
+        return f"{year}-{month}-{day}"
