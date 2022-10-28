@@ -551,7 +551,7 @@ def download_readme(
 
 def get_date(version: str, **kwargs) -> str:
     """Get the date of a given version."""
-    path = download_readme(version=version, **kwargs)
+    path = cast(Path, download_readme(version=version, **kwargs))
     try:
         date_p = (
             next(line for line in path.read_text().splitlines() if line.startswith("* Date:"))
