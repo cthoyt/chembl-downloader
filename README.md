@@ -23,13 +23,13 @@
 Don't worry about downloading/extracting ChEMBL or versioning - just use ``chembl_downloader`` to write code that knows
 how to download it and use it automatically.
 
-## Installation
+Install with:
 
 ```bash
 $ pip install chembl-downloader
 ```
 
-## Usage
+## Database Usage
 
 ### Download A Specific Version
 
@@ -48,9 +48,8 @@ a [paid feature](https://sqlite.org/purchase/zipvfs).
 
 ### Download the Latest Version
 
-First, you'll have to install [`bioversions`](https://github.com/cthoyt/bioversions)
-with `pip install bioversions`, whose job it is to look up the latest version of many databases. Then, you can modify
-the previous code slightly by omitting the `version` keyword argument:
+You can modify the previous code slightly by omitting the `version` keyword
+argument to automatically find the latest version of ChEMBL:
 
 ```python
 import chembl_downloader
@@ -142,6 +141,8 @@ with chembl_downloader.supplier() as suppl:
 This example was adapted from Greg Landrum's RDKit blog post
 on [generalized substructure search](https://greglandrum.github.io/rdkit-blog/tutorial/substructure/2021/08/03/generalized-substructure-search.html).
 
+## SDF Usage
+
 ### Get an RDKit substructure library
 
 Building on the `supplier()` function, the `get_substructure_library()`
@@ -164,6 +165,38 @@ library = chembl_downloader.get_substructure_library()
 query = Chem.MolFromSmarts('[O,N]=C-c:1:c:c:n:c:c:1')
 matches = library.GetMatches(query)
 ```
+
+## Morgan Fingerprints Usage
+
+### Get the Morgan Fingerprint file
+
+ChEMBL makes a file containing pre-computed 2048 bit radius 2 morgan
+fingerprints for each molecule available. It can be downloaded using:
+
+```python
+import chembl_downloader
+
+path = chembl_downloader.download_fps()
+```
+
+The `version` and other keyword arguments are also valid for this function.
+
+### Load fingerprints with [`chemfp`](https://chemfp.com/)
+
+The following wraps the `download_fps` function with `chemfp`'s fingerprint
+loader:
+
+```python
+import chembl_downloader
+
+arena = chembl_downloader.chemfp_load_fps()
+```
+
+The `version` and other keyword arguments are also valid for this function.
+More information on working with the `arena` object can be found
+[here](https://chemfp.readthedocs.io/en/latest/using-api.html#working-with-a-fingerprintarena).
+
+## Extras
 
 ### Store in a Different Place
 
@@ -200,5 +233,46 @@ $ chembl_downloader --test
 
 ## Contributing
 
+Please read the contribution guidelines in [CONTRIBUTING.md](.github/CONTRIBUTING.md).
+
 If you'd like to contribute, there's a submodule called `chembl_downloader.queries`
-where you can add an SQL query along with a description of what it does for easy importing.
+where you can add a useful SQL queries along with a description of what it does for easy
+importing and reuse.
+
+## Statistics
+
+|   ChEMBL Version | Release Date   |
+|------------------|----------------|
+|               31 | 2022-07-12     |
+|               30 | 2022-02-22     |
+|               29 | 2021-07-01     |
+|               28 | 2021-01-15     |
+|               27 | 2020-05-18     |
+|               26 | 2020-02-14     |
+|               25 | 2019-02-01     |
+|             24_1 | 2018-05-01     |
+|               24 |                |
+|               23 | 2017-05-18     |
+|             22_1 | 2016-11-17     |
+|               22 |                |
+|               21 | 2015-02-12     |
+|               20 | 2015-02-03     |
+|               19 | 2014-07-2333   |
+|               18 | 2014-04-02     |
+|               17 | 2013-09-16     |
+|               16 | 2013-055555-15 |
+|               15 | 2013-01-30     |
+|               14 | 2012 -07-18    |
+|               13 | 2012-02-29     |
+|               12 | 2011-11-30     |
+|               11 | 2011-06-07     |
+|               10 | 2011-06-07     |
+|               09 | 2011-01-04     |
+|               08 | 2010-11-05     |
+|               07 | 2010-09-03     |
+|               06 | 2010-09-03     |
+|               05 | 2010-06-07     |
+|               04 | 2010-05-26     |
+|               03 | 2010-04-30     |
+|               02 | 2009-12-07     |
+|               01 | 2009-10-28     |
