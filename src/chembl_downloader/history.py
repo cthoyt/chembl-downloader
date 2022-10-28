@@ -4,7 +4,7 @@ import click
 from tabulate import tabulate
 from tqdm import tqdm
 
-from chembl_downloader.api import download_readme, get_date, versions
+from chembl_downloader.api import get_date, versions
 
 
 @click.command()

@@ -106,6 +106,8 @@ def _download_helper(
         to allow downloading arbitrarily named files.
     :return: If ``return_version`` is true, return a pair of the version and the
         local file path to the downloaded file. Otherwise, just return the path.
+    :raises ValueError:
+        If file could not be downloaded
     """
     if version is None:
         version = latest()
@@ -308,6 +310,7 @@ def chemfp_load_fps(
         :func:`latest` to look up the latest.
     :param prefix: The directory inside :mod:`pystow` to use
     :param kwargs: Remaining keyword arguments are passed into :func:`chemfp.load_fingerprints`.
+    :return: A fingerpring arena object
     :rtype: chemfp.arena.FingerprintArena
     """
     import chemfp
@@ -440,6 +443,7 @@ def supplier(
     :param prefix: The directory inside :mod:`pystow` to use
     :param kwargs: keyword arguments to pass through to :class:`rdkit.Chem.ForwardSDMolSupplier`, such as
         ``sanitize`` and ``removeHs``.
+    :yields: A supplier to be used in a context manager
 
     Example:
     .. code-block:: python
