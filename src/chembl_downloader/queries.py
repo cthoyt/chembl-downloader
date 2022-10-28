@@ -4,9 +4,25 @@
 
 from textwrap import dedent
 
+__all__ = [
+    "ID_NAME_QUERY",
+    "ACTIVITIES_QUERY",
+    "get_assay_sql",
+    "DRUG_INDICATIONS_SQL",
+    "CHEBI_UNMAPPED_SQL",
+]
+
+
+def markdown(s: str):
+    """Get a markdown object for pretty display in Jupyter."""
+    from IPython.display import Markdown
+
+    return Markdown(f"```sql\n{s.lstrip()}```")
+
+
 #: This query yields tuples of ChEMBL identifiers and their preferred names, omitting
 #: pairs where there is no name or if there's no structure
-ID_NAME_QUERY = """
+ID_NAME_QUERY = """\
 SELECT
     MOLECULE_DICTIONARY.chembl_id,
     MOLECULE_DICTIONARY.pref_name
@@ -18,7 +34,7 @@ WHERE molecule_dictionary.pref_name IS NOT NULL
 #: This query returns five examples from the molecule dictionary table
 ID_NAME_QUERY_EXAMPLE = ID_NAME_QUERY + "\nLIMIT 5"
 
-ACTIVITIES_QUERY = """
+ACTIVITIES_QUERY = """\
 SELECT
     COMPOUND_STRUCTURES.canonical_smiles,
     MOLECULE_DICTIONARY.chembl_id,
@@ -76,4 +92,29 @@ SELECT COUNT(MOLECULE_DICTIONARY.chembl_id) as count
 FROM MOLECULE_DICTIONARY
 JOIN COMPOUND_STRUCTURES ON MOLECULE_DICTIONARY.molregno == COMPOUND_STRUCTURES.molregno
 WHERE molecule_dictionary.pref_name IS NOT NULL
+"""
+
+DRUG_INDICATIONS_SQL = """\
+SELECT
+    MOLECULE_DICTIONARY.chembl_id,
+    MOLECULE_DICTIONARY.pref_name,
+    MOLECULE_DICTIONARY.chebi_par_id,
+    DRUG_INDICATION.mesh_id,
+    DRUG_INDICATION.mesh_heading,
+    DRUG_INDICATION.efo_id AS indication_curie,
+    DRUG_INDICATION.efo_term AS indication_label,
+    DRUG_INDICATION.max_phase_for_ind
+FROM MOLECULE_DICTIONARY
+JOIN DRUG_INDICATION ON MOLECULE_DICTIONARY.molregno == DRUG_INDICATION.molregno
+"""
+
+#: A query for ChEMBL molecules that are unmapped to ChEBI
+CHEBI_UNMAPPED_SQL = """\
+SELECT
+    chembl_id,
+    pref_name
+FROM MOLECULE_DICTIONARY
+WHERE
+    chebi_par_id IS NULL
+    AND pref_name IS NOT NULL
 """
