@@ -52,9 +52,10 @@ logger = logging.getLogger(__name__)
 #: The default path inside the :mod:`pystow` directory
 PYSTOW_PARTS = ["chembl"]
 RELEASE_PREFIX = "* Release:"
+DATE_PREFIX = "* Date:"
 
 
-def _removeprefix(s, prefix):
+def _removeprefix(s: str, prefix: str) -> str:
     if s.startswith(prefix):
         return s[len(prefix) :]
     return s
@@ -553,11 +554,10 @@ def get_date(version: str, **kwargs) -> str:
     """Get the date of a given version."""
     path = cast(Path, download_readme(version=version, **kwargs))
     try:
-        date_p = (
-            next(line for line in path.read_text().splitlines() if line.startswith("* Date:"))
-            .removeprefix("* Date:")
-            .lstrip()
-        )
+        date_p = _removeprefix(
+            next(line for line in path.read_text().splitlines() if line.startswith("* Date:")),
+            DATE_PREFIX,
+        ).lstrip()
     except StopIteration:
         return ""  # happens on 22.1 and 24.1
     else:
