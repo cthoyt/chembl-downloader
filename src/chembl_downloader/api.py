@@ -2,7 +2,9 @@
 
 """API for :mod:`chembl_downloader`."""
 
+import ftplib
 import gzip
+import io
 import logging
 import os
 import pickle
@@ -48,20 +50,30 @@ logger = logging.getLogger(__name__)
 
 #: The default path inside the :mod:`pystow` directory
 PYSTOW_PARTS = ["chembl"]
+RELEASE_PREFIX = "* Release:"
+
+
+def _removeprefix(s, prefix):
+    if s.startswith(prefix):
+        return s[len(prefix) :]
+    return s
 
 
 def latest() -> str:
-    """Get the latest version of ChEBML as a string.
+    """Get the latest version of ChEMBL as a string.
 
-    :returns: The latest version string of ChEBML
-    :raises ImportError: If :mod:`bioversions` is not installed.
+    :returns: The latest version string of ChEMBL
+    :raises ValueError: If the latest README can not be parsed
     """
-    try:
-        import bioversions
-    except ImportError:
-        raise ImportError("Could not import `bioversions`. Install with `pip install bioversions`.")
-    else:
-        return bioversions.get_version("chembl")
+    bio = io.BytesIO()
+    with ftplib.FTP("ftp.ebi.ac.uk") as ftp:
+        ftp.login()
+        ftp.retrbinary("RETR pub/databases/chembl/ChEMBLdb/latest/README", bio.write)
+    bio.seek(0)
+    for line in bio.read().decode("utf-8").split("\n"):
+        if line.startswith(RELEASE_PREFIX):
+            return _removeprefix(_removeprefix(line, RELEASE_PREFIX).strip(), "chembl_")
+    raise ValueError("could not find latest ChEMBL version")
 
 
 def versions() -> List[str]:
@@ -84,7 +96,7 @@ def _download_helper(
 
     :param suffix: The suffix of the file
     :param version: The version number of ChEMBL to get. If none specified, uses
-        :func:`bioversions.get_version` to look up the latest.
+        :func:`latest` to look up the latest.
     :param prefix: The directory inside :mod:`pystow` to use
     :param return_version: Should the version get returned? Turn this to true
         if you're looking up the latest version and want to reduce redundant code.
@@ -129,7 +141,7 @@ def download_sqlite(
     """Ensure the latest ChEMBL SQLite dump is downloaded.
 
     :param version: The version number of ChEMBL to get. If none specified, uses
-        :func:`bioversions.get_version` to look up the latest.
+        :func:`latest` to look up the latest.
     :param prefix: The directory inside :mod:`pystow` to use
     :param return_version: Should the version get returned? Turn this to true
         if you're looking up the latest version and want to reduce redundant code.
@@ -150,7 +162,7 @@ def download_extract_sqlite(
     """Ensure the latest ChEMBL SQLite dump is downloaded and extracted.
 
     :param version: The version number of ChEMBL to get. If none specified, uses
-        :func:`bioversions.get_version` to look up the latest.
+        :func:`latest` to look up the latest.
     :param prefix: The directory inside :mod:`pystow` to use
     :param return_version: Should the version get returned? Turn this to true
         if you're looking up the latest version and want to reduce redundant code.
@@ -196,7 +208,7 @@ def connect(version: Optional[str] = None, prefix: Optional[Sequence[str]] = Non
     """Ensure and connect to the database.
 
     :param version: The version number of ChEMBL to get. If none specified, uses
-        :func:`bioversions.get_version` to look up the latest.
+        :func:`latest` to look up the latest.
     :param prefix: The directory inside :mod:`pystow` to use
     :yields: The SQLite connection object.
 
@@ -219,7 +231,7 @@ def cursor(version: Optional[str] = None, prefix: Optional[Sequence[str]] = None
     """Ensure, connect, and get a cursor from the database to the database.
 
     :param version: The version number of ChEMBL to get. If none specified, uses
-        :func:`bioversions.get_version` to look up the latest.
+        :func:`latest` to look up the latest.
     :param prefix: The directory inside :mod:`pystow` to use
     :yields: The SQLite cursor object.
 
@@ -243,7 +255,7 @@ def query(
 
     :param sql: A SQL query string or table name
     :param version: The version number of ChEMBL to get. If none specified, uses
-        :func:`bioversions.get_version` to look up the latest.
+        :func:`latest` to look up the latest.
     :param prefix: The directory inside :mod:`pystow` to use
     :param kwargs: keyword arguments to pass through to :func:`pandas.read_sql`, such as
         ``index_col``.
@@ -273,7 +285,7 @@ def download_fps(
     This file contains 2048 bit radius 2 morgan fingerprints.
 
     :param version: The version number of ChEMBL to get. If none specified, uses
-        :func:`bioversions.get_version` to look up the latest.
+        :func:`latest` to look up the latest.
     :param prefix: The directory inside :mod:`pystow` to use
     :param return_version: Should the version get returned? Turn this to true
         if you're looking up the latest version and want to reduce redundant code.
@@ -292,7 +304,7 @@ def chemfp_load_fps(
     """Ensure the ChEMBL fingerprints file is downloaded and open with :func:`chemfp.load_fingerprints`.
 
     :param version: The version number of ChEMBL to get. If none specified, uses
-        :func:`bioversions.get_version` to look up the latest.
+        :func:`latest` to look up the latest.
     :param prefix: The directory inside :mod:`pystow` to use
     :param kwargs: Remaining keyword arguments are passed into :func:`chemfp.load_fingerprints`.
     :rtype: chemfp.arena.FingerprintArena
@@ -320,7 +332,7 @@ def download_chemreps(
     If you want to directly parse it with :mod:`pandas`, use :func:`get_chemreps_df`.
 
     :param version: The version number of ChEMBL to get. If none specified, uses
-        :func:`bioversions.get_version` to look up the latest.
+        :func:`latest` to look up the latest.
     :param prefix: The directory inside :mod:`pystow` to use
     :param return_version: Should the version get returned? Turn this to true
         if you're looking up the latest version and want to reduce redundant code.
@@ -339,7 +351,7 @@ def get_chemreps_df(
     """Download and parse the latest ChEMBL chemical representations file.
 
     :param version: The version number of ChEMBL to get. If none specified, uses
-        :func:`bioversions.get_version` to look up the latest.
+        :func:`latest` to look up the latest.
     :param prefix: The directory inside :mod:`pystow` to use
     :return: A dataframe with four columns:
         1. ``chembl_id``
@@ -362,7 +374,7 @@ def download_sdf(
     """Ensure the latest ChEMBL SDF dump is downloaded.
 
     :param version: The version number of ChEMBL to get. If none specified, uses
-        :func:`bioversions.get_version` to look up the latest.
+        :func:`latest` to look up the latest.
     :param prefix: The directory inside :mod:`pystow` to use
     :param return_version: Should the version get returned? Turn this to true
         if you're looking up the latest version and want to reduce redundant code.
@@ -383,7 +395,7 @@ def download_monomer_library(
     """Ensure the latest ChEMBL monomer library is downloaded.
 
     :param version: The version number of ChEMBL to get. If none specified, uses
-        :func:`bioversions.get_version` to look up the latest.
+        :func:`latest` to look up the latest.
     :param prefix: The directory inside :mod:`pystow` to use
     :param return_version: Should the version get returned? Turn this to true
         if you're looking up the latest version and want to reduce redundant code.
@@ -403,7 +415,7 @@ def get_monomer_library_root(
     """Ensure the latest ChEMBL monomer library is downloaded and parse its root with :mod:`xml`.
 
     :param version: The version number of ChEMBL to get. If none specified, uses
-        :func:`bioversions.get_version` to look up the latest.
+        :func:`latest` to look up the latest.
     :param prefix: The directory inside :mod:`pystow` to use
     :return: Return the root of the monomers XML tree, parsed
     """
@@ -423,7 +435,7 @@ def supplier(
     """Get a :class:`rdkit.Chem.ForwardSDMolSupplier` for the given version of ChEMBL.
 
     :param version: The version number of ChEMBL to get. If none specified, uses
-        :func:`bioversions.get_version` to look up the latest.
+        :func:`latest` to look up the latest.
     :param prefix: The directory inside :mod:`pystow` to use
     :param kwargs: keyword arguments to pass through to :class:`rdkit.Chem.ForwardSDMolSupplier`, such as
         ``sanitize`` and ``removeHs``.
@@ -460,7 +472,7 @@ def get_substructure_library(
     """Get the ChEMBL substructure library.
 
     :param version: The version number of ChEMBL to get. If none specified, uses
-        :func:`bioversions.get_version` to look up the latest.
+        :func:`latest` to look up the latest.
     :param prefix: The directory inside :mod:`pystow` to use
     :param max_heavy: The largest number of heavy atoms that are considered before skipping the molecule.
     :param kwargs: keyword arguments to pass through to :class:`rdkit.Chem.ForwardSDMolSupplier`, such as
@@ -515,7 +527,7 @@ def download_readme(
     """Ensure the latest ChEMBL README.
 
     :param version: The version number of ChEMBL to get. If none specified, uses
-        :func:`bioversions.get_version` to look up the latest.
+        :func:`latest` to look up the latest.
     :param prefix: The directory inside :mod:`pystow` to use
     :param return_version: Should the version get returned? Turn this to true
         if you're looking up the latest version and want to reduce redundant code.
