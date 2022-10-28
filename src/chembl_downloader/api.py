@@ -543,6 +543,8 @@ def download_readme(
         return_version=return_version,
         filename_repeats_version=False,
     )
+
+
 def get_date(version: str, **kwargs) -> str:
     """Get the date of a given version."""
     path = download_readme(version=version, **kwargs)
