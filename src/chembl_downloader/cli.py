@@ -2,19 +2,27 @@
 
 """CLI for :mod:`chembl_downloader`."""
 
+import sys
 from typing import Optional
 
 import click
 from more_click import verbose_option
+from tqdm import tqdm
 
-from .api import download_extract_sqlite, get_substructure_library, query
+from .api import (
+    download_extract_sqlite,
+    get_date,
+    get_substructure_library,
+    query,
+    versions,
+)
 from .queries import ACTIVITIES_QUERY, ID_NAME_QUERY
 
 __all__ = [
     "main",
 ]
 
-version_option = click.option("--version", help="The ChEMBL version to use.")
+version_option = click.option("--version", help="The ChEMBL version to use. Defaults to latest.")
 
 
 @click.group()
@@ -50,6 +58,18 @@ def test(version: Optional[str]):
 def substructure(version: Optional[str]):
     """Build a substructure library."""
     get_substructure_library(version=version)
+
+
+@main.command()
+def history():
+    """Generate a history command."""
+    try:
+        from tabulate import tabulate
+    except ImportError:
+        click.secho("Could not import `tabulate`. Please run `python -m pip install tabulate`")
+        sys.exit(1)
+    rows = [(version, get_date(version=version)) for version in tqdm(versions())]
+    click.echo(tabulate(rows, tablefmt="github", headers=["ChEMBL Version", "Release Date"]))
 
 
 if __name__ == "__main__":
