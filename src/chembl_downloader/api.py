@@ -160,6 +160,7 @@ def download_sqlite(
 
 def download_extract_sqlite(
     version: Optional[str] = None,
+    *,
     prefix: Optional[Sequence[str]] = None,
     return_version: bool = False,
 ) -> Union[Path, Tuple[str, Path]]:
@@ -208,7 +209,7 @@ def download_extract_sqlite(
 
 
 @contextmanager
-def connect(version: Optional[str] = None, prefix: Optional[Sequence[str]] = None):
+def connect(version: Optional[str] = None, *, prefix: Optional[Sequence[str]] = None):
     """Ensure and connect to the database.
 
     :param version: The version number of ChEMBL to get. If none specified, uses
@@ -231,7 +232,7 @@ def connect(version: Optional[str] = None, prefix: Optional[Sequence[str]] = Non
 
 
 @contextmanager
-def cursor(version: Optional[str] = None, prefix: Optional[Sequence[str]] = None):
+def cursor(version: Optional[str] = None, *, prefix: Optional[Sequence[str]] = None):
     """Ensure, connect, and get a cursor from the database to the database.
 
     :param version: The version number of ChEMBL to get. If none specified, uses
@@ -253,7 +254,7 @@ def cursor(version: Optional[str] = None, prefix: Optional[Sequence[str]] = None
 
 
 def query(
-    sql: str, version: Optional[str] = None, prefix: Optional[Sequence[str]] = None, **kwargs
+    sql: str, version: Optional[str] = None, *, prefix: Optional[Sequence[str]] = None, **kwargs
 ) -> "pandas.DataFrame":
     """Ensure the data is available, run the query, then put the results in a dataframe.
 
@@ -281,6 +282,7 @@ def query(
 
 def download_fps(
     version: Optional[str] = None,
+    *,
     prefix: Optional[Sequence[str]] = None,
     return_version: bool = False,
 ) -> Union[Path, Tuple[str, Path]]:
@@ -303,7 +305,7 @@ def download_fps(
 
 
 def chemfp_load_fps(
-    version: Optional[str] = None, prefix: Optional[Sequence[str]] = None, **kwargs
+    version: Optional[str] = None, *, prefix: Optional[Sequence[str]] = None, **kwargs
 ):
     """Ensure the ChEMBL fingerprints file is downloaded and open with :func:`chemfp.load_fingerprints`.
 
@@ -322,6 +324,7 @@ def chemfp_load_fps(
 
 def download_chemreps(
     version: Optional[str] = None,
+    *,
     prefix: Optional[Sequence[str]] = None,
     return_version: bool = False,
 ) -> Union[Path, Tuple[str, Path]]:
@@ -351,7 +354,7 @@ def download_chemreps(
 
 
 def get_chemreps_df(
-    version: Optional[str] = None, prefix: Optional[Sequence[str]] = None
+    version: Optional[str] = None, *, prefix: Optional[Sequence[str]] = None
 ) -> "pandas.DataFrame":
     """Download and parse the latest ChEMBL chemical representations file.
 
@@ -373,6 +376,7 @@ def get_chemreps_df(
 
 def download_sdf(
     version: Optional[str] = None,
+    *,
     prefix: Optional[Sequence[str]] = None,
     return_version: bool = False,
 ) -> Union[Path, Tuple[str, Path]]:
@@ -394,6 +398,7 @@ def download_sdf(
 
 def download_monomer_library(
     version: Optional[str] = None,
+    *,
     prefix: Optional[Sequence[str]] = None,
     return_version: bool = False,
 ) -> Union[Path, Tuple[str, Path]]:
@@ -415,6 +420,7 @@ def download_monomer_library(
 
 def get_monomer_library_root(
     version: Optional[str] = None,
+    *,
     prefix: Optional[Sequence[str]] = None,
 ) -> ElementTree.Element:
     """Ensure the latest ChEMBL monomer library is downloaded and parse its root with :mod:`xml`.
@@ -434,6 +440,7 @@ def get_monomer_library_root(
 @contextmanager
 def supplier(
     version: Optional[str] = None,
+    *,
     prefix: Optional[Sequence[str]] = None,
     **kwargs,
 ):
@@ -472,16 +479,17 @@ def supplier(
 
 def get_substructure_library(
     version: Optional[str] = None,
-    prefix: Optional[Sequence[str]] = None,
+    *,
     max_heavy: int = 75,
+    prefix: Optional[Sequence[str]] = None,
     **kwargs,
 ):
     """Get the ChEMBL substructure library.
 
     :param version: The version number of ChEMBL to get. If none specified, uses
         :func:`latest` to look up the latest.
-    :param prefix: The directory inside :mod:`pystow` to use
     :param max_heavy: The largest number of heavy atoms that are considered before skipping the molecule.
+    :param prefix: The directory inside :mod:`pystow` to use
     :param kwargs: keyword arguments to pass through to :class:`rdkit.Chem.ForwardSDMolSupplier`, such as
         ``sanitize`` and ``removeHs`` via :func:`supplier`.
     :returns: A substructure library object
@@ -528,6 +536,7 @@ def get_substructure_library(
 
 def download_readme(
     version: Optional[str] = None,
+    *,
     prefix: Optional[Sequence[str]] = None,
     return_version: bool = False,
 ) -> Union[Path, Tuple[str, Path]]:
