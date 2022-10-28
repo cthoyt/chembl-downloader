@@ -52,9 +52,10 @@ logger = logging.getLogger(__name__)
 #: The default path inside the :mod:`pystow` directory
 PYSTOW_PARTS = ["chembl"]
 RELEASE_PREFIX = "* Release:"
+DATE_PREFIX = "* Date:"
 
 
-def _removeprefix(s, prefix):
+def _removeprefix(s: str, prefix: str) -> str:
     if s.startswith(prefix):
         return s[len(prefix) :]
     return s
@@ -106,6 +107,8 @@ def _download_helper(
         to allow downloading arbitrarily named files.
     :return: If ``return_version`` is true, return a pair of the version and the
         local file path to the downloaded file. Otherwise, just return the path.
+    :raises ValueError:
+        If file could not be downloaded
     """
     if version is None:
         version = latest()
@@ -308,6 +311,7 @@ def chemfp_load_fps(
         :func:`latest` to look up the latest.
     :param prefix: The directory inside :mod:`pystow` to use
     :param kwargs: Remaining keyword arguments are passed into :func:`chemfp.load_fingerprints`.
+    :return: A fingerpring arena object
     :rtype: chemfp.arena.FingerprintArena
     """
     import chemfp
@@ -440,6 +444,7 @@ def supplier(
     :param prefix: The directory inside :mod:`pystow` to use
     :param kwargs: keyword arguments to pass through to :class:`rdkit.Chem.ForwardSDMolSupplier`, such as
         ``sanitize`` and ``removeHs``.
+    :yields: A supplier to be used in a context manager
 
     Example:
     .. code-block:: python
@@ -547,13 +552,12 @@ def download_readme(
 
 def get_date(version: str, **kwargs) -> str:
     """Get the date of a given version."""
-    path = download_readme(version=version, **kwargs)
+    path = cast(Path, download_readme(version=version, **kwargs))
     try:
-        date_p = (
-            next(line for line in path.read_text().splitlines() if line.startswith("* Date:"))
-            .removeprefix("* Date:")
-            .lstrip()
-        )
+        date_p = _removeprefix(
+            next(line for line in path.read_text().splitlines() if line.startswith("* Date:")),
+            DATE_PREFIX,
+        ).lstrip()
     except StopIteration:
         return ""  # happens on 22.1 and 24.1
     else:
