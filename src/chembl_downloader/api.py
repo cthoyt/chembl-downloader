@@ -177,6 +177,15 @@ def download_extract_sqlite(
     :raises FileNotFoundError: If no database file could be found in the
         extracted directories
     """
+    if version is not None:
+        _directory = pystow.join(*(prefix or PYSTOW_PARTS), version)
+        if _directory.is_dir():
+            rv = _find_sqlite_file(_directory)
+            if rv:
+                if return_version:
+                    return version, rv
+                return rv
+
     version, path = cast(
         Tuple[str, Path], download_sqlite(version=version, prefix=prefix, return_version=True)
     )
@@ -192,6 +201,16 @@ def download_extract_sqlite(
     else:
         logger.debug("did not re-unarchive %s to %s", path, directory)
 
+    rv = _find_sqlite_file(directory)
+    if rv is None:
+        raise FileNotFoundError("could not find a .db file in the ChEMBL archive")
+    elif return_version:
+        return version, rv
+    else:
+        return rv
+
+
+def _find_sqlite_file(directory: Union[str, Path]) -> Optional[Path]:
     # Since the structure of the zip changes from version to version,
     # it's better to just walk through the unarchived folders recursively
     # and find the DB file
@@ -200,12 +219,8 @@ def download_extract_sqlite(
             if not file.endswith(".db"):
                 continue
             rv = Path(root).joinpath(file)
-            if return_version:
-                return version, rv
-            else:
-                return rv
-
-    raise FileNotFoundError("could not find a .db file in the ChEMBL archive")
+            return rv
+    return None
 
 
 @contextmanager
