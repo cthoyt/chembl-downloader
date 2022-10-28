@@ -16,3 +16,4 @@ python:
       path: .
       extra_requirements:
         - docs
+        - pandas

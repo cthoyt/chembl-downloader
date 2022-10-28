@@ -25,8 +25,11 @@ To install in development mode, use the following:
 
 Usage
 -----
-.. automodule:: chembl_downloader
-    :members:
+.. automodapi:: chembl_downloader.api
+
+Queries
+-------
+.. automodapi:: chembl_downloader.queries
 
 Indices and Tables
 ------------------

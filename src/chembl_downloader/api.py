@@ -447,6 +447,7 @@ def supplier(
     :yields: A supplier to be used in a context manager
 
     Example:
+
     .. code-block:: python
 
         from rdkit import Chem

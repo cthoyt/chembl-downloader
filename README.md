@@ -18,6 +18,9 @@
     <a href="https://github.com/psf/black">
         <img src="https://img.shields.io/badge/code%20style-black-000000.svg" alt="Code style: black" />
     </a>
+    <a href='https://chembl-downloader.readthedocs.io/en/latest/?badge=latest'>
+        <img src='https://readthedocs.org/projects/chembl-downloader/badge/?version=latest' alt='Documentation Status' />
+    </a>
 </p>
 
 Don't worry about downloading/extracting ChEMBL or versioning - just use ``chembl_downloader`` to write code that knows
@@ -28,6 +31,11 @@ Install with:
 ```bash
 $ pip install chembl-downloader
 ```
+
+Full technical documentation can be found on
+[ReadTheDocs](https://chembl-downloader.readthedocs.io. Tutorials can be found
+in Jupyter notebooks in the [notebooks/](notebooks/) directory of the
+repository.
 
 ## Database Usage
 
