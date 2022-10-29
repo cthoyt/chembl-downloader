@@ -7,9 +7,11 @@ from textwrap import dedent
 __all__ = [
     "ID_NAME_QUERY",
     "ACTIVITIES_QUERY",
-    "get_assay_sql",
     "DRUG_INDICATIONS_SQL",
     "CHEBI_UNMAPPED_SQL",
+    # Functions
+    "get_assay_sql",
+    "get_target_sql",
 ]
 
 
@@ -82,6 +84,26 @@ def get_assay_sql(assay_chembl_id: str) -> str:
             and ACTIVITIES.standard_value is not null
             and ACTIVITIES.standard_relation is not null
             and ACTIVITIES.standard_relation = '='
+    """  # noqa: S608
+    )
+
+
+def get_target_sql(target_id: str) -> str:
+    """Get the SQL for all chemicals inhibiting the target."""
+    return dedent(
+        f"""\
+        SELECT
+            ASSAYS.chembl_id              AS assay_chembl_id,
+            COMPOUND_STRUCTURES.canonical_smiles,
+            MOLECULE_DICTIONARY.chembl_id AS molecule_chembl_id,
+            ACTIVITIES.pchembl_value
+        FROM TARGET_DICTIONARY
+             JOIN ASSAYS ON TARGET_DICTIONARY.tid == ASSAYS.tid
+             JOIN ACTIVITIES ON ASSAYS.assay_id == ACTIVITIES.assay_id
+             JOIN MOLECULE_DICTIONARY ON MOLECULE_DICTIONARY.molregno == ACTIVITIES.molregno
+             JOIN COMPOUND_STRUCTURES ON MOLECULE_DICTIONARY.molregno == COMPOUND_STRUCTURES.molregno
+        WHERE TARGET_DICTIONARY.chembl_id = '{target_id}'
+            AND ACTIVITIES.pchembl_value IS NOT NULL
     """  # noqa: S608
     )
 
