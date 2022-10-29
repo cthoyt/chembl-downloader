@@ -6,35 +6,52 @@ from pathlib import Path
 from typing import TYPE_CHECKING, Optional
 
 import click
-from scipy import stats
+import pystow
 
-from chembl_downloader.api import query
+from chembl_downloader.api import latest, query
 from chembl_downloader.queries import get_target_sql
 
 if TYPE_CHECKING:
     import pandas
 
-# TODO see https://github.com/PatWalters/datafiles/blob/main/CHEMBL4550.smi
+__all__ = [
+    "get_target_smi_df",
+    "write_target_smi_file",
+]
 
 
 def get_target_smi_df(
     target_id: str,
     *,
     version: Optional[str] = None,
-    aggregate: Optional[str] = "gmean",
+    aggregate: Optional[str] = "mean",
+    refresh: bool = False,
     **kwargs,
 ) -> "pandas.DataFrame":
     """Get a SMI."""
-    sql = get_target_sql(target_id)
-    df = query(sql=sql, version=version, **kwargs)
+    import pandas as pd
+
+    if version is None:
+        version = latest()
+
+    path = pystow.join("chembl", version, "targets", name=f"{target_id}.smi")
+    if path.is_file() and not refresh:
+        df = pd.read_csv(path)
+    else:
+        sql = get_target_sql(target_id)
+        df = query(sql=sql, version=version, **kwargs)
+        df.to_csv(path, index=False)
+
     if aggregate is not None:
         group_object = df.groupby(["canonical_smiles", "molecule_chembl_id"])
         if aggregate == "gmean":
+            from scipy import stats
+
             df = group_object.agg(stats.gmean)["pchembl_value"]
         elif aggregate == "mean":
             df = group_object.mean()["pchembl_value"]
         else:
-            raise ValueError
+            raise ValueError(f"unknown aggregate: {aggregate}")
     return df
 
 
