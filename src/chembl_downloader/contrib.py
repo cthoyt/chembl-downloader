@@ -49,7 +49,7 @@ def get_target_smi_df(
 
             df = group_object.agg(stats.gmean)["pchembl_value"]
         elif aggregate == "mean":
-            df = group_object.mean()["pchembl_value"]
+            df = group_object.mean(numeric_only=True)["pchembl_value"]
         else:
             raise ValueError(f"unknown aggregate: {aggregate}")
     return df
