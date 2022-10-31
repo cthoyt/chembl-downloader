@@ -47,9 +47,9 @@ def get_target_smi_df(
         if aggregate == "gmean":
             from scipy import stats
 
-            df = group_object.agg(stats.gmean)["pchembl_value"]
+            df = group_object.agg(stats.gmean)["pchembl_value"].reset_index()
         elif aggregate == "mean":
-            df = group_object.mean(numeric_only=True)["pchembl_value"]
+            df = group_object.mean(numeric_only=True)["pchembl_value"].reset_index()
         else:
             raise ValueError(f"unknown aggregate: {aggregate}")
     return df
