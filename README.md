@@ -33,7 +33,7 @@ $ pip install chembl-downloader
 ```
 
 Full technical documentation can be found on
-[ReadTheDocs](https://chembl-downloader.readthedocs.io. Tutorials can be found
+[ReadTheDocs](https://chembl-downloader.readthedocs.io). Tutorials can be found
 in Jupyter notebooks in the [notebooks/](notebooks/) directory of the
 repository.
 
