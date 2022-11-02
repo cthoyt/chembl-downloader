@@ -29,7 +29,8 @@ def main():
         check_downloader(version_name=version)
         for version in tqdm(chembl_versions)
     ]
-    with open('../README.md', 'a') as file:
+
+    with open('../../README.md', 'a') as file:
         print('\n \n', file=file)
         print('## ChEMBL Downloader Status', file=file)
         print('\n \n', file=file)
