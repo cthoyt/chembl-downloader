@@ -7,7 +7,7 @@ from tqdm import tqdm
 import chembl_downloader
 
 from tabulate import tabulate
-from chembl_downloader.queries import COUNT_QUERY
+from chembl_downloader.queries import COUNT_QUERY_SQL
 from chembl_downloader import versions
 
 
@@ -17,7 +17,7 @@ def check_downloader(version_name: str) -> Tuple[str, str, str, str]:
     except Exception as e:
         return version_name, 'No', str(e), '-'
 
-    total_compounds = chembl_downloader.query(COUNT_QUERY)['count'][0]
+    total_compounds = chembl_downloader.query(COUNT_QUERY_SQL)['count'][0]
     return version_name, 'Yes', '',  total_compounds
 
 
