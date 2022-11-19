@@ -247,6 +247,10 @@ If you'd like to contribute, there's a submodule called `chembl_downloader.queri
 where you can add a useful SQL queries along with a description of what it does for easy
 importing and reuse.
 
+## Users
+
+See [who's using `chembl-downloader`](https://github.com/search?q=chembl_downloader+-user%3Acthoyt&type=Code).
+
 ## Statistics and Compatibility
 
 `chembl-downloader` is compatible with all versions of ChEMBL. However, some files are
