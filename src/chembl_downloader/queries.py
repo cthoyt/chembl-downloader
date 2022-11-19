@@ -12,6 +12,7 @@ __all__ = [
     # Functions
     "get_assay_sql",
     "get_target_sql",
+    "get_document_molecule_sql",
 ]
 
 
@@ -132,3 +133,20 @@ WHERE
     chebi_par_id IS NULL
     AND pref_name IS NOT NULL
 """
+
+
+def get_document_molecule_sql(document_chembl_id: str) -> str:
+    """Get all molecules mentioned in a document."""
+    return dedent(
+        f"""\
+            SELECT DISTINCT
+                MOLECULE_DICTIONARY.chembl_id,
+                COMPOUND_RECORDS.compound_name,
+                COMPOUND_STRUCTURES.canonical_smiles
+            FROM DOCS
+                JOIN COMPOUND_RECORDS ON COMPOUND_RECORDS.doc_id == DOCS.doc_id
+                JOIN MOLECULE_DICTIONARY ON MOLECULE_DICTIONARY.molregno == COMPOUND_RECORDS.molregno
+                JOIN COMPOUND_STRUCTURES ON COMPOUND_RECORDS.molregno == COMPOUND_STRUCTURES.molregno
+            WHERE DOCS.chembl_id = '{document_chembl_id}'
+        """  # noqa: S608
+    )

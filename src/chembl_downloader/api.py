@@ -45,6 +45,9 @@ __all__ = [
     # Monomers
     "download_monomer_library",
     "get_monomer_library_root",
+    # UniProt mappings
+    "download_uniprot_mapping",
+    "get_uniprot_mapping_df",
 ]
 
 logger = logging.getLogger(__name__)
@@ -588,3 +591,73 @@ def get_date(version: str, **kwargs) -> str:
     else:
         day, month, year = date_p.split("/")
         return f"{year}-{month}-{day}"
+
+
+def download_uniprot_mapping(
+    version: Optional[str] = None,
+    *,
+    prefix: Optional[Sequence[str]] = None,
+    return_version: bool = False,
+):
+    """Ensure the latest ChEMBL-UniProt target mapping TSV file.
+
+    :param version: The version number of ChEMBL to get. If none specified, uses
+        :func:`latest` to look up the latest.
+    :param prefix: The directory inside :mod:`pystow` to use
+    :param return_version: Should the version get returned? Turn this to true
+        if you're looking up the latest version and want to reduce redundant code.
+    :return: If ``return_version`` is true, return a pair of the version and the
+        local file path to the downloaded ``*.txt`` file. Otherwise,
+        just return the path.
+    """
+    return _download_helper(
+        "chembl_uniprot_mapping.txt",
+        version=version,
+        prefix=prefix,
+        return_version=return_version,
+        filename_repeats_version=False,
+    )
+
+
+def get_uniprot_mapping_df(
+    version: Optional[str] = None,
+    *,
+    prefix: Optional[Sequence[str]] = None,
+) -> "pandas.DataFrame":
+    """Download and parse the latest ChEMBL-UniProt target mapping TSV file.
+
+    :param version:
+        The version number of ChEMBL to get. If none specified, uses
+        :func:`latest` to look up the latest.
+    :param prefix: The directory inside :mod:`pystow` to use
+    :return: A dataframe with four columns:
+
+        1. ``uniprot_id``
+        2. ``chembl_target_id``
+        3. ``name``, the name from ChEMBL
+        4. ``type``, which can have one of the following values:
+
+           - ``CHIMERIC PROTEIN``
+           - ``NUCLEIC-ACID``
+           - ``PROTEIN COMPLEX``
+           - ``PROTEIN COMPLEX GROUP``
+           - ``PROTEIN FAMILY``
+           - ``PROTEIN NUCLEIC-ACID COMPLEX``
+           - ``PROTEIN-PROTEIN INTERACTION``
+           - ``SELECTIVITY GROUP``
+           - ``SINGLE PROTEIN``
+
+    """
+    import pandas as pd
+
+    path = cast(
+        Path, download_uniprot_mapping(version=version, prefix=prefix, return_version=False)
+    )
+    df = pd.read_csv(
+        path,
+        sep="\t",
+        skiprows=1,
+        header=None,
+        names=["uniprot_id", "chembl_target_id", "name", "type"],
+    )
+    return df
