@@ -46,18 +46,20 @@ def get_target_smi_df(
     if path.is_file() and not refresh:
         df = pd.read_csv(path)
     else:
-        sql = get_target_sql(target_id)
-        df = query(sql=sql, version=version, **kwargs)
+        sql = get_target_sql(target_id, **kwargs)
+        df = query(sql=sql, version=version)
         df.to_csv(path, index=False)
 
     if aggregate is not None:
-        group_object = df.groupby(["canonical_smiles", "molecule_chembl_id"])
+        group_object = df[["canonical_smiles", "molecule_chembl_id", "pchembl_value"]].groupby(
+            ["canonical_smiles", "molecule_chembl_id"]
+        )
         if aggregate == "gmean":
             from scipy import stats
 
-            df = group_object.agg(stats.gmean)["pchembl_value"]
+            df = group_object.agg(stats.gmean)["pchembl_value"].reset_index()
         elif aggregate == "mean":
-            df = group_object.mean()["pchembl_value"]
+            df = group_object.mean(numeric_only=True)["pchembl_value"].reset_index()
         else:
             raise ValueError(f"unknown aggregate: {aggregate}")
     return df

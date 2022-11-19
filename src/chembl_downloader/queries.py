@@ -3,6 +3,7 @@
 """A collection of query strings for ChEMBL."""
 
 from textwrap import dedent
+from typing import Optional
 
 __all__ = [
     "ID_NAME_QUERY",
@@ -89,8 +90,22 @@ def get_assay_sql(assay_chembl_id: str) -> str:
     )
 
 
-def get_target_sql(target_id: str) -> str:
+def get_target_sql(
+    target_id: str,
+    target_type: Optional[str] = None,
+    standard_relation: Optional[str] = None,
+    standard_type: Optional[str] = None,
+    tax_id: Optional[str] = None,
+) -> str:
     """Get the SQL for all chemicals inhibiting the target."""
+    ar = (
+        ""
+        if standard_relation is None
+        else f"AND ACTIVITIES.standard_relation = '{standard_relation}'"
+    )
+    st = "" if standard_relation is None else f"AND ACTIVITIES.standard_type = '{standard_type}'"
+    tt = "" if target_type is None else f"AND TARGET_DICTIONARY.target_type = '{target_type}'"
+    tax = "" if tax_id is None else f"AND TARGET_DICTIONARY.tax_id = '{tax_id}'"
     return dedent(
         f"""\
         SELECT
@@ -105,6 +120,10 @@ def get_target_sql(target_id: str) -> str:
              JOIN COMPOUND_STRUCTURES ON MOLECULE_DICTIONARY.molregno == COMPOUND_STRUCTURES.molregno
         WHERE TARGET_DICTIONARY.chembl_id = '{target_id}'
             AND ACTIVITIES.pchembl_value IS NOT NULL
+            {tt}
+            {ar}
+            {st}
+            {tax}
     """  # noqa: S608
     )
 
