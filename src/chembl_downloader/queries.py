@@ -3,6 +3,7 @@
 """A collection of query strings for ChEMBL."""
 
 from textwrap import dedent
+from typing import Optional
 
 __all__ = [
     "ID_NAME_QUERY",
@@ -12,6 +13,7 @@ __all__ = [
     # Functions
     "get_assay_sql",
     "get_target_sql",
+    "get_document_molecule_sql",
 ]
 
 
@@ -88,8 +90,22 @@ def get_assay_sql(assay_chembl_id: str) -> str:
     )
 
 
-def get_target_sql(target_id: str) -> str:
+def get_target_sql(
+    target_id: str,
+    target_type: Optional[str] = None,
+    standard_relation: Optional[str] = None,
+    standard_type: Optional[str] = None,
+    tax_id: Optional[str] = None,
+) -> str:
     """Get the SQL for all chemicals inhibiting the target."""
+    ar = (
+        ""
+        if standard_relation is None
+        else f"AND ACTIVITIES.standard_relation = '{standard_relation}'"
+    )
+    st = "" if standard_relation is None else f"AND ACTIVITIES.standard_type = '{standard_type}'"
+    tt = "" if target_type is None else f"AND TARGET_DICTIONARY.target_type = '{target_type}'"
+    tax = "" if tax_id is None else f"AND TARGET_DICTIONARY.tax_id = '{tax_id}'"
     return dedent(
         f"""\
         SELECT
@@ -104,6 +120,10 @@ def get_target_sql(target_id: str) -> str:
              JOIN COMPOUND_STRUCTURES ON MOLECULE_DICTIONARY.molregno == COMPOUND_STRUCTURES.molregno
         WHERE TARGET_DICTIONARY.chembl_id = '{target_id}'
             AND ACTIVITIES.pchembl_value IS NOT NULL
+            {tt}
+            {ar}
+            {st}
+            {tax}
     """  # noqa: S608
     )
 
@@ -140,3 +160,20 @@ FROM MOLECULE_DICTIONARY
 JOIN COMPOUND_STRUCTURES ON MOLECULE_DICTIONARY.molregno == COMPOUND_STRUCTURES.molregno
 WHERE molecule_dictionary.pref_name IS NOT NULL
 """
+
+
+def get_document_molecule_sql(document_chembl_id: str) -> str:
+    """Get all molecules mentioned in a document."""
+    return dedent(
+        f"""\
+            SELECT DISTINCT
+                MOLECULE_DICTIONARY.chembl_id,
+                COMPOUND_RECORDS.compound_name,
+                COMPOUND_STRUCTURES.canonical_smiles
+            FROM DOCS
+                JOIN COMPOUND_RECORDS ON COMPOUND_RECORDS.doc_id == DOCS.doc_id
+                JOIN MOLECULE_DICTIONARY ON MOLECULE_DICTIONARY.molregno == COMPOUND_RECORDS.molregno
+                JOIN COMPOUND_STRUCTURES ON COMPOUND_RECORDS.molregno == COMPOUND_STRUCTURES.molregno
+            WHERE DOCS.chembl_id = '{document_chembl_id}'
+        """  # noqa: S608
+    )
