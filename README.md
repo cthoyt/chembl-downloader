@@ -294,18 +294,18 @@ importing and reuse.
 |   ChEMBL Version | Downloader working   | Error                                                                                                                                | Total compounds   |
 |------------------|----------------------|--------------------------------------------------------------------------------------------------------------------------------------|-------------------|
 |               31 | Yes                  |                                                                                                                                      | 41585             |
-|               30 | Yes                  |                                                                                                                                      | 41585             |
-|               29 | Yes                  |                                                                                                                                      | 41585             |
-|               28 | Yes                  |                                                                                                                                      | 41585             |
-|               27 | Yes                  |                                                                                                                                      | 41585             |
-|               26 | Yes                  |                                                                                                                                      | 41585             |
-|               25 | Yes                  |                                                                                                                                      | 41585             |
-|             24_1 | Yes                  |                                                                                                                                      | 41585             |
-|               24 | Yes                  |                                                                                                                                      | 41585             |
-|               23 | Yes                  |                                                                                                                                      | 41585             |
-|             22_1 | Yes                  |                                                                                                                                      | 41585             |
-|               22 | Yes                  |                                                                                                                                      | 41585             |
-|               21 | Yes                  |                                                                                                                                      | 41585             |
+|               30 | Yes                  |                                                                                                                                      | 41549             |
+|               29 | Yes                  |                                                                                                                                      | 41383             |
+|               28 | Yes                  |                                                                                                                                      | 41049             |
+|               27 | Yes                  |                                                                                                                                      | 40834             |
+|               26 | Yes                  |                                                                                                                                      | 40822             |
+|               25 | Yes                  |                                                                                                                                      | 39885             |
+|             24_1 | Yes                  |                                                                                                                                      | 39877             |
+|               24 | Yes                  |                                                                                                                                      | 39877             |
+|               23 | Yes                  |                                                                                                                                      | 39584             |
+|             22_1 | Yes                  |                                                                                                                                      | 39422             |
+|               22 | Yes                  |                                                                                                                                      | 39422             |
+|               21 | Yes                  |                                                                                                                                      | 39347             |
 |               20 | No                   | could not find chembl_20_sqlite.tar.gz in data for ChEMBL 20 in ftp://ftp.ebi.ac.uk/pub/databases/chembl/ChEMBLdb/releases/chembl_20 | -                 |
 |               19 | No                   | could not find chembl_19_sqlite.tar.gz in data for ChEMBL 19 in ftp://ftp.ebi.ac.uk/pub/databases/chembl/ChEMBLdb/releases/chembl_19 | -                 |
 |               18 | No                   | could not find chembl_18_sqlite.tar.gz in data for ChEMBL 18 in ftp://ftp.ebi.ac.uk/pub/databases/chembl/ChEMBLdb/releases/chembl_18 | -                 |
