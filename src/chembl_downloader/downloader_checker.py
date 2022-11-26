@@ -11,20 +11,20 @@ from chembl_downloader.queries import COUNT_QUERY_SQL
 from chembl_downloader import versions
 
 
-def check_downloader(version_name: str) -> Tuple[str, str, str, str]:
+def check_downloader(version_name: str) -> Tuple[str, str, str]:
     try:
         path = chembl_downloader.download_extract_sqlite(version=version_name)
     except Exception as e:
-        return version_name, 'No', str(e), '-'
+        return version_name, 'No', '-'
 
     total_compounds = chembl_downloader.query(COUNT_QUERY_SQL, version=version_name)['count'][0]
-    return version_name, 'Yes', '',  total_compounds
+    return version_name, 'Yes', total_compounds
 
 
 def main():
     chembl_versions = versions()
 
-    headers = ['ChEMBL Version', 'Downloader working', 'Error', 'Total compounds']
+    headers = ['ChEMBL Version', 'Downloader working', 'Total compounds']
     table = [
         check_downloader(version_name=version)
         for version in tqdm(chembl_versions)
@@ -33,6 +33,9 @@ def main():
     with open('../../README.md', 'a') as file:
         print('\n \n', file=file)
         print('## ChEMBL Downloader Status', file=file)
+        print(
+            '> **_NOTE:_** `chembl_downloader` runs only on SQLite distributions of ChEMBL. If the run was unsuccessful, it is becuase earlier versions of ChEMBL were provided on a MongoDB distribution.',
+            file=file)
         print('\n \n', file=file)
         print(tabulate(table, headers=headers, tablefmt='github'), file=file)
         print('\n', file=file)

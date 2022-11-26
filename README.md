@@ -284,47 +284,47 @@ importing and reuse.
 |               03 | 2010-04-30     |
 |               02 | 2009-12-07     |
 |               01 | 2009-10-28     |
-
  
 
 ## ChEMBL Downloader Status
+> **_NOTE:_** `chembl_downloader` runs only on SQLite distributions of ChEMBL. If the run was unsuccessful, it is becuase earlier versions of ChEMBL were provided on a MongoDB distribution.
 
  
 
-|   ChEMBL Version | Downloader working   | Error                                                                                                                                | Total compounds   |
-|------------------|----------------------|--------------------------------------------------------------------------------------------------------------------------------------|-------------------|
-|               31 | Yes                  |                                                                                                                                      | 41585             |
-|               30 | Yes                  |                                                                                                                                      | 41549             |
-|               29 | Yes                  |                                                                                                                                      | 41383             |
-|               28 | Yes                  |                                                                                                                                      | 41049             |
-|               27 | Yes                  |                                                                                                                                      | 40834             |
-|               26 | Yes                  |                                                                                                                                      | 40822             |
-|               25 | Yes                  |                                                                                                                                      | 39885             |
-|             24_1 | Yes                  |                                                                                                                                      | 39877             |
-|               24 | Yes                  |                                                                                                                                      | 39877             |
-|               23 | Yes                  |                                                                                                                                      | 39584             |
-|             22_1 | Yes                  |                                                                                                                                      | 39422             |
-|               22 | Yes                  |                                                                                                                                      | 39422             |
-|               21 | Yes                  |                                                                                                                                      | 39347             |
-|               20 | No                   | could not find chembl_20_sqlite.tar.gz in data for ChEMBL 20 in ftp://ftp.ebi.ac.uk/pub/databases/chembl/ChEMBLdb/releases/chembl_20 | -                 |
-|               19 | No                   | could not find chembl_19_sqlite.tar.gz in data for ChEMBL 19 in ftp://ftp.ebi.ac.uk/pub/databases/chembl/ChEMBLdb/releases/chembl_19 | -                 |
-|               18 | No                   | could not find chembl_18_sqlite.tar.gz in data for ChEMBL 18 in ftp://ftp.ebi.ac.uk/pub/databases/chembl/ChEMBLdb/releases/chembl_18 | -                 |
-|               17 | No                   | could not find chembl_17_sqlite.tar.gz in data for ChEMBL 17 in ftp://ftp.ebi.ac.uk/pub/databases/chembl/ChEMBLdb/releases/chembl_17 | -                 |
-|               16 | No                   | could not find chembl_16_sqlite.tar.gz in data for ChEMBL 16 in ftp://ftp.ebi.ac.uk/pub/databases/chembl/ChEMBLdb/releases/chembl_16 | -                 |
-|               15 | No                   | could not find chembl_15_sqlite.tar.gz in data for ChEMBL 15 in ftp://ftp.ebi.ac.uk/pub/databases/chembl/ChEMBLdb/releases/chembl_15 | -                 |
-|               14 | No                   | could not find chembl_14_sqlite.tar.gz in data for ChEMBL 14 in ftp://ftp.ebi.ac.uk/pub/databases/chembl/ChEMBLdb/releases/chembl_14 | -                 |
-|               13 | No                   | could not find chembl_13_sqlite.tar.gz in data for ChEMBL 13 in ftp://ftp.ebi.ac.uk/pub/databases/chembl/ChEMBLdb/releases/chembl_13 | -                 |
-|               12 | No                   | could not find chembl_12_sqlite.tar.gz in data for ChEMBL 12 in ftp://ftp.ebi.ac.uk/pub/databases/chembl/ChEMBLdb/releases/chembl_12 | -                 |
-|               11 | No                   | could not find chembl_11_sqlite.tar.gz in data for ChEMBL 11 in ftp://ftp.ebi.ac.uk/pub/databases/chembl/ChEMBLdb/releases/chembl_11 | -                 |
-|               10 | No                   | could not find chembl_10_sqlite.tar.gz in data for ChEMBL 10 in ftp://ftp.ebi.ac.uk/pub/databases/chembl/ChEMBLdb/releases/chembl_10 | -                 |
-|               09 | No                   | could not find chembl_09_sqlite.tar.gz in data for ChEMBL 09 in ftp://ftp.ebi.ac.uk/pub/databases/chembl/ChEMBLdb/releases/chembl_09 | -                 |
-|               08 | No                   | could not find chembl_08_sqlite.tar.gz in data for ChEMBL 08 in ftp://ftp.ebi.ac.uk/pub/databases/chembl/ChEMBLdb/releases/chembl_08 | -                 |
-|               07 | No                   | could not find chembl_07_sqlite.tar.gz in data for ChEMBL 07 in ftp://ftp.ebi.ac.uk/pub/databases/chembl/ChEMBLdb/releases/chembl_07 | -                 |
-|               06 | No                   | could not find chembl_06_sqlite.tar.gz in data for ChEMBL 06 in ftp://ftp.ebi.ac.uk/pub/databases/chembl/ChEMBLdb/releases/chembl_06 | -                 |
-|               05 | No                   | could not find chembl_05_sqlite.tar.gz in data for ChEMBL 05 in ftp://ftp.ebi.ac.uk/pub/databases/chembl/ChEMBLdb/releases/chembl_05 | -                 |
-|               04 | No                   | could not find chembl_04_sqlite.tar.gz in data for ChEMBL 04 in ftp://ftp.ebi.ac.uk/pub/databases/chembl/ChEMBLdb/releases/chembl_04 | -                 |
-|               03 | No                   | could not find chembl_03_sqlite.tar.gz in data for ChEMBL 03 in ftp://ftp.ebi.ac.uk/pub/databases/chembl/ChEMBLdb/releases/chembl_03 | -                 |
-|               02 | No                   | could not find chembl_02_sqlite.tar.gz in data for ChEMBL 02 in ftp://ftp.ebi.ac.uk/pub/databases/chembl/ChEMBLdb/releases/chembl_02 | -                 |
-|               01 | No                   | could not find chembl_01_sqlite.tar.gz in data for ChEMBL 01 in ftp://ftp.ebi.ac.uk/pub/databases/chembl/ChEMBLdb/releases/chembl_01 | -                 |
+|   ChEMBL Version | Downloader working   | Total compounds   |
+|------------------|----------------------|-------------------|
+|               31 | Yes                  | 41585             |
+|               30 | Yes                  | 41549             |
+|               29 | Yes                  | 41383             |
+|               28 | Yes                  | 41049             |
+|               27 | Yes                  | 40834             |
+|               26 | Yes                  | 40822             |
+|               25 | Yes                  | 39885             |
+|             24_1 | Yes                  | 39877             |
+|               24 | Yes                  | 39877             |
+|               23 | Yes                  | 39584             |
+|             22_1 | Yes                  | 39422             |
+|               22 | Yes                  | 39422             |
+|               21 | Yes                  | 39347             |
+|               20 | No                   | -                 |
+|               19 | No                   | -                 |
+|               18 | No                   | -                 |
+|               17 | No                   | -                 |
+|               16 | No                   | -                 |
+|               15 | No                   | -                 |
+|               14 | No                   | -                 |
+|               13 | No                   | -                 |
+|               12 | No                   | -                 |
+|               11 | No                   | -                 |
+|               10 | No                   | -                 |
+|               09 | No                   | -                 |
+|               08 | No                   | -                 |
+|               07 | No                   | -                 |
+|               06 | No                   | -                 |
+|               05 | No                   | -                 |
+|               04 | No                   | -                 |
+|               03 | No                   | -                 |
+|               02 | No                   | -                 |
+|               01 | No                   | -                 |
 
 
