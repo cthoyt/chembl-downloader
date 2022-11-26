@@ -17,7 +17,7 @@ def check_downloader(version_name: str) -> Tuple[str, str, str, str]:
     except Exception as e:
         return version_name, 'No', str(e), '-'
 
-    total_compounds = chembl_downloader.query(COUNT_QUERY_SQL)['count'][0]
+    total_compounds = chembl_downloader.query(COUNT_QUERY_SQL, version=version_name)['count'][0]
     return version_name, 'Yes', '',  total_compounds
 
 
