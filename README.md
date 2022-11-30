@@ -293,12 +293,9 @@ added in release 21 (2015-02-12).
 |               02 | 2009-12-07     |
 |               01 | 2009-10-28     |
  
-
-## ChEMBL Downloader Status
-> **_NOTE:_** `chembl_downloader` runs only on SQLite distributions of ChEMBL. If the run was unsuccessful, it is becuase earlier versions of ChEMBL were provided on a MongoDB distribution.
-
+## ChEMBL Downloader Status 
+> **_NOTE:_** `chembl_downloader` runs only on SQLite distributions of ChEMBL.             If the run was unsuccessful, it is because earlier versions of ChEMBL were provided             on a MongoDB distribution.
  
-
 |   ChEMBL Version | Total compounds   |
 |------------------|-------------------|
 |               31 | 41585             |
@@ -334,5 +331,3 @@ added in release 21 (2015-02-12).
 |               03 | -                 |
 |               02 | -                 |
 |               01 | -                 |
-
-
