@@ -110,8 +110,11 @@ def get_target_sql(
         f"""\
         SELECT
             ASSAYS.chembl_id              AS assay_chembl_id,
+            TARGET_DICTIONARY.target_type,
+            TARGET_DICTIONARY.tax_id,
             COMPOUND_STRUCTURES.canonical_smiles,
             MOLECULE_DICTIONARY.chembl_id AS molecule_chembl_id,
+            ACTIVITIES.standard_type,
             ACTIVITIES.pchembl_value
         FROM TARGET_DICTIONARY
              JOIN ASSAYS ON TARGET_DICTIONARY.tid == ASSAYS.tid
