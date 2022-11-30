@@ -76,7 +76,7 @@ def history():
         tabulate(
             rows,
             tablefmt="github",
-            headers=["ChEMBL Version", "Release Date", "Total Compounds *from SQLite*"],
+            headers=["ChEMBL Version", "Release Date", "Total Named Compounds *from SQLite*"],
         )
     )
 
