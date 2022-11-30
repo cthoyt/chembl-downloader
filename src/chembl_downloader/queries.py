@@ -110,8 +110,11 @@ def get_target_sql(
         f"""\
         SELECT
             ASSAYS.chembl_id              AS assay_chembl_id,
+            TARGET_DICTIONARY.target_type,
+            TARGET_DICTIONARY.tax_id,
             COMPOUND_STRUCTURES.canonical_smiles,
             MOLECULE_DICTIONARY.chembl_id AS molecule_chembl_id,
+            ACTIVITIES.standard_type,
             ACTIVITIES.pchembl_value
         FROM TARGET_DICTIONARY
              JOIN ASSAYS ON TARGET_DICTIONARY.tid == ASSAYS.tid
@@ -151,6 +154,14 @@ FROM MOLECULE_DICTIONARY
 WHERE
     chebi_par_id IS NULL
     AND pref_name IS NOT NULL
+"""
+
+#: Return the count of molecules
+COUNT_QUERY_SQL = """\
+SELECT COUNT(MOLECULE_DICTIONARY.chembl_id) as count
+FROM MOLECULE_DICTIONARY
+JOIN COMPOUND_STRUCTURES ON MOLECULE_DICTIONARY.molregno == COMPOUND_STRUCTURES.molregno
+WHERE molecule_dictionary.pref_name IS NOT NULL
 """
 
 

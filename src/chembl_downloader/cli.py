@@ -68,8 +68,28 @@ def history():
     except ImportError:
         click.secho("Could not import `tabulate`. Please run `python -m pip install tabulate`")
         sys.exit(1)
-    rows = [(version, get_date(version=version)) for version in tqdm(versions())]
-    click.echo(tabulate(rows, tablefmt="github", headers=["ChEMBL Version", "Release Date"]))
+    rows = [
+        (version, get_date(version=version), _count_compounds(version=version))
+        for version in tqdm(versions())
+    ]
+    click.echo(
+        tabulate(
+            rows,
+            tablefmt="github",
+            headers=["ChEMBL Version", "Release Date", "Total Named Compounds *from SQLite*"],
+        )
+    )
+
+
+def _count_compounds(version: str) -> str:
+    """Test downloader for specific ChEMBL version."""
+    from .queries import COUNT_QUERY_SQL
+
+    try:
+        total_compounds = query(COUNT_QUERY_SQL, version=version)["count"][0]
+    except Exception:
+        return "-"
+    return f"{total_compounds:,}"
 
 
 if __name__ == "__main__":
