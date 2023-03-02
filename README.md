@@ -124,6 +124,8 @@ around with complicated conda environments and configurations. One of the powerf
 the [rdkit.Chem.PandasTools](https://rdkit.org/docs/source/rdkit.Chem.PandasTools.html)
 module.
 
+## SDF Usage
+
 ### Access an RDKit supplier over entries in the SDF dump
 
 This example is a bit more fit-for-purpose than the last two. The `supplier()` function makes sure that the latest SDF
@@ -148,8 +150,6 @@ with chembl_downloader.supplier() as suppl:
 
 This example was adapted from Greg Landrum's RDKit blog post
 on [generalized substructure search](https://greglandrum.github.io/rdkit-blog/tutorial/substructure/2021/08/03/generalized-substructure-search.html).
-
-## SDF Usage
 
 ### Get an RDKit substructure library
 
