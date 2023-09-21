@@ -200,7 +200,7 @@ def download_extract_sqlite(
     if not directory.is_dir():
         logger.info("unarchiving %s to %s", path, directory)
         with tarfile.open(path, mode="r", encoding="utf-8") as tar_file:
-            tar_file.extractall(directory)
+            tar_file.extractall(directory)  # noqa:S202
     else:
         logger.debug("did not re-unarchive %s to %s", path, directory)
 
