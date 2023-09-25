@@ -20,6 +20,7 @@ from .api import (  # noqa:F401
     get_monomer_library_root,
     get_substructure_library,
     get_uniprot_mapping_df,
+    iterate_smiles,
     latest,
     query,
     supplier,

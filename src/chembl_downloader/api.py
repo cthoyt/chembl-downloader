@@ -12,7 +12,7 @@ import sqlite3
 import tarfile
 from contextlib import closing, contextmanager
 from pathlib import Path
-from typing import TYPE_CHECKING, List, Optional, Sequence, Tuple, Union, cast
+from typing import TYPE_CHECKING, Iterable, List, Optional, Sequence, Tuple, Union, cast
 from xml.etree import ElementTree
 
 import pystow
@@ -35,6 +35,7 @@ __all__ = [
     # SDF
     "download_sdf",
     "supplier",
+    "iterate_smiles",
     "get_substructure_library",
     # Chemreps
     "download_chemreps",
@@ -493,6 +494,24 @@ def supplier(
     path = cast(Path, download_sdf(version=version, prefix=prefix, return_version=False))
     with gzip.open(path) as file:
         yield Chem.ForwardSDMolSupplier(file, **kwargs)
+
+
+def iterate_smiles(
+    version: Optional[str] = None,
+    *,
+    prefix: Optional[Sequence[str]] = None,
+    **kwargs,
+) -> Iterable[str]:
+    """Iterate over SMILES via RDKit."""
+    from rdkit import Chem
+
+    with supplier(version=version, prefix=prefix, **kwargs) as suppl:
+        for mol in suppl:
+            if mol is None:
+                continue
+            smiles = Chem.MolToSmiles(mol)
+            if smiles:
+                yield smiles
 
 
 def get_substructure_library(

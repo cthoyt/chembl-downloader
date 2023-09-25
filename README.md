@@ -151,6 +151,18 @@ with chembl_downloader.supplier() as suppl:
 This example was adapted from Greg Landrum's RDKit blog post
 on [generalized substructure search](https://greglandrum.github.io/rdkit-blog/tutorial/substructure/2021/08/03/generalized-substructure-search.html).
 
+### Iterate over SMILES
+
+This example uses the `supplier()` method and RDKit to get SMILES strings from molecules 
+in ChEMBL's SDF file. If you want direct access to the RDKit molecule objects, use `supplier()`.
+
+```python
+import chembl_downloader
+
+for smiles in chembl_downloader.iterate_smiles():
+    print(smiles)
+```
+
 ### Get an RDKit substructure library
 
 Building on the `supplier()` function, the `get_substructure_library()`
