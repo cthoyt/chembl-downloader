@@ -263,7 +263,7 @@ importing and reuse.
 
 ## Users
 
-See [who's using `chembl-downloader`](https://github.com/search?q=chembl_downloader+-user%3Acthoyt&type=Code).
+See [who's using `chembl-downloader`](https://github.com/search?q=chembl_downloader+-user%3Acthoyt+-is%3Afork&type=code).
 
 ## Statistics and Compatibility
 
