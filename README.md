@@ -26,6 +26,8 @@
 Don't worry about downloading/extracting ChEMBL or versioning - just use ``chembl_downloader`` to write code that knows
 how to download it and use it automatically.
 
+## Installation
+
 Install with:
 
 ```bash
