@@ -96,7 +96,7 @@ def get_target_sql(
     standard_relation: Optional[str] = None,
     standard_type: Optional[str] = None,
     tax_id: Optional[str] = None,
-    max_phase: Optional[str] = None,
+    max_phase: bool = False,
 ) -> str:
     """Get the SQL for all chemicals inhibiting the target."""
     ar = (
@@ -107,7 +107,7 @@ def get_target_sql(
     st = "" if standard_relation is None else f"AND ACTIVITIES.standard_type = '{standard_type}'"
     tt = "" if target_type is None else f"AND TARGET_DICTIONARY.target_type = '{target_type}'"
     tax = "" if tax_id is None else f"AND TARGET_DICTIONARY.tax_id = '{tax_id}'"
-    mp = "" if max_phase is None else f"AND MOLECULE_DICTIONARY.max_phase = '{max_phase}'"
+    mp = "" if max_phase is False else f"MOLECULE_DICTIONARY.max_phase"
     return dedent(
         f"""\
         SELECT
@@ -117,7 +117,8 @@ def get_target_sql(
             COMPOUND_STRUCTURES.canonical_smiles,
             MOLECULE_DICTIONARY.chembl_id AS molecule_chembl_id,
             ACTIVITIES.standard_type,
-            ACTIVITIES.pchembl_value
+            ACTIVITIES.pchembl_value,
+            {mp}
         FROM TARGET_DICTIONARY
              JOIN ASSAYS ON TARGET_DICTIONARY.tid == ASSAYS.tid
              JOIN ACTIVITIES ON ASSAYS.assay_id == ACTIVITIES.assay_id
@@ -129,7 +130,6 @@ def get_target_sql(
             {ar}
             {st}
             {tax}
-            {mp}
     """  # noqa: S608
     )
 
