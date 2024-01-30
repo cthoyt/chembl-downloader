@@ -107,7 +107,7 @@ def get_target_sql(
     st = "" if standard_relation is None else f"AND ACTIVITIES.standard_type = '{standard_type}'"
     tt = "" if target_type is None else f"AND TARGET_DICTIONARY.target_type = '{target_type}'"
     tax = "" if tax_id is None else f"AND TARGET_DICTIONARY.tax_id = '{tax_id}'"
-    mp = "MOLECULE_DICTIONARY.max_phase," if max_phase else ""
+    mp = "\n            MOLECULE_DICTIONARY.max_phase," if max_phase else ""
     return dedent(
         f"""\
         SELECT
@@ -115,8 +115,7 @@ def get_target_sql(
             TARGET_DICTIONARY.target_type,
             TARGET_DICTIONARY.tax_id,
             COMPOUND_STRUCTURES.canonical_smiles,
-            MOLECULE_DICTIONARY.chembl_id AS molecule_chembl_id,
-            {mp}
+            MOLECULE_DICTIONARY.chembl_id AS molecule_chembl_id,{mp}
             ACTIVITIES.standard_type,
             ACTIVITIES.pchembl_value
         FROM TARGET_DICTIONARY
@@ -131,7 +130,7 @@ def get_target_sql(
             {st}
             {tax}
     """  # noqa: S608
-    )
+    ).strip()
 
 
 DRUG_INDICATIONS_SQL = """\
