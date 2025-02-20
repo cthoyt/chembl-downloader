@@ -50,9 +50,9 @@ __all__ = [
     "get_monomer_library_root",
     "get_substructure_library",
     "get_uniprot_mapping_df",
+    "iterate_fps",
     "iterate_smiles",
     "latest",
-    "load_fps",
     "query",
     "supplier",
     "versions",
@@ -424,9 +424,9 @@ def chemfp_load_fps(
     return chemfp.load_fingerprints(path, **kwargs)
 
 
-def load_fps(
+def iterate_fps(
     version: str | None = None, *, prefix: Sequence[str] | None = None
-) -> dict[str, numpy.ndarray]:
+) -> Iterable[tuple[str, numpy.ndarray]]:
     """Download and open the ChEMBL fingerprints via RDKit/Numpy.
 
     :param version: The version number of ChEMBL to get. If none specified, uses
@@ -439,7 +439,6 @@ def load_fps(
     from rdkit.DataStructs import ConvertToNumpyArray
 
     path = download_fps(version=version, prefix=prefix, return_version=False)
-    rv = {}
     with gzip.open(path, mode="rt") as file:
         for _ in range(6):  # throw away headers
             next(file)
@@ -451,8 +450,7 @@ def load_fps(
             bitvect = DataStructs.cDataStructs.CreateFromBinaryText(binary_fp)
             arr = np.zeros((bitvect.GetNumBits(),), dtype=np.uint8)
             ConvertToNumpyArray(bitvect, arr)
-            rv[chembl_id] = arr
-    return rv
+            yield chembl_id, arr
 
 
 # docstr-coverage:excused `overload`
