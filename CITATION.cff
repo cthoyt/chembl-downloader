@@ -3,6 +3,6 @@ message: "If you use this software, please cite it as below."
 title: "ChEMBL Downloader"
 authors:
   - name: "Charles Tapley Hoyt"
-version: 0.5.0
+version: 0.5.1-dev
 doi:
 url: "https://github.com/cthoyt/chembl-downloader"
