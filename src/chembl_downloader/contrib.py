@@ -40,24 +40,21 @@ def get_target_smi_df(
 ) -> pandas.DataFrame:
     """Geta dataframe for activities of compounds against the given target.
 
-    :param target_id: ChEMBL identifier for the target.
-        For example, use CHEMBL1867 for the human A2A receptor.
+    :param target_id: ChEMBL identifier for the target. For example, use CHEMBL1867 for
+        the human A2A receptor.
     :param version: The version of ChEMBL to use. If not given, uses the latest version.
-    :param aggregate:
-        The aggregation to use (either "mean" or "gmean" for geometric mean).
-        If none, do not do aggregation.
-    :param refresh:
-        If true, rebuild the cached file.
-    :param standard_relation:
-        Relation type filter, applied before aggregation. For example, can be "="
-    :param standard_type:
-        Assay type filter, applied before aggregation. For example, can be "IC50"
-    :param kwargs:
-        Remaining keyword arguments to pass through to :func:`get_target_sql`
-    :return:
-        A dataframe
-    :raises ValueError:
-        If an unknown ``aggregate`` value is given
+    :param aggregate: The aggregation to use (either "mean" or "gmean" for geometric
+        mean). If none, do not do aggregation.
+    :param refresh: If true, rebuild the cached file.
+    :param standard_relation: Relation type filter, applied before aggregation. For
+        example, can be "="
+    :param standard_type: Assay type filter, applied before aggregation. For example,
+        can be "IC50"
+    :param kwargs: Remaining keyword arguments to pass through to :func:`get_target_sql`
+
+    :returns: A dataframe
+
+    :raises ValueError: If an unknown ``aggregate`` value is given
 
     Note, this caches the unfiltered, unaggregated data as a SMI file for later reuse.
     """

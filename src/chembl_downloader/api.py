@@ -83,6 +83,7 @@ def latest() -> str:
     """Get the latest version of ChEMBL as a string.
 
     :returns: The latest version string of ChEMBL
+
     :raises ValueError: If the latest README can not be parsed
     """
     bio = io.BytesIO()
@@ -118,15 +119,15 @@ def _download_helper(
     :param version: The version number of ChEMBL to get. If none specified, uses
         :func:`latest` to look up the latest.
     :param prefix: The directory inside :mod:`pystow` to use
-    :param return_version: Should the version get returned? Turn this to true
-        if you're looking up the latest version and want to reduce redundant code.
-    :param filename_repeats_version:
-        True if filename contains ``chembl_<version>`` in the beginning. Set to false
-        to allow downloading arbitrarily named files.
-    :return: If ``return_version`` is true, return a pair of the version and the
-        local file path to the downloaded file. Otherwise, just return the path.
-    :raises ValueError:
-        If file could not be downloaded
+    :param return_version: Should the version get returned? Turn this to true if you're
+        looking up the latest version and want to reduce redundant code.
+    :param filename_repeats_version: True if filename contains ``chembl_<version>`` in
+        the beginning. Set to false to allow downloading arbitrarily named files.
+
+    :returns: If ``return_version`` is true, return a pair of the version and the local
+        file path to the downloaded file. Otherwise, just return the path.
+
+    :raises ValueError: If file could not be downloaded
     """
     if version is None:
         version = latest()
@@ -186,11 +187,11 @@ def download_sqlite(
     :param version: The version number of ChEMBL to get. If none specified, uses
         :func:`latest` to look up the latest.
     :param prefix: The directory inside :mod:`pystow` to use
-    :param return_version: Should the version get returned? Turn this to true
-        if you're looking up the latest version and want to reduce redundant code.
-    :return: If ``return_version`` is true, return a pair of the version and the
-        local file path to the downloaded ``*.tar.gz`` file. Otherwise, just
-        return the path.
+    :param return_version: Should the version get returned? Turn this to true if you're
+        looking up the latest version and want to reduce redundant code.
+
+    :returns: If ``return_version`` is true, return a pair of the version and the local
+        file path to the downloaded ``*.tar.gz`` file. Otherwise, just return the path.
     """
     return _download_helper(
         suffix="_sqlite.tar.gz",
@@ -231,13 +232,15 @@ def download_extract_sqlite(
     :param version: The version number of ChEMBL to get. If none specified, uses
         :func:`latest` to look up the latest.
     :param prefix: The directory inside :mod:`pystow` to use
-    :param return_version: Should the version get returned? Turn this to true
-        if you're looking up the latest version and want to reduce redundant code.
-    :return: If ``return_version`` is true, return a pair of the version and the
-        local file path to the downloaded ChEMBLSQLite database file. Otherwise,
-        just return the path.
-    :raises FileNotFoundError: If no database file could be found in the
-        extracted directories
+    :param return_version: Should the version get returned? Turn this to true if you're
+        looking up the latest version and want to reduce redundant code.
+
+    :returns: If ``return_version`` is true, return a pair of the version and the local
+        file path to the downloaded ChEMBLSQLite database file. Otherwise, just return
+        the path.
+
+    :raises FileNotFoundError: If no database file could be found in the extracted
+        directories
     """
     if version is not None:
         _directory = pystow.join(*(prefix or PYSTOW_PARTS), version)
@@ -292,10 +295,10 @@ def connect(
     :param version: The version number of ChEMBL to get. If none specified, uses
         :func:`latest` to look up the latest.
     :param prefix: The directory inside :mod:`pystow` to use
+
     :yields: The SQLite connection object.
 
-    Example:
-    .. code-block:: python
+    Example: .. code-block:: python
 
         import chembl_downloader
 
@@ -317,10 +320,10 @@ def cursor(
     :param version: The version number of ChEMBL to get. If none specified, uses
         :func:`latest` to look up the latest.
     :param prefix: The directory inside :mod:`pystow` to use
+
     :yields: The SQLite cursor object.
 
-    Example:
-    .. code-block:: python
+    Example: .. code-block:: python
 
         import chembl_downloader
 
@@ -347,13 +350,13 @@ def query(
     :param prefix: The directory inside :mod:`pystow` to use
     :param kwargs: keyword arguments to pass through to :func:`pandas.read_sql`, such as
         ``index_col``.
-    :return: A dataframe
 
-    Example:
-    .. code-block:: python
+    :returns: A dataframe
 
-        import chembl_downloader
-        from chembl_downloader.queries import ID_NAME_QUERY_EXAMPLE
+    Example: .. code-block:: python
+
+        import chembl_downloader from chembl_downloader.queries import
+        ID_NAME_QUERY_EXAMPLE
 
         df = chembl_downloader.query(ID_NAME_QUERY_EXAMPLE)
     """
@@ -396,11 +399,11 @@ def download_fps(
     :param version: The version number of ChEMBL to get. If none specified, uses
         :func:`latest` to look up the latest.
     :param prefix: The directory inside :mod:`pystow` to use
-    :param return_version: Should the version get returned? Turn this to true
-        if you're looking up the latest version and want to reduce redundant code.
-    :return: If ``return_version`` is true, return a pair of the version and the
-        local file path to the downloaded ``*.fps.gz`` file. Otherwise,
-        just return the path.
+    :param return_version: Should the version get returned? Turn this to true if you're
+        looking up the latest version and want to reduce redundant code.
+
+    :returns: If ``return_version`` is true, return a pair of the version and the local
+        file path to the downloaded ``*.fps.gz`` file. Otherwise, just return the path.
     """
     return _download_helper(
         suffix=".fps.gz", version=version, prefix=prefix, return_version=return_version
@@ -415,8 +418,10 @@ def chemfp_load_fps(
     :param version: The version number of ChEMBL to get. If none specified, uses
         :func:`latest` to look up the latest.
     :param prefix: The directory inside :mod:`pystow` to use
-    :param kwargs: Remaining keyword arguments are passed into :func:`chemfp.load_fingerprints`.
-    :return: A fingerprint arena object
+    :param kwargs: Remaining keyword arguments are passed into
+        :func:`chemfp.load_fingerprints`.
+
+    :returns: A fingerprint arena object
     """
     import chemfp
 
@@ -503,11 +508,12 @@ def download_chemreps(
     :param version: The version number of ChEMBL to get. If none specified, uses
         :func:`latest` to look up the latest.
     :param prefix: The directory inside :mod:`pystow` to use
-    :param return_version: Should the version get returned? Turn this to true
-        if you're looking up the latest version and want to reduce redundant code.
-    :return: If ``return_version`` is true, return a pair of the version and the
-        local file path to the downloaded ``*_chemreps.txt.gz`` file. Otherwise,
-        just return the path.
+    :param return_version: Should the version get returned? Turn this to true if you're
+        looking up the latest version and want to reduce redundant code.
+
+    :returns: If ``return_version`` is true, return a pair of the version and the local
+        file path to the downloaded ``*_chemreps.txt.gz`` file. Otherwise, just return
+        the path.
     """
     return _download_helper(
         suffix="_chemreps.txt.gz ",
@@ -525,11 +531,9 @@ def get_chemreps_df(
     :param version: The version number of ChEMBL to get. If none specified, uses
         :func:`latest` to look up the latest.
     :param prefix: The directory inside :mod:`pystow` to use
-    :return: A dataframe with four columns:
-        1. ``chembl_id``
-        2. ``canonical_smiles``
-        3. ``standard_inchi``
-        4. ``standard_inchi_key``
+
+    :returns: A dataframe with four columns: 1. ``chembl_id`` 2. ``canonical_smiles`` 3.
+        ``standard_inchi`` 4. ``standard_inchi_key``
     """
     import pandas
 
@@ -569,11 +573,11 @@ def download_sdf(
     :param version: The version number of ChEMBL to get. If none specified, uses
         :func:`latest` to look up the latest.
     :param prefix: The directory inside :mod:`pystow` to use
-    :param return_version: Should the version get returned? Turn this to true
-        if you're looking up the latest version and want to reduce redundant code.
-    :return: If ``return_version`` is true, return a pair of the version and the
-        local file path to the downloaded ``*.sdf.gz`` file. Otherwise,
-        just return the path.
+    :param return_version: Should the version get returned? Turn this to true if you're
+        looking up the latest version and want to reduce redundant code.
+
+    :returns: If ``return_version`` is true, return a pair of the version and the local
+        file path to the downloaded ``*.sdf.gz`` file. Otherwise, just return the path.
     """
     return _download_helper(
         suffix=".sdf.gz", version=version, prefix=prefix, return_version=return_version
@@ -611,11 +615,12 @@ def download_monomer_library(
     :param version: The version number of ChEMBL to get. If none specified, uses
         :func:`latest` to look up the latest.
     :param prefix: The directory inside :mod:`pystow` to use
-    :param return_version: Should the version get returned? Turn this to true
-        if you're looking up the latest version and want to reduce redundant code.
-    :return: If ``return_version`` is true, return a pair of the version and the
-        local file path to the downloaded ``*_monomer_library.xml`` file. Otherwise,
-        just return the path.
+    :param return_version: Should the version get returned? Turn this to true if you're
+        looking up the latest version and want to reduce redundant code.
+
+    :returns: If ``return_version`` is true, return a pair of the version and the local
+        file path to the downloaded ``*_monomer_library.xml`` file. Otherwise, just
+        return the path.
     """
     return _download_helper(
         suffix="_monomer_library.xml",
@@ -635,7 +640,8 @@ def get_monomer_library_root(
     :param version: The version number of ChEMBL to get. If none specified, uses
         :func:`latest` to look up the latest.
     :param prefix: The directory inside :mod:`pystow` to use
-    :return: Return the root of the monomers XML tree, parsed
+
+    :returns: Return the root of the monomers XML tree, parsed
     """
     monomers_path = download_monomer_library(version=version, prefix=prefix, return_version=False)
     tree = ElementTree.parse(monomers_path)  # noqa:S314
@@ -654,9 +660,9 @@ def supplier(
     :param version: The version number of ChEMBL to get. If none specified, uses
         :func:`latest` to look up the latest.
     :param prefix: The directory inside :mod:`pystow` to use
-    :param kwargs:
-        keyword arguments to pass through to :class:`rdkit.Chem.ForwardSDMolSupplier`,
-        such as ``sanitize`` and ``removeHs``.
+    :param kwargs: keyword arguments to pass through to
+        :class:`rdkit.Chem.ForwardSDMolSupplier`, such as ``sanitize`` and ``removeHs``.
+
     :yields: A supplier to be used in a context manager
 
     In the following example, a supplier is used to get fingerprints and SMILES.
@@ -712,11 +718,13 @@ def get_substructure_library(
 
     :param version: The version number of ChEMBL to get. If none specified, uses
         :func:`latest` to look up the latest.
-    :param max_heavy:
-        The largest number of heavy atoms that are considered before skipping the molecule.
+    :param max_heavy: The largest number of heavy atoms that are considered before
+        skipping the molecule.
     :param prefix: The directory inside :mod:`pystow` to use
-    :param kwargs: keyword arguments to pass through to :class:`rdkit.Chem.ForwardSDMolSupplier`,
-        such as ``sanitize`` and ``removeHs`` via :func:`supplier`.
+    :param kwargs: keyword arguments to pass through to
+        :class:`rdkit.Chem.ForwardSDMolSupplier`, such as ``sanitize`` and ``removeHs``
+        via :func:`supplier`.
+
     :returns: A substructure library object
 
     .. seealso::
@@ -792,11 +800,11 @@ def download_readme(
     :param version: The version number of ChEMBL to get. If none specified, uses
         :func:`latest` to look up the latest.
     :param prefix: The directory inside :mod:`pystow` to use
-    :param return_version: Should the version get returned? Turn this to true
-        if you're looking up the latest version and want to reduce redundant code.
-    :return: If ``return_version`` is true, return a pair of the version and the
-        local file path to the downloaded ``*.sdf.gz`` file. Otherwise,
-        just return the path.
+    :param return_version: Should the version get returned? Turn this to true if you're
+        looking up the latest version and want to reduce redundant code.
+
+    :returns: If ``return_version`` is true, return a pair of the version and the local
+        file path to the downloaded ``*.sdf.gz`` file. Otherwise, just return the path.
     """
     return _download_helper(
         "README",
@@ -853,11 +861,11 @@ def download_uniprot_mapping(
     :param version: The version number of ChEMBL to get. If none specified, uses
         :func:`latest` to look up the latest.
     :param prefix: The directory inside :mod:`pystow` to use
-    :param return_version: Should the version get returned? Turn this to true
-        if you're looking up the latest version and want to reduce redundant code.
-    :return: If ``return_version`` is true, return a pair of the version and the
-        local file path to the downloaded ``*.txt`` file. Otherwise,
-        just return the path.
+    :param return_version: Should the version get returned? Turn this to true if you're
+        looking up the latest version and want to reduce redundant code.
+
+    :returns: If ``return_version`` is true, return a pair of the version and the local
+        file path to the downloaded ``*.txt`` file. Otherwise, just return the path.
     """
     return _download_helper(
         "chembl_uniprot_mapping.txt",
@@ -875,11 +883,11 @@ def get_uniprot_mapping_df(
 ) -> pandas.DataFrame:
     """Download and parse the latest ChEMBL-UniProt target mapping TSV file.
 
-    :param version:
-        The version number of ChEMBL to get. If none specified, uses
+    :param version: The version number of ChEMBL to get. If none specified, uses
         :func:`latest` to look up the latest.
     :param prefix: The directory inside :mod:`pystow` to use
-    :return: A dataframe with four columns:
+
+    :returns: A dataframe with four columns:
 
         1. ``uniprot_id``
         2. ``chembl_target_id``
@@ -895,7 +903,6 @@ def get_uniprot_mapping_df(
            - ``PROTEIN-PROTEIN INTERACTION``
            - ``SELECTIVITY GROUP``
            - ``SINGLE PROTEIN``
-
     """
     import pandas as pd
 
