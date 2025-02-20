@@ -1,13 +1,12 @@
-# -*- coding: utf-8 -*-
-
 """Extended functionality not in main scope of chembl-downloader."""
 
+from __future__ import annotations
+
 from pathlib import Path
-from typing import TYPE_CHECKING, Optional
+from typing import TYPE_CHECKING, Any, Literal
 
 import click
 import pystow
-from typing_extensions import Literal
 
 from chembl_downloader.api import latest, query
 from chembl_downloader.queries import (
@@ -20,25 +19,25 @@ if TYPE_CHECKING:
     import pandas
 
 __all__ = [
-    "get_target_smi_df",
-    "write_target_smi_file",
     "get_assay_smi_df",
-    "write_assay_smi_file",
     "get_document_smi_df",
+    "get_target_smi_df",
+    "write_assay_smi_file",
     "write_document_smi_file",
+    "write_target_smi_file",
 ]
 
 
 def get_target_smi_df(
     target_id: str,
     *,
-    version: Optional[str] = None,
+    version: str | None = None,
     refresh: bool = False,
-    standard_relation: Optional[str] = None,
-    standard_type: Optional[str] = None,
-    aggregate: Optional[Literal["mean", "gmean"]] = "mean",
-    **kwargs,
-) -> "pandas.DataFrame":
+    standard_relation: str | None = None,
+    standard_type: str | None = None,
+    aggregate: Literal["mean", "gmean"] | None = "mean",
+    **kwargs: Any,
+) -> pandas.DataFrame:
     """Geta dataframe for activities of compounds against the given target.
 
     :param target_id: ChEMBL identifier for the target.
@@ -96,7 +95,7 @@ def get_target_smi_df(
 
 
 def write_target_smi_file(
-    target_id: str, path: Path, *, version: Optional[str] = None, sep: str = ",", **kwargs
+    target_id: str, path: Path, *, version: str | None = None, sep: str = ",", **kwargs: Any
 ) -> None:
     """Write SMI file for the given target."""
     df = get_target_smi_df(target_id=target_id, version=version, **kwargs)
@@ -106,10 +105,10 @@ def write_target_smi_file(
 def get_assay_smi_df(
     assay_chembl_id: str,
     *,
-    version: Optional[str] = None,
+    version: str | None = None,
     refresh: bool = False,
-    **kwargs,
-) -> "pandas.DataFrame":
+    **kwargs: Any,
+) -> pandas.DataFrame:
     """Get a SMI."""
     import pandas as pd
 
@@ -128,7 +127,7 @@ def get_assay_smi_df(
 
 
 def write_assay_smi_file(
-    assay_chembl_id: str, path: Path, *, version: Optional[str] = None, sep: str = ",", **kwargs
+    assay_chembl_id: str, path: Path, *, version: str | None = None, sep: str = ",", **kwargs: Any
 ) -> None:
     """Write SMI file for the given assay."""
     df = get_assay_smi_df(assay_chembl_id=assay_chembl_id, version=version, **kwargs)
@@ -138,10 +137,10 @@ def write_assay_smi_file(
 def get_document_smi_df(
     document_chembl_id: str,
     *,
-    version: Optional[str] = None,
+    version: str | None = None,
     refresh: bool = False,
-    **kwargs,
-) -> "pandas.DataFrame":
+    **kwargs: Any,
+) -> pandas.DataFrame:
     """Get a SMI."""
     import pandas as pd
 
@@ -160,7 +159,12 @@ def get_document_smi_df(
 
 
 def write_document_smi_file(
-    document_chembl_id: str, path: Path, *, version: Optional[str] = None, sep: str = ",", **kwargs
+    document_chembl_id: str,
+    path: Path,
+    *,
+    version: str | None = None,
+    sep: str = ",",
+    **kwargs: Any,
 ) -> None:
     """Write SMI file for the given document."""
     df = get_document_smi_df(document_chembl_id=document_chembl_id, version=version, **kwargs)
@@ -168,7 +172,7 @@ def write_document_smi_file(
 
 
 @click.command()
-def _main():
+def _main() -> None:
     path = Path(__file__).parent.resolve().joinpath("CHEMBL3098111.smi")
     write_document_smi_file("CHEMBL3098111", path=path, version="31", refresh=True)
     click.echo(f"output to {path}")

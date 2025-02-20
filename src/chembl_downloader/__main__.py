@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 """CLI for :mod:`chembl_downloader`."""
 
 from .cli import main

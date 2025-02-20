@@ -1,23 +1,26 @@
-# -*- coding: utf-8 -*-
-
 """A collection of query strings for ChEMBL."""
 
+from __future__ import annotations
+
 from textwrap import dedent
-from typing import Optional
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    import IPython.display
 
 __all__ = [
-    "ID_NAME_QUERY",
     "ACTIVITIES_QUERY",
-    "DRUG_INDICATIONS_SQL",
     "CHEBI_UNMAPPED_SQL",
+    "DRUG_INDICATIONS_SQL",
+    "ID_NAME_QUERY",
     # Functions
     "get_assay_sql",
-    "get_target_sql",
     "get_document_molecule_sql",
+    "get_target_sql",
 ]
 
 
-def markdown(s: str):
+def markdown(s: str) -> IPython.display.Markdown:
     """Get a markdown object for pretty display in Jupyter."""
     from IPython.display import Markdown
 
@@ -92,10 +95,10 @@ def get_assay_sql(assay_chembl_id: str) -> str:
 
 def get_target_sql(
     target_id: str,
-    target_type: Optional[str] = None,
-    standard_relation: Optional[str] = None,
-    standard_type: Optional[str] = None,
-    tax_id: Optional[str] = None,
+    target_type: str | None = None,
+    standard_relation: str | None = None,
+    standard_type: str | None = None,
+    tax_id: str | None = None,
     max_phase: bool = False,
 ) -> str:
     """Get the SQL for all chemicals inhibiting the target."""
@@ -121,8 +124,10 @@ def get_target_sql(
         FROM TARGET_DICTIONARY
              JOIN ASSAYS ON TARGET_DICTIONARY.tid == ASSAYS.tid
              JOIN ACTIVITIES ON ASSAYS.assay_id == ACTIVITIES.assay_id
-             JOIN MOLECULE_DICTIONARY ON MOLECULE_DICTIONARY.molregno == ACTIVITIES.molregno
-             JOIN COMPOUND_STRUCTURES ON MOLECULE_DICTIONARY.molregno == COMPOUND_STRUCTURES.molregno
+             JOIN MOLECULE_DICTIONARY
+                ON MOLECULE_DICTIONARY.molregno == ACTIVITIES.molregno
+             JOIN COMPOUND_STRUCTURES
+                ON MOLECULE_DICTIONARY.molregno == COMPOUND_STRUCTURES.molregno
         WHERE TARGET_DICTIONARY.chembl_id = '{target_id}'
             AND ACTIVITIES.pchembl_value IS NOT NULL
             {tt}
@@ -177,8 +182,10 @@ def get_document_molecule_sql(document_chembl_id: str) -> str:
                 COMPOUND_STRUCTURES.canonical_smiles
             FROM DOCS
                 JOIN COMPOUND_RECORDS ON COMPOUND_RECORDS.doc_id == DOCS.doc_id
-                JOIN MOLECULE_DICTIONARY ON MOLECULE_DICTIONARY.molregno == COMPOUND_RECORDS.molregno
-                JOIN COMPOUND_STRUCTURES ON COMPOUND_RECORDS.molregno == COMPOUND_STRUCTURES.molregno
+                JOIN MOLECULE_DICTIONARY
+                    ON MOLECULE_DICTIONARY.molregno == COMPOUND_RECORDS.molregno
+                JOIN COMPOUND_STRUCTURES
+                    ON COMPOUND_RECORDS.molregno == COMPOUND_STRUCTURES.molregno
             WHERE DOCS.chembl_id = '{document_chembl_id}'
         """  # noqa: S608
     )
