@@ -1,4 +1,3 @@
-
 """CLI for :mod:`chembl_downloader`."""
 
 import sys

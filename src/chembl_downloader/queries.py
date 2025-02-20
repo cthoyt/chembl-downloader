@@ -1,4 +1,3 @@
-
 """A collection of query strings for ChEMBL."""
 
 from textwrap import dedent
@@ -119,8 +118,10 @@ def get_target_sql(
         FROM TARGET_DICTIONARY
              JOIN ASSAYS ON TARGET_DICTIONARY.tid == ASSAYS.tid
              JOIN ACTIVITIES ON ASSAYS.assay_id == ACTIVITIES.assay_id
-             JOIN MOLECULE_DICTIONARY ON MOLECULE_DICTIONARY.molregno == ACTIVITIES.molregno
-             JOIN COMPOUND_STRUCTURES ON MOLECULE_DICTIONARY.molregno == COMPOUND_STRUCTURES.molregno
+             JOIN MOLECULE_DICTIONARY
+                ON MOLECULE_DICTIONARY.molregno == ACTIVITIES.molregno
+             JOIN COMPOUND_STRUCTURES
+                ON MOLECULE_DICTIONARY.molregno == COMPOUND_STRUCTURES.molregno
         WHERE TARGET_DICTIONARY.chembl_id = '{target_id}'
             AND ACTIVITIES.pchembl_value IS NOT NULL
             {tt}
@@ -175,8 +176,10 @@ def get_document_molecule_sql(document_chembl_id: str) -> str:
                 COMPOUND_STRUCTURES.canonical_smiles
             FROM DOCS
                 JOIN COMPOUND_RECORDS ON COMPOUND_RECORDS.doc_id == DOCS.doc_id
-                JOIN MOLECULE_DICTIONARY ON MOLECULE_DICTIONARY.molregno == COMPOUND_RECORDS.molregno
-                JOIN COMPOUND_STRUCTURES ON COMPOUND_RECORDS.molregno == COMPOUND_STRUCTURES.molregno
+                JOIN MOLECULE_DICTIONARY
+                    ON MOLECULE_DICTIONARY.molregno == COMPOUND_RECORDS.molregno
+                JOIN COMPOUND_STRUCTURES
+                    ON COMPOUND_RECORDS.molregno == COMPOUND_STRUCTURES.molregno
             WHERE DOCS.chembl_id = '{document_chembl_id}'
         """  # noqa: S608
     )

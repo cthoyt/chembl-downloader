@@ -1,5 +1,6 @@
-
 """API for :mod:`chembl_downloader`."""
+
+from __future__ import annotations
 
 import ftplib
 import gzip
@@ -19,7 +20,9 @@ import pystow
 from tqdm import tqdm
 
 if TYPE_CHECKING:
+    import chemfp.arena
     import pandas
+    import rdkit.Chem.rdSubstructLibrary
 
 __all__ = [
     "chemfp_load_fps",
@@ -72,7 +75,7 @@ def latest() -> str:
     :raises ValueError: If the latest README can not be parsed
     """
     bio = io.BytesIO()
-    with ftplib.FTP("ftp.ebi.ac.uk") as ftp:
+    with ftplib.FTP("ftp.ebi.ac.uk") as ftp:  # noqa:S321
         ftp.login()
         ftp.retrbinary("RETR pub/databases/chembl/ChEMBLdb/latest/README", bio.write)
     bio.seek(0)
@@ -274,7 +277,7 @@ def cursor(version: str | None = None, *, prefix: Sequence[str] | None = None):
 
 def query(
     sql: str, version: str | None = None, *, prefix: Sequence[str] | None = None, **kwargs
-) -> "pandas.DataFrame":
+) -> pandas.DataFrame:
     """Ensure the data is available, run the query, then put the results in a dataframe.
 
     :param sql: A SQL query string or table name
@@ -325,15 +328,14 @@ def download_fps(
 
 def chemfp_load_fps(
     version: str | None = None, *, prefix: Sequence[str] | None = None, **kwargs
-):
-    """Ensure the ChEMBL fingerprints file is downloaded and open with :func:`chemfp.load_fingerprints`.
+) -> chemfp.arena.FingerprintArena:
+    """Download and open the ChEMBL fingerprints via :func:`chemfp.load_fingerprints`.
 
     :param version: The version number of ChEMBL to get. If none specified, uses
         :func:`latest` to look up the latest.
     :param prefix: The directory inside :mod:`pystow` to use
     :param kwargs: Remaining keyword arguments are passed into :func:`chemfp.load_fingerprints`.
-    :return: A fingerpring arena object
-    :rtype: chemfp.arena.FingerprintArena
+    :return: A fingerprint arena object
     """
     import chemfp
 
@@ -374,7 +376,7 @@ def download_chemreps(
 
 def get_chemreps_df(
     version: str | None = None, *, prefix: Sequence[str] | None = None
-) -> "pandas.DataFrame":
+) -> pandas.DataFrame:
     """Download and parse the latest ChEMBL chemical representations file.
 
     :param version: The version number of ChEMBL to get. If none specified, uses
@@ -452,7 +454,7 @@ def get_monomer_library_root(
     monomers_path = cast(
         Path, download_monomer_library(version=version, prefix=prefix, return_version=False)
     )
-    tree = ElementTree.parse(monomers_path)
+    tree = ElementTree.parse(monomers_path)  # noqa:S314
     return tree.getroot()
 
 
@@ -468,8 +470,9 @@ def supplier(
     :param version: The version number of ChEMBL to get. If none specified, uses
         :func:`latest` to look up the latest.
     :param prefix: The directory inside :mod:`pystow` to use
-    :param kwargs: keyword arguments to pass through to :class:`rdkit.Chem.ForwardSDMolSupplier`, such as
-        ``sanitize`` and ``removeHs``.
+    :param kwargs:
+        keyword arguments to pass through to :class:`rdkit.Chem.ForwardSDMolSupplier`,
+        such as ``sanitize`` and ``removeHs``.
     :yields: A supplier to be used in a context manager
 
     In the following example, a supplier is used to get fingerprints and SMILES.
@@ -520,17 +523,17 @@ def get_substructure_library(
     max_heavy: int = 75,
     prefix: Sequence[str] | None = None,
     **kwargs,
-):
+) -> rdkit.Chem.rdSubstructLibrary.SubstructLibrary:
     """Get the ChEMBL substructure library.
 
     :param version: The version number of ChEMBL to get. If none specified, uses
         :func:`latest` to look up the latest.
-    :param max_heavy: The largest number of heavy atoms that are considered before skipping the molecule.
+    :param max_heavy:
+        The largest number of heavy atoms that are considered before skipping the molecule.
     :param prefix: The directory inside :mod:`pystow` to use
-    :param kwargs: keyword arguments to pass through to :class:`rdkit.Chem.ForwardSDMolSupplier`, such as
-        ``sanitize`` and ``removeHs`` via :func:`supplier`.
+    :param kwargs: keyword arguments to pass through to :class:`rdkit.Chem.ForwardSDMolSupplier`,
+        such as ``sanitize`` and ``removeHs`` via :func:`supplier`.
     :returns: A substructure library object
-    :rtype: rdkit.Chem.rdSubstructLibrary.SubstructLibrary
 
     .. seealso::
 
@@ -551,7 +554,7 @@ def get_substructure_library(
     if path.is_file():
         logger.info("loading substructure library from pickle: %s", path)
         with path.open("rb") as file:
-            return pickle.load(file)
+            return pickle.load(file)  # noqa:S301
 
     molecule_holder = CachedTrustedSmilesMolHolder()
     tautomer_pattern_holder = TautomerPatternHolder()
@@ -642,7 +645,7 @@ def get_uniprot_mapping_df(
     version: str | None = None,
     *,
     prefix: Sequence[str] | None = None,
-) -> "pandas.DataFrame":
+) -> pandas.DataFrame:
     """Download and parse the latest ChEMBL-UniProt target mapping TSV file.
 
     :param version:

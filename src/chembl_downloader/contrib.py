@@ -1,4 +1,3 @@
-
 """Extended functionality not in main scope of chembl-downloader."""
 
 from pathlib import Path

@@ -1,4 +1,3 @@
-
 """Download, open, and query ChEMBL through SQLite."""
 
 from . import queries  # noqa:F401

@@ -30,8 +30,10 @@ class TestApi(unittest.TestCase):
         FROM TARGET_DICTIONARY
              JOIN ASSAYS ON TARGET_DICTIONARY.tid == ASSAYS.tid
              JOIN ACTIVITIES ON ASSAYS.assay_id == ACTIVITIES.assay_id
-             JOIN MOLECULE_DICTIONARY ON MOLECULE_DICTIONARY.molregno == ACTIVITIES.molregno
-             JOIN COMPOUND_STRUCTURES ON MOLECULE_DICTIONARY.molregno == COMPOUND_STRUCTURES.molregno
+             JOIN MOLECULE_DICTIONARY
+                ON MOLECULE_DICTIONARY.molregno == ACTIVITIES.molregno
+             JOIN COMPOUND_STRUCTURES
+                ON MOLECULE_DICTIONARY.molregno == COMPOUND_STRUCTURES.molregno
         WHERE TARGET_DICTIONARY.chembl_id = 'CHEMBL3467'
             AND ACTIVITIES.pchembl_value IS NOT NULL
         """
@@ -55,8 +57,10 @@ class TestApi(unittest.TestCase):
                 FROM TARGET_DICTIONARY
                      JOIN ASSAYS ON TARGET_DICTIONARY.tid == ASSAYS.tid
                      JOIN ACTIVITIES ON ASSAYS.assay_id == ACTIVITIES.assay_id
-                     JOIN MOLECULE_DICTIONARY ON MOLECULE_DICTIONARY.molregno == ACTIVITIES.molregno
-                     JOIN COMPOUND_STRUCTURES ON MOLECULE_DICTIONARY.molregno == COMPOUND_STRUCTURES.molregno
+                     JOIN MOLECULE_DICTIONARY
+                        ON MOLECULE_DICTIONARY.molregno == ACTIVITIES.molregno
+                     JOIN COMPOUND_STRUCTURES
+                        ON MOLECULE_DICTIONARY.molregno == COMPOUND_STRUCTURES.molregno
                 WHERE TARGET_DICTIONARY.chembl_id = 'CHEMBL3467'
                     AND ACTIVITIES.pchembl_value IS NOT NULL
                 """
