@@ -21,6 +21,7 @@ from tqdm import tqdm
 
 if TYPE_CHECKING:
     import chemfp.arena
+    import numpy
     import pandas
     import rdkit.Chem
     import rdkit.Chem.rdSubstructLibrary
@@ -49,6 +50,7 @@ __all__ = [
     "get_monomer_library_root",
     "get_substructure_library",
     "get_uniprot_mapping_df",
+    "iterate_fps",
     "iterate_smiles",
     "latest",
     "query",
@@ -361,6 +363,26 @@ def query(
         return pd.read_sql(sql, con=con, **kwargs)
 
 
+# docstr-coverage:excused `overload`
+@overload
+def download_fps(
+    version: str | None = ...,
+    *,
+    prefix: Sequence[str] | None = ...,
+    return_version: Literal[True] = ...,
+) -> VersionPathPair: ...
+
+
+# docstr-coverage:excused `overload`
+@overload
+def download_fps(
+    version: str | None = ...,
+    *,
+    prefix: Sequence[str] | None = ...,
+    return_version: Literal[False] = ...,
+) -> Path: ...
+
+
 def download_fps(
     version: str | None = None,
     *,
@@ -400,6 +422,35 @@ def chemfp_load_fps(
 
     path = download_fps(version=version, prefix=prefix, return_version=False)
     return chemfp.load_fingerprints(path, **kwargs)
+
+
+def iterate_fps(
+    version: str | None = None, *, prefix: Sequence[str] | None = None
+) -> Iterable[tuple[str, numpy.ndarray]]:
+    """Download and open the ChEMBL fingerprints via RDKit/Numpy.
+
+    :param version: The version number of ChEMBL to get. If none specified, uses
+        :func:`latest` to look up the latest.
+    :param prefix: The directory inside :mod:`pystow` to use
+    :returns: A dictionary from ChEMBL IDs to NumPy arrays
+    """
+    import numpy as np
+    from rdkit import DataStructs
+    from rdkit.DataStructs import ConvertToNumpyArray
+
+    path = download_fps(version=version, prefix=prefix, return_version=False)
+    with gzip.open(path, mode="rt") as file:
+        for _ in range(6):  # throw away headers
+            next(file)
+        for line in tqdm(
+            file, unit_scale=True, desc="Getting chemical features", unit="fingerprint"
+        ):
+            hex_fp, chembl_id = line.strip().split("\t")
+            binary_fp = bytes.fromhex(hex_fp)
+            bitvect = DataStructs.cDataStructs.CreateFromBinaryText(binary_fp)
+            arr = np.zeros((bitvect.GetNumBits(),), dtype=np.uint8)
+            ConvertToNumpyArray(bitvect, arr)
+            yield chembl_id, arr
 
 
 # docstr-coverage:excused `overload`
