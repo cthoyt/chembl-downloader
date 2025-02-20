@@ -2,6 +2,7 @@
 
 from . import queries
 from .api import (
+    VersionPathPair,
     chemfp_load_fps,
     connect,
     cursor,
@@ -26,6 +27,7 @@ from .api import (
 )
 
 __all__ = [
+    "VersionPathPair",
     "chemfp_load_fps",
     "connect",
     "cursor",
