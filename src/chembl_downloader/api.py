@@ -425,18 +425,26 @@ def chemfp_load_fps(
 
 
 def iterate_fps(
-    version: str | None = None, *, prefix: Sequence[str] | None = None
+    version: str | None = None,
+    *,
+    prefix: Sequence[str] | None = None,
+    identifier_format: Literal["local", "curie"] = "local",
 ) -> Iterable[tuple[str, numpy.ndarray]]:
     """Download and open the ChEMBL fingerprints via RDKit/Numpy.
 
     :param version: The version number of ChEMBL to get. If none specified, uses
         :func:`latest` to look up the latest.
     :param prefix: The directory inside :mod:`pystow` to use
-    :returns: A dictionary from ChEMBL IDs to NumPy arrays
+    :param identifier_format: Should identifiers get returned as local unique
+        identifiers, or compact URIs (CURIEs)?
+
+    :returns: A pair of identifiers and numpy arrays
     """
     import numpy as np
     from rdkit import DataStructs
     from rdkit.DataStructs import ConvertToNumpyArray
+
+    use_curie = identifier_format == "curie"
 
     path = download_fps(version=version, prefix=prefix, return_version=False)
     with gzip.open(path, mode="rt") as file:
@@ -450,6 +458,8 @@ def iterate_fps(
             bitvect = DataStructs.cDataStructs.CreateFromBinaryText(binary_fp)
             arr = np.zeros((bitvect.GetNumBits(),), dtype=np.uint8)
             ConvertToNumpyArray(bitvect, arr)
+            if use_curie:
+                chembl_id = f"chembl.compound:{chembl_id}"
             yield chembl_id, arr
 
 
