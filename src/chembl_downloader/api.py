@@ -363,6 +363,26 @@ def query(
         return pd.read_sql(sql, con=con, **kwargs)
 
 
+# docstr-coverage:excused `overload`
+@overload
+def download_fps(
+    version: str | None = ...,
+    *,
+    prefix: Sequence[str] | None = ...,
+    return_version: Literal[True] = ...,
+) -> VersionPathPair: ...
+
+
+# docstr-coverage:excused `overload`
+@overload
+def download_fps(
+    version: str | None = ...,
+    *,
+    prefix: Sequence[str] | None = ...,
+    return_version: Literal[False] = ...,
+) -> Path: ...
+
+
 def download_fps(
     version: str | None = None,
     *,
