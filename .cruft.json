@@ -1,6 +1,6 @@
 {
   "template": "https://github.com/cthoyt/cookiecutter-snekpack",
-  "commit": "0c6871ee8cf3663217e769c55eaee4bdda6cb749",
+  "commit": "6094086bb8f130c85f76d78429bdb65ac618e93d",
   "checkout": null,
   "context": {
     "cookiecutter": {
@@ -24,7 +24,7 @@
       "__runner_tests": "py",
       "__gh_slug": "cthoyt/chembl-downloader",
       "_template": "https://github.com/cthoyt/cookiecutter-snekpack",
-      "_commit": "0c6871ee8cf3663217e769c55eaee4bdda6cb749"
+      "_commit": "6094086bb8f130c85f76d78429bdb65ac618e93d"
     }
   },
   "directory": null
