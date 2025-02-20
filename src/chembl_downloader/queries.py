@@ -1,6 +1,12 @@
 """A collection of query strings for ChEMBL."""
 
+from __future__ import annotations
+
 from textwrap import dedent
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    import IPython.display
 
 __all__ = [
     "ACTIVITIES_QUERY",
@@ -14,7 +20,7 @@ __all__ = [
 ]
 
 
-def markdown(s: str):
+def markdown(s: str) -> IPython.display.Markdown:
     """Get a markdown object for pretty display in Jupyter."""
     from IPython.display import Markdown
 

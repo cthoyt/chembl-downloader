@@ -10,10 +10,10 @@ import os
 import pickle
 import sqlite3
 import tarfile
-from collections.abc import Iterable, Sequence
+from collections.abc import Generator, Iterable, Sequence
 from contextlib import closing, contextmanager
 from pathlib import Path
-from typing import TYPE_CHECKING, cast
+from typing import TYPE_CHECKING, Any, cast
 from xml.etree import ElementTree
 
 import pystow
@@ -22,6 +22,7 @@ from tqdm import tqdm
 if TYPE_CHECKING:
     import chemfp.arena
     import pandas
+    import rdkit.Chem
     import rdkit.Chem.rdSubstructLibrary
 
 __all__ = [
@@ -231,7 +232,9 @@ def _find_sqlite_file(directory: str | Path) -> Path | None:
 
 
 @contextmanager
-def connect(version: str | None = None, *, prefix: Sequence[str] | None = None):
+def connect(
+    version: str | None = None, *, prefix: Sequence[str] | None = None
+) -> Generator[sqlite3.Connection, None, None]:
     """Ensure and connect to the database.
 
     :param version: The version number of ChEMBL to get. If none specified, uses
@@ -254,7 +257,9 @@ def connect(version: str | None = None, *, prefix: Sequence[str] | None = None):
 
 
 @contextmanager
-def cursor(version: str | None = None, *, prefix: Sequence[str] | None = None):
+def cursor(
+    version: str | None = None, *, prefix: Sequence[str] | None = None
+) -> Generator[sqlite3.Cursor]:
     """Ensure, connect, and get a cursor from the database to the database.
 
     :param version: The version number of ChEMBL to get. If none specified, uses
@@ -276,7 +281,7 @@ def cursor(version: str | None = None, *, prefix: Sequence[str] | None = None):
 
 
 def query(
-    sql: str, version: str | None = None, *, prefix: Sequence[str] | None = None, **kwargs
+    sql: str, version: str | None = None, *, prefix: Sequence[str] | None = None, **kwargs: Any
 ) -> pandas.DataFrame:
     """Ensure the data is available, run the query, then put the results in a dataframe.
 
@@ -327,7 +332,7 @@ def download_fps(
 
 
 def chemfp_load_fps(
-    version: str | None = None, *, prefix: Sequence[str] | None = None, **kwargs
+    version: str | None = None, *, prefix: Sequence[str] | None = None, **kwargs: Any
 ) -> chemfp.arena.FingerprintArena:
     """Download and open the ChEMBL fingerprints via :func:`chemfp.load_fingerprints`.
 
@@ -463,8 +468,8 @@ def supplier(
     version: str | None = None,
     *,
     prefix: Sequence[str] | None = None,
-    **kwargs,
-):
+    **kwargs: Any,
+) -> Generator[rdkit.Chem.ForwardSDMolSupplier]:
     """Get a :class:`rdkit.Chem.ForwardSDMolSupplier` for the given version of ChEMBL.
 
     :param version: The version number of ChEMBL to get. If none specified, uses
@@ -503,7 +508,7 @@ def iterate_smiles(
     version: str | None = None,
     *,
     prefix: Sequence[str] | None = None,
-    **kwargs,
+    **kwargs: Any,
 ) -> Iterable[str]:
     """Iterate over SMILES via RDKit."""
     from rdkit import Chem
@@ -522,7 +527,7 @@ def get_substructure_library(
     *,
     max_heavy: int = 75,
     prefix: Sequence[str] | None = None,
-    **kwargs,
+    **kwargs: Any,
 ) -> rdkit.Chem.rdSubstructLibrary.SubstructLibrary:
     """Get the ChEMBL substructure library.
 
@@ -600,7 +605,7 @@ def download_readme(
     )
 
 
-def get_date(version: str, **kwargs) -> str:
+def get_date(version: str, **kwargs: Any) -> str:
     """Get the date of a given version."""
     path = cast(Path, download_readme(version=version, **kwargs))
     try:
@@ -620,7 +625,7 @@ def download_uniprot_mapping(
     *,
     prefix: Sequence[str] | None = None,
     return_version: bool = False,
-):
+) -> Path | tuple[str, Path]:
     """Ensure the latest ChEMBL-UniProt target mapping TSV file.
 
     :param version: The version number of ChEMBL to get. If none specified, uses
