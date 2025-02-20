@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 
 """API for :mod:`chembl_downloader`."""
 
@@ -10,9 +9,10 @@ import os
 import pickle
 import sqlite3
 import tarfile
+from collections.abc import Iterable, Sequence
 from contextlib import closing, contextmanager
 from pathlib import Path
-from typing import TYPE_CHECKING, Iterable, List, Optional, Sequence, Tuple, Union, cast
+from typing import TYPE_CHECKING, cast
 from xml.etree import ElementTree
 
 import pystow
@@ -22,33 +22,33 @@ if TYPE_CHECKING:
     import pandas
 
 __all__ = [
-    "latest",
-    "versions",
-    "download_readme",
-    "get_date",
-    # Database
-    "download_sqlite",
-    "download_extract_sqlite",
+    "chemfp_load_fps",
     "connect",
     "cursor",
-    "query",
-    # SDF
-    "download_sdf",
-    "supplier",
-    "iterate_smiles",
-    "get_substructure_library",
     # Chemreps
     "download_chemreps",
-    "get_chemreps_df",
+    "download_extract_sqlite",
     # Fingerprints
     "download_fps",
-    "chemfp_load_fps",
     # Monomers
     "download_monomer_library",
-    "get_monomer_library_root",
+    "download_readme",
+    # SDF
+    "download_sdf",
+    # Database
+    "download_sqlite",
     # UniProt mappings
     "download_uniprot_mapping",
+    "get_chemreps_df",
+    "get_date",
+    "get_monomer_library_root",
+    "get_substructure_library",
     "get_uniprot_mapping_df",
+    "iterate_smiles",
+    "latest",
+    "query",
+    "supplier",
+    "versions",
 ]
 
 logger = logging.getLogger(__name__)
@@ -82,7 +82,7 @@ def latest() -> str:
     raise ValueError("could not find latest ChEMBL version")
 
 
-def versions() -> List[str]:
+def versions() -> list[str]:
     """Get all versions of ChEMBL."""
     version_list = [str(i).zfill(2) for i in range(1, int(latest()) + 1)]
     # Side version in ChEMBL
@@ -92,12 +92,12 @@ def versions() -> List[str]:
 
 def _download_helper(
     suffix: str,
-    version: Optional[str] = None,
-    prefix: Optional[Sequence[str]] = None,
+    version: str | None = None,
+    prefix: Sequence[str] | None = None,
     *,
     return_version: bool,
     filename_repeats_version: bool = True,
-) -> Union[Path, Tuple[str, Path]]:
+) -> Path | tuple[str, Path]:
     """Ensure the latest ChEMBL file with the given suffix is downloaded.
 
     :param suffix: The suffix of the file
@@ -132,7 +132,7 @@ def _download_helper(
     ]:
         try:
             path = pystow.ensure(*(prefix or PYSTOW_PARTS), fmt_version, url=url)
-        except IOError:
+        except OSError:
             continue
         if return_version:
             return version, path
@@ -142,10 +142,10 @@ def _download_helper(
 
 
 def download_sqlite(
-    version: Optional[str] = None,
-    prefix: Optional[Sequence[str]] = None,
+    version: str | None = None,
+    prefix: Sequence[str] | None = None,
     return_version: bool = False,
-) -> Union[Path, Tuple[str, Path]]:
+) -> Path | tuple[str, Path]:
     """Ensure the latest ChEMBL SQLite dump is downloaded.
 
     :param version: The version number of ChEMBL to get. If none specified, uses
@@ -163,11 +163,11 @@ def download_sqlite(
 
 
 def download_extract_sqlite(
-    version: Optional[str] = None,
+    version: str | None = None,
     *,
-    prefix: Optional[Sequence[str]] = None,
+    prefix: Sequence[str] | None = None,
     return_version: bool = False,
-) -> Union[Path, Tuple[str, Path]]:
+) -> Path | tuple[str, Path]:
     """Ensure the latest ChEMBL SQLite dump is downloaded and extracted.
 
     :param version: The version number of ChEMBL to get. If none specified, uses
@@ -191,7 +191,7 @@ def download_extract_sqlite(
                 return rv
 
     version, path = cast(
-        Tuple[str, Path], download_sqlite(version=version, prefix=prefix, return_version=True)
+        tuple[str, Path], download_sqlite(version=version, prefix=prefix, return_version=True)
     )
 
     # Extraction will be done in the same directory as the download.
@@ -214,7 +214,7 @@ def download_extract_sqlite(
         return rv
 
 
-def _find_sqlite_file(directory: Union[str, Path]) -> Optional[Path]:
+def _find_sqlite_file(directory: str | Path) -> Path | None:
     # Since the structure of the zip changes from version to version,
     # it's better to just walk through the unarchived folders recursively
     # and find the DB file
@@ -228,7 +228,7 @@ def _find_sqlite_file(directory: Union[str, Path]) -> Optional[Path]:
 
 
 @contextmanager
-def connect(version: Optional[str] = None, *, prefix: Optional[Sequence[str]] = None):
+def connect(version: str | None = None, *, prefix: Sequence[str] | None = None):
     """Ensure and connect to the database.
 
     :param version: The version number of ChEMBL to get. If none specified, uses
@@ -251,7 +251,7 @@ def connect(version: Optional[str] = None, *, prefix: Optional[Sequence[str]] = 
 
 
 @contextmanager
-def cursor(version: Optional[str] = None, *, prefix: Optional[Sequence[str]] = None):
+def cursor(version: str | None = None, *, prefix: Sequence[str] | None = None):
     """Ensure, connect, and get a cursor from the database to the database.
 
     :param version: The version number of ChEMBL to get. If none specified, uses
@@ -273,7 +273,7 @@ def cursor(version: Optional[str] = None, *, prefix: Optional[Sequence[str]] = N
 
 
 def query(
-    sql: str, version: Optional[str] = None, *, prefix: Optional[Sequence[str]] = None, **kwargs
+    sql: str, version: str | None = None, *, prefix: Sequence[str] | None = None, **kwargs
 ) -> "pandas.DataFrame":
     """Ensure the data is available, run the query, then put the results in a dataframe.
 
@@ -300,11 +300,11 @@ def query(
 
 
 def download_fps(
-    version: Optional[str] = None,
+    version: str | None = None,
     *,
-    prefix: Optional[Sequence[str]] = None,
+    prefix: Sequence[str] | None = None,
     return_version: bool = False,
-) -> Union[Path, Tuple[str, Path]]:
+) -> Path | tuple[str, Path]:
     """Ensure the latest ChEMBL fingerprints file is downloaded.
 
     This file contains 2048 bit radius 2 morgan fingerprints.
@@ -324,7 +324,7 @@ def download_fps(
 
 
 def chemfp_load_fps(
-    version: Optional[str] = None, *, prefix: Optional[Sequence[str]] = None, **kwargs
+    version: str | None = None, *, prefix: Sequence[str] | None = None, **kwargs
 ):
     """Ensure the ChEMBL fingerprints file is downloaded and open with :func:`chemfp.load_fingerprints`.
 
@@ -342,11 +342,11 @@ def chemfp_load_fps(
 
 
 def download_chemreps(
-    version: Optional[str] = None,
+    version: str | None = None,
     *,
-    prefix: Optional[Sequence[str]] = None,
+    prefix: Sequence[str] | None = None,
     return_version: bool = False,
-) -> Union[Path, Tuple[str, Path]]:
+) -> Path | tuple[str, Path]:
     """Ensure the latest ChEMBL chemical representations file is downloaded.
 
     This file is tab-separated and has four columns:
@@ -373,7 +373,7 @@ def download_chemreps(
 
 
 def get_chemreps_df(
-    version: Optional[str] = None, *, prefix: Optional[Sequence[str]] = None
+    version: str | None = None, *, prefix: Sequence[str] | None = None
 ) -> "pandas.DataFrame":
     """Download and parse the latest ChEMBL chemical representations file.
 
@@ -394,11 +394,11 @@ def get_chemreps_df(
 
 
 def download_sdf(
-    version: Optional[str] = None,
+    version: str | None = None,
     *,
-    prefix: Optional[Sequence[str]] = None,
+    prefix: Sequence[str] | None = None,
     return_version: bool = False,
-) -> Union[Path, Tuple[str, Path]]:
+) -> Path | tuple[str, Path]:
     """Ensure the latest ChEMBL SDF dump is downloaded.
 
     :param version: The version number of ChEMBL to get. If none specified, uses
@@ -416,11 +416,11 @@ def download_sdf(
 
 
 def download_monomer_library(
-    version: Optional[str] = None,
+    version: str | None = None,
     *,
-    prefix: Optional[Sequence[str]] = None,
+    prefix: Sequence[str] | None = None,
     return_version: bool = False,
-) -> Union[Path, Tuple[str, Path]]:
+) -> Path | tuple[str, Path]:
     """Ensure the latest ChEMBL monomer library is downloaded.
 
     :param version: The version number of ChEMBL to get. If none specified, uses
@@ -438,9 +438,9 @@ def download_monomer_library(
 
 
 def get_monomer_library_root(
-    version: Optional[str] = None,
+    version: str | None = None,
     *,
-    prefix: Optional[Sequence[str]] = None,
+    prefix: Sequence[str] | None = None,
 ) -> ElementTree.Element:
     """Ensure the latest ChEMBL monomer library is downloaded and parse its root with :mod:`xml`.
 
@@ -458,9 +458,9 @@ def get_monomer_library_root(
 
 @contextmanager
 def supplier(
-    version: Optional[str] = None,
+    version: str | None = None,
     *,
-    prefix: Optional[Sequence[str]] = None,
+    prefix: Sequence[str] | None = None,
     **kwargs,
 ):
     """Get a :class:`rdkit.Chem.ForwardSDMolSupplier` for the given version of ChEMBL.
@@ -497,9 +497,9 @@ def supplier(
 
 
 def iterate_smiles(
-    version: Optional[str] = None,
+    version: str | None = None,
     *,
-    prefix: Optional[Sequence[str]] = None,
+    prefix: Sequence[str] | None = None,
     **kwargs,
 ) -> Iterable[str]:
     """Iterate over SMILES via RDKit."""
@@ -515,10 +515,10 @@ def iterate_smiles(
 
 
 def get_substructure_library(
-    version: Optional[str] = None,
+    version: str | None = None,
     *,
     max_heavy: int = 75,
-    prefix: Optional[Sequence[str]] = None,
+    prefix: Sequence[str] | None = None,
     **kwargs,
 ):
     """Get the ChEMBL substructure library.
@@ -572,11 +572,11 @@ def get_substructure_library(
 
 
 def download_readme(
-    version: Optional[str] = None,
+    version: str | None = None,
     *,
-    prefix: Optional[Sequence[str]] = None,
+    prefix: Sequence[str] | None = None,
     return_version: bool = False,
-) -> Union[Path, Tuple[str, Path]]:
+) -> Path | tuple[str, Path]:
     """Ensure the latest ChEMBL README.
 
     :param version: The version number of ChEMBL to get. If none specified, uses
@@ -613,9 +613,9 @@ def get_date(version: str, **kwargs) -> str:
 
 
 def download_uniprot_mapping(
-    version: Optional[str] = None,
+    version: str | None = None,
     *,
-    prefix: Optional[Sequence[str]] = None,
+    prefix: Sequence[str] | None = None,
     return_version: bool = False,
 ):
     """Ensure the latest ChEMBL-UniProt target mapping TSV file.
@@ -639,9 +639,9 @@ def download_uniprot_mapping(
 
 
 def get_uniprot_mapping_df(
-    version: Optional[str] = None,
+    version: str | None = None,
     *,
-    prefix: Optional[Sequence[str]] = None,
+    prefix: Sequence[str] | None = None,
 ) -> "pandas.DataFrame":
     """Download and parse the latest ChEMBL-UniProt target mapping TSV file.
 

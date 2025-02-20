@@ -9,12 +9,12 @@ import chembl_downloader
 class TestApi(unittest.TestCase):
     """Tests for the API."""
 
-    def test_latest_version(self):
+    def test_latest_version(self) -> None:
         """Test getting the latest version."""
         latest_version = chembl_downloader.latest()
         self.assertIsInstance(latest_version, str)
 
-    def test_get_target_sql(self):
+    def test_get_target_sql(self) -> None:
         """Test getting the target sql."""
         target = chembl_downloader.queries.get_target_sql("CHEMBL3467")
         expected = dedent(
@@ -38,7 +38,7 @@ class TestApi(unittest.TestCase):
         ).strip()
         self.assertEqual(expected, target)
 
-    def test_get_target_with_max_phase(self):
+    def test_get_target_with_max_phase(self) -> None:
         """Test getting target sql with a max phase."""
         target = chembl_downloader.queries.get_target_sql("CHEMBL3467", max_phase=True)
         expected = dedent(

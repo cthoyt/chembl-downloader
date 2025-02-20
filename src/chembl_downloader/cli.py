@@ -1,9 +1,7 @@
-# -*- coding: utf-8 -*-
 
 """CLI for :mod:`chembl_downloader`."""
 
 import sys
-from typing import Optional
 
 import click
 from more_click import verbose_option
@@ -33,7 +31,7 @@ def main():
 @main.command()
 @version_option
 @verbose_option
-def download(version: Optional[str]):
+def download(version: str | None):
     """Download the data."""
     click.echo(download_extract_sqlite(version=version))
 
@@ -41,7 +39,7 @@ def download(version: Optional[str]):
 @main.command()
 @version_option
 @verbose_option
-def test(version: Optional[str]):
+def test(version: str | None):
     """Run test queries."""
     click.secho("ID to Name Query\n", fg="green")
     df = query(ID_NAME_QUERY + "\nLIMIT 5", version=version)
@@ -55,7 +53,7 @@ def test(version: Optional[str]):
 @main.command()
 @version_option
 @verbose_option
-def substructure(version: Optional[str]):
+def substructure(version: str | None):
     """Build a substructure library."""
     get_substructure_library(version=version)
 

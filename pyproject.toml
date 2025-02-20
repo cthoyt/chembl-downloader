@@ -1,14 +1,240 @@
-# See https://setuptools.readthedocs.io/en/latest/build_meta.html
 [build-system]
-requires = ["setuptools", "wheel"]
-build-backend = "setuptools.build_meta:__legacy__"
+requires = ["uv>=0.5.13,<0.7.0"]
+# The uv backend entered preview mode in https://github.com/astral-sh/uv/pull/8886/files
+# with the 0.5.0 release. See also https://github.com/astral-sh/uv/issues/3957 for tracking.
+build-backend = "uv"
 
-[tool.black]
+[project]
+name = "chembl_downloader"
+version = "0.4.6-dev"
+description = "Reproducibly download, open, parse, and query ChEMBL"
+readme = "README.md"
+authors = [
+    { name = "Charles Tapley Hoyt", email = "cthoyt@gmail.com" }
+]
+maintainers = [
+    { name = "Charles Tapley Hoyt", email = "cthoyt@gmail.com" }
+]
+
+# See https://packaging.python.org/en/latest/guides/writing-pyproject-toml/#classifiers
+# Search tags using the controlled vocabulary at https://pypi.org/classifiers
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Environment :: Console",
+    "Intended Audience :: Developers",
+    "Intended Audience :: Science/Research",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+    "Framework :: Pytest",
+    "Framework :: tox",
+    "Framework :: Sphinx",
+    "Natural Language :: English",
+    "Programming Language :: Python",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Programming Language :: Python :: 3 :: Only",
+    "Typing :: Typed",
+    "Topic :: Scientific/Engineering :: Chemistry",
+]
+keywords = [
+    "snekpack", # please keep this keyword to credit the cookiecutter-snekpack template
+    "cookiecutter",
+    "ChEMBL",
+    "sqlite",
+    "fingerprints",
+]
+
+# License Information.
+# See PEP-639 at https://peps.python.org/pep-0639/#add-license-files-key
+license-files = [
+    "LICENSE",
+]
+
+requires-python = ">=3.10"
+dependencies = [
+    "tqdm", # progress bars
+    "click",
+    "more_click",
+    "pystow",
+    "typing-extensions",
+]
+
+[project.optional-dependencies]
+pandas = [
+    "pandas",
+]
+rdkit = [
+    "rdkit-pypi",
+]
+tests = [
+    "pytest",
+    "coverage[toml]",
+]
+docs = [
+    "sphinx>=8",
+    "sphinx-rtd-theme>=3.0",
+    "sphinx-click",
+    "sphinx_automodapi",
+]
+
+# See https://packaging.python.org/en/latest/guides/writing-pyproject-toml/#urls
+# and also https://packaging.python.org/en/latest/specifications/well-known-project-urls/
+[project.urls]
+"Bug Tracker" = "https://github.com/cthoyt/chembl-downloader/issues"
+Homepage = "https://github.com/cthoyt/chembl-downloader"
+Repository = "https://github.com/cthoyt/chembl-downloader.git"
+Documentation = "https://chembl_downloader.readthedocs.io"
+Funding = "https://github.com/sponsors/cthoyt"
+
+[project.scripts]
+chembl_downloader = "chembl_downloader.cli:main"
+
+[tool.cruft]
+skip = [
+    "**/__init__.py",
+    "tests/*"
+]
+
+# MyPy, see https://mypy.readthedocs.io/en/stable/config_file.html
+[tool.mypy]
+plugins = [
+    "pydantic.mypy",
+]
+
+# Doc8, see https://doc8.readthedocs.io/en/stable/readme.html#ini-file-usage
+[tool.doc8]
+max-line-length = 120
+
+# Pytest, see https://docs.pytest.org/en/stable/reference/customize.html#pyproject-toml
+[tool.pytest.ini_options]
+markers = [
+    "slow: marks tests as slow (deselect with '-m \"not slow\"')",
+]
+
+# Coverage, see https://coverage.readthedocs.io/en/latest/config.html
+[tool.coverage.run]
+branch = true
+source = [
+    "chembl_downloader",
+]
+omit = [
+    "tests/*",
+    "docs/*",
+    "src/chembl_downloader/version.py",
+    "src/chembl_downloader/__main__.py",
+    "src/chembl_downloader/cli.py",
+]
+
+[tool.coverage.paths]
+source = [
+    "src/chembl_downloader",
+    ".tox/*/lib/python*/site-packages/chembl_downloader",
+]
+
+[tool.coverage.report]
+show_missing = true
+exclude_lines = [
+    "pragma: no cover",
+    "raise NotImplementedError",
+    "if __name__ == \"__main__\":",
+    "if TYPE_CHECKING:",
+    "def __str__",
+    "def __repr__",
+]
+
+[tool.ruff]
 line-length = 100
-target-version = ["py37", "py38", "py39", "py310"]
+extend-include = ["*.ipynb"]
 
-[tool.isort]
-profile = "black"
-multi_line_output = 3
-include_trailing_comma = true
-reverse_relative = true
+[tool.ruff.lint]
+# See https://docs.astral.sh/ruff/rules
+extend-select = [
+    "F", # pyflakes
+    "E", # pycodestyle errors
+    "W", # pycodestyle warnings
+    "C90", # mccabe
+    "I", # isort
+    "UP", # pyupgrade
+    "D", # pydocstyle
+    "DOC", # pydoclint
+    "B", # bugbear
+    "S", # bandit
+    "T20", # print
+    "N", # pep8 naming
+    "ERA", # eradicate commented out code
+    "NPY", # numpy checks
+    "RUF", # ruff rules
+    "C4", # comprehensions
+]
+ignore = [
+    "D105", # Missing docstring in magic method
+    "E203", # Black conflicts with the following
+]
+
+# See https://docs.astral.sh/ruff/settings/#per-file-ignores
+[tool.ruff.lint.per-file-ignores]
+# Ignore security issues in the version.py, which are inconsistent
+"src/chembl_downloader/version.py" = ["S603", "S607"]
+# Ignore commented out code in Sphinx configuration file
+"docs/source/conf.py" = ["ERA001"]
+# Prints are okay in notebooks
+"notebooks/**/*.ipynb" = ["T201"]
+
+[tool.ruff.lint.pydocstyle]
+convention = "pep257"
+
+[tool.ruff.lint.isort]
+relative-imports-order = "closest-to-furthest"
+known-third-party = [
+    "tqdm",
+]
+known-first-party = [
+    "chembl_downloader",
+    "tests",
+]
+
+[tool.ruff.format]
+# see https://docs.astral.sh/ruff/settings/#format_docstring-code-format
+docstring-code-format = true
+
+[tool.bumpversion]
+current_version = "0.4.6-dev"
+parse = "(?P<major>\\d+)\\.(?P<minor>\\d+)\\.(?P<patch>\\d+)(?:-(?P<release>[0-9A-Za-z-]+(?:\\.[0-9A-Za-z-]+)*))?(?:\\+(?P<build>[0-9A-Za-z-]+(?:\\.[0-9A-Za-z-]+)*))?"
+serialize = [
+    "{major}.{minor}.{patch}-{release}+{build}",
+    "{major}.{minor}.{patch}+{build}",
+    "{major}.{minor}.{patch}-{release}",
+    "{major}.{minor}.{patch}",
+]
+commit = true
+tag = false
+
+[tool.bumpversion.parts.release]
+optional_value = "production"
+first_value = "dev"
+values = [
+    "dev",
+    "production",
+]
+
+[[tool.bumpversion.files]]
+filename = "pyproject.toml"
+search = "version = \"{current_version}\""
+replace = "version = \"{new_version}\""
+
+[[tool.bumpversion.files]]
+filename = "docs/source/conf.py"
+search = "release = \"{current_version}\""
+replace = "release = \"{new_version}\""
+
+[[tool.bumpversion.files]]
+filename = "src/chembl_downloader/version.py"
+search = "VERSION = \"{current_version}\""
+replace = "VERSION = \"{new_version}\""
+
+[[tool.bumpversion.files]]
+filename = "CITATION.cff"
+search = "version: {current_version}"
+replace = "version: {new_version}"

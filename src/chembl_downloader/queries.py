@@ -1,19 +1,17 @@
-# -*- coding: utf-8 -*-
 
 """A collection of query strings for ChEMBL."""
 
 from textwrap import dedent
-from typing import Optional
 
 __all__ = [
-    "ID_NAME_QUERY",
     "ACTIVITIES_QUERY",
-    "DRUG_INDICATIONS_SQL",
     "CHEBI_UNMAPPED_SQL",
+    "DRUG_INDICATIONS_SQL",
+    "ID_NAME_QUERY",
     # Functions
     "get_assay_sql",
-    "get_target_sql",
     "get_document_molecule_sql",
+    "get_target_sql",
 ]
 
 
@@ -92,10 +90,10 @@ def get_assay_sql(assay_chembl_id: str) -> str:
 
 def get_target_sql(
     target_id: str,
-    target_type: Optional[str] = None,
-    standard_relation: Optional[str] = None,
-    standard_type: Optional[str] = None,
-    tax_id: Optional[str] = None,
+    target_type: str | None = None,
+    standard_relation: str | None = None,
+    standard_type: str | None = None,
+    tax_id: str | None = None,
     max_phase: bool = False,
 ) -> str:
     """Get the SQL for all chemicals inhibiting the target."""
