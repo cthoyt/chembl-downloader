@@ -8,7 +8,7 @@ ChEMBL Downloader |release| Documentation
 
     installation
     usage
-   cli
+    cli
 
 Indices and Tables
 ------------------
