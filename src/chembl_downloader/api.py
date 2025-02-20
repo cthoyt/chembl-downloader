@@ -21,6 +21,7 @@ from tqdm import tqdm
 
 if TYPE_CHECKING:
     import chemfp.arena
+    import numpy
     import pandas
     import rdkit.Chem
     import rdkit.Chem.rdSubstructLibrary
@@ -50,6 +51,7 @@ __all__ = [
     "get_uniprot_mapping_df",
     "iterate_smiles",
     "latest",
+    "load_fps",
     "query",
     "supplier",
     "versions",
@@ -346,6 +348,37 @@ def chemfp_load_fps(
 
     path = download_fps(version=version, prefix=prefix, return_version=False)
     return chemfp.load_fingerprints(path, **kwargs)
+
+
+def load_fps(
+    version: str | None = None, *, prefix: Sequence[str] | None = None
+) -> dict[str, numpy.ndarray]:
+    """Download and open the ChEMBL fingerprints via RDKit/Numpy.
+
+    :param version: The version number of ChEMBL to get. If none specified, uses
+        :func:`latest` to look up the latest.
+    :param prefix: The directory inside :mod:`pystow` to use
+    :returns: A dictionary from ChEMBL IDs to NumPy arrays
+    """
+    import numpy as np
+    from rdkit import DataStructs
+    from rdkit.DataStructs import ConvertToNumpyArray
+
+    path = download_fps(version=version, prefix=prefix, return_version=False)
+    rv = {}
+    with gzip.open(path, mode="rt") as file:
+        for _ in range(6):  # throw away headers
+            next(file)
+        for line in tqdm(
+            file, unit_scale=True, desc="Getting chemical features", unit="fingerprint"
+        ):
+            hex_fp, chembl_id = line.strip().split("\t")
+            binary_fp = bytes.fromhex(hex_fp)
+            bitvect = DataStructs.cDataStructs.CreateFromBinaryText(binary_fp)
+            arr = np.zeros((bitvect.GetNumBits(),), dtype=np.uint8)
+            ConvertToNumpyArray(bitvect, arr)
+            rv[chembl_id] = arr
+    return rv
 
 
 def download_chemreps(
