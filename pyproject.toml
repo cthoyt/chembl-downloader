@@ -121,7 +121,6 @@ source = [
 omit = [
     "tests/*",
     "docs/*",
-    "src/chembl_downloader/version.py",
     "src/chembl_downloader/__main__.py",
     "src/chembl_downloader/cli.py",
 ]
@@ -174,8 +173,6 @@ ignore = [
 
 # See https://docs.astral.sh/ruff/settings/#per-file-ignores
 [tool.ruff.lint.per-file-ignores]
-# Ignore security issues in the version.py, which are inconsistent
-"src/chembl_downloader/version.py" = ["S603", "S607"]
 # Ignore commented out code in Sphinx configuration file
 "docs/source/conf.py" = ["ERA001"]
 # Prints are okay in notebooks
@@ -227,11 +224,6 @@ replace = "version = \"{new_version}\""
 filename = "docs/source/conf.py"
 search = "release = \"{current_version}\""
 replace = "release = \"{new_version}\""
-
-[[tool.bumpversion.files]]
-filename = "src/chembl_downloader/version.py"
-search = "VERSION = \"{current_version}\""
-replace = "VERSION = \"{new_version}\""
 
 [[tool.bumpversion.files]]
 filename = "CITATION.cff"
