@@ -256,8 +256,10 @@ def download_extract_sqlite(
     # Extraction will be done in the same directory as the download.
     # All ChEMBL SQLite dumps have the same internal folder structure,
     # so assume there's going to be a directory here
-    directory = path.parent.joinpath("data")
-    if directory.is_dir():
+    directory = path.parent.joinpath("data").mkdir(exist_ok=True)
+    
+    rv = _find_sqlite_file(directory)
+    if rv is None:
         logger.info("unarchiving %s to %s", path, directory)
         with tarfile.open(path, mode="r", encoding="utf-8") as tar_file:
             tar_file.extractall(directory)  # noqa:S202
