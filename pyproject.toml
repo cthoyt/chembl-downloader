@@ -76,6 +76,16 @@ docs = [
     "sphinx-click",
     "sphinx_automodapi",
 ]
+notebooks = [
+    "matplotlib",
+    "rdkit",
+    "seaborn",
+    "matplotlib_venn",
+    "scikit-learn",
+    "scipy",
+    "pyobo[gilda-slim]",
+    "biomappings>=0.4.0",
+]
 
 # See https://packaging.python.org/en/latest/guides/writing-pyproject-toml/#urls
 # and also https://packaging.python.org/en/latest/specifications/well-known-project-urls/
