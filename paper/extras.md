@@ -21,14 +21,3 @@ works in bulk.
   [Free Wilson analysis examples](https://github.com/rdkit/rdkit/tree/master/Contrib/FreeWilson/data))
 
 Potential CDK integration [@Willighagen2017] or Bacting
-
-## Third case study
-
-A third case study demonstrates using the query interface during the
-construction of the INDRA CoGEx knowledge graph. Interestingly, no published
-knowledge graphs have yet to include more generic bioactivity databases like
-ChEMBL while many have focused on drug-specific databases such as DrugBank and
-Drug Central [@Bonner2022].
-
-> This case study won't be used since there is no reference publication for
-> INDRA CoGEx
