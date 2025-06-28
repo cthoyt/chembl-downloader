@@ -230,16 +230,16 @@ information on working with the `arena` object can be found
 ### Command Line Interface
 
 After installing, run the following CLI command to ensure it and send the path
-to stdout
+to stdout:
 
 ```console
-$ chembl_downloader
+$ chembl_downloader download
 ```
 
-Use `--test` to show two example queries
+Use the `test` subcommand to show two example queries:
 
 ```console
-$ chembl_downloader --test
+$ chembl_downloader test
 ```
 
 ## Configuration
@@ -281,17 +281,14 @@ $ python3 -m pip install chembl_downloader
 The most recent code and data can be installed directly from GitHub with uv:
 
 ```console
-$ uv --preview pip install git+https://github.com/cthoyt/chembl-downloader.git
+$ uv pip install git+https://github.com/cthoyt/chembl-downloader.git
 ```
 
 or with pip:
 
 ```console
-$ UV_PREVIEW=1 python3 -m pip install git+https://github.com/cthoyt/chembl-downloader.git
+$ python3 -m pip install git+https://github.com/cthoyt/chembl-downloader.git
 ```
-
-Note that this requires setting `UV_PREVIEW` mode enabled until the uv build
-backend becomes a stable feature.
 
 ## Users
 
@@ -304,41 +301,41 @@ See
 files are not available for all versions. For example, the SQLite version of the
 database was first added in release 21 (2015-02-12).
 
-| ChEMBL Version | Release Date   | Total Named Compounds _from SQLite_ |
-| -------------- | -------------- | ----------------------------------: |
-| 31             | 2022-07-12     |                              41,585 |
-| 30             | 2022-02-22     |                              41,549 |
-| 29             | 2021-07-01     |                              41,383 |
-| 28             | 2021-01-15     |                              41,049 |
-| 27             | 2020-05-18     |                              40,834 |
-| 26             | 2020-02-14     |                              40,822 |
-| 25             | 2019-02-01     |                              39,885 |
-| 24_1           | 2018-05-01     |                              39,877 |
-| 24             |                |                                     |
-| 23             | 2017-05-18     |                              39,584 |
-| 22_1           | 2016-11-17     |                                     |
-| 22             |                |                              39,422 |
-| 21             | 2015-02-12     |                              39,347 |
-| 20             | 2015-02-03     |                                   - |
-| 19             | 2014-07-2333   |                                   - |
-| 18             | 2014-04-02     |                                   - |
-| 17             | 2013-09-16     |                                   - |
-| 16             | 2013-055555-15 |                                   - |
-| 15             | 2013-01-30     |                                   - |
-| 14             | 2012 -07-18    |                                   - |
-| 13             | 2012-02-29     |                                   - |
-| 12             | 2011-11-30     |                                   - |
-| 11             | 2011-06-07     |                                   - |
-| 10             | 2011-06-07     |                                   - |
-| 09             | 2011-01-04     |                                   - |
-| 08             | 2010-11-05     |                                   - |
-| 07             | 2010-09-03     |                                   - |
-| 06             | 2010-09-03     |                                   - |
-| 05             | 2010-06-07     |                                   - |
-| 04             | 2010-05-26     |                                   - |
-| 03             | 2010-04-30     |                                   - |
-| 02             | 2009-12-07     |                                   - |
-| 01             | 2009-10-28     |                                   - |
+| ChEMBL Version | Release Date | Total Named Compounds _from SQLite_ |
+| -------------- | ------------ | ----------------------------------: |
+| 31             | 2022-07-12   |                              41,585 |
+| 30             | 2022-02-22   |                              41,549 |
+| 29             | 2021-07-01   |                              41,383 |
+| 28             | 2021-01-15   |                              41,049 |
+| 27             | 2020-05-18   |                              40,834 |
+| 26             | 2020-02-14   |                              40,822 |
+| 25             | 2019-02-01   |                              39,885 |
+| 24_1           | 2018-05-01   |                              39,877 |
+| 24             |              |                                     |
+| 23             | 2017-05-18   |                              39,584 |
+| 22_1           | 2016-11-17   |                                     |
+| 22             |              |                              39,422 |
+| 21             | 2015-02-12   |                              39,347 |
+| 20             | 2015-02-03   |                                   - |
+| 19             | 2014-07-23   |                                   - |
+| 18             | 2014-04-02   |                                   - |
+| 17             | 2013-09-16   |                                   - |
+| 16             | 2013-05-15   |                                   - |
+| 15             | 2013-01-30   |                                   - |
+| 14             | 2012-07-18   |                                   - |
+| 13             | 2012-02-29   |                                   - |
+| 12             | 2011-11-30   |                                   - |
+| 11             | 2011-06-07   |                                   - |
+| 10             | 2011-06-07   |                                   - |
+| 09             | 2011-01-04   |                                   - |
+| 08             | 2010-11-05   |                                   - |
+| 07             | 2010-09-03   |                                   - |
+| 06             | 2010-09-03   |                                   - |
+| 05             | 2010-06-07   |                                   - |
+| 04             | 2010-05-26   |                                   - |
+| 03             | 2010-04-30   |                                   - |
+| 02             | 2009-12-07   |                                   - |
+| 01             | 2009-10-28   |                                   - |
 
 ## 👐 Contributing
 
@@ -402,17 +399,14 @@ To install in development mode, use the following:
 ```console
 $ git clone git+https://github.com/cthoyt/chembl-downloader.git
 $ cd chembl-downloader
-$ uv --preview pip install -e .
+$ uv pip install -e .
 ```
 
 Alternatively, install using pip:
 
 ```console
-$ UV_PREVIEW=1 python3 -m pip install -e .
+$ python3 -m pip install -e .
 ```
-
-Note that this requires setting `UV_PREVIEW` mode enabled until the uv build
-backend becomes a stable feature.
 
 ### Updating Package Boilerplate
 

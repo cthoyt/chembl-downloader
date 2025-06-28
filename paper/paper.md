@@ -21,9 +21,9 @@ authors:
     affiliation: 1
 
 affiliations:
-  - name: RWTH Aachen University
+  - name: RWTH Aachen University, Institute of Inorganic Chemistry
     index: 1
-    wikidata: 04xfq0f34
+    ror: 04xfq0f34
 
 date: 26 June 2025
 bibliography: paper.bib
@@ -103,7 +103,7 @@ aggregation. See the corresponding
 A second case study demonstrates the value of having a reproducible script for
 identifying missing identifier mappings between molecules in ChEMBL and ChEBI
 [@Hastings2016] _via_ lexical mappings produced by Gilda [@Gyori2022], which
-identified 1,921 potential mappings for curation e.g., in a workflow such as
+identified 4,266 potential mappings for curation e.g., in a workflow such as
 Biomappings [@Hoyt2022]. See the corresponding
 [Jupyter notebook](https://github.com/cthoyt/chembl-downloader/blob/main/notebooks/chebi-mappings.ipynb).
 
