@@ -25,7 +25,7 @@ affiliations:
     index: 1
     ror: 04xfq0f34
 
-date: 26 June 2025
+date: 7 July 2025
 bibliography: paper.bib
 repository: cthoyt/chembl-downloader
 ---
@@ -88,7 +88,7 @@ contains several pre-formatted SQL queries to retrieve the bioactivities
 associated with a given assay or target, to retrieve the compounds mentioned in
 a publication or patent, to retrieve the names of all compounds, etc.
 
-# Case Studies
+# Case studies
 
 A first case study demonstrates how the high-level utilities in
 `chembl-downloader` can be used to reproduce the dataset generation from
@@ -147,5 +147,10 @@ documentation available at
 [https://chembl-downloader.readthedocs.io](https://chembl-downloader.readthedocs.io).
 The repository also contains an interactive Jupyter notebook tutorial and
 notebooks for the case studies described above.
+
+# Acknowledgements
+
+The author would like to thank Yojana Gadiya and Jennifer HY Lin for helpful
+discussions and the NFDI4Chem Consortium (https://www.nfdi4chem.de) for support.
 
 # References
