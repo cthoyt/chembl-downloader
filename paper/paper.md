@@ -19,6 +19,8 @@ authors:
   - name: Charles Tapley Hoyt
     orcid: 0000-0003-4423-4370
     affiliation: 1
+    email: cthoyt@gmail.com
+    corresponding: true
 
 affiliations:
   - name: RWTH Aachen University, Institute of Inorganic Chemistry
