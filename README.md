@@ -357,14 +357,14 @@ The code in this package is licensed under the MIT License.
 
 ```bibtex
 @article{hoyt2025chembl,
-   title={Improving reproducibility of cheminformatics workflows with chembl-downloader}, 
+   title={Improving reproducibility of cheminformatics workflows with chembl-downloader},
    author={Charles Tapley Hoyt},
    year={2025},
    eprint={2507.17783},
    archivePrefix={arXiv},
    primaryClass={q-bio.QM},
    doi={https://doi.org/10.48550/arXiv.2507.17783}
-   url={https://arxiv.org/abs/2507.17783}, 
+   url={https://arxiv.org/abs/2507.17783},
 }
 ```
 
