@@ -1,8 +1,23 @@
-cff-version: 1.0.2
+cff-version: 1.2.0
 message: "If you use this software, please cite it as below."
 title: "ChEMBL Downloader"
 authors:
-  - name: "Charles Tapley Hoyt"
+  - family-names: Hoyt
+    given-names: Charles Tapley
+    orcid: 0000-0003-4423-4370
 version: 0.5.2-dev
-doi:
 url: "https://github.com/cthoyt/chembl-downloader"
+preferred-citation:
+  type: article
+  title: "Improving reproducibility of cheminformatics workflows with chembl-downloader"
+  authors:
+    - family-names: Hoyt
+      given-names: Charles Tapley
+      orcid: 0000-0003-4423-4370
+  date: 2025
+  doi: 10.48550/arXiv.2507.17783
+  url: https://arxiv.org/abs/2507.17783
+  archive: arXiv
+  archive-id: 2507.17783
+  archive-prefix: arXiv
+  arxiv-class: q-bio.QM
