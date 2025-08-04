@@ -29,6 +29,8 @@
         <img src="https://img.shields.io/badge/Contributor%20Covenant-2.1-4baaaa.svg" alt="Contributor Covenant"/></a>
     <a href="https://zenodo.org/badge/latestdoi/390113187">
         <img src="https://zenodo.org/badge/390113187.svg" alt="DOI"></a>
+    <a href="https://joss.theoj.org/papers/bf700e4bdbef157f982fd3944761414a">
+        <img src="https://joss.theoj.org/papers/bf700e4bdbef157f982fd3944761414a/status.svg"></a>
 </p>
 
 Reproducibly download, open, parse, and query ChEMBL.
