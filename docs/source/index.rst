@@ -7,7 +7,11 @@ ChEMBL Downloader |release| Documentation
     :name: start
 
     installation
-    usage
+    sql
+    sdf
+    fingerprints
+    reference
+    configuration
     cli
 
 Indices and Tables
