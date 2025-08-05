@@ -38,7 +38,7 @@ def get_target_smi_df(
     aggregate: Literal["mean", "gmean"] | None = "mean",
     **kwargs: Any,
 ) -> pandas.DataFrame:
-    """Geta dataframe for activities of compounds against the given target.
+    """Get bioactivities for compounds against the given target (from :func:`get_target_sql`).
 
     :param target_id: ChEMBL identifier for the target. For example, use CHEMBL1867 for
         the human A2A receptor.
@@ -106,7 +106,7 @@ def get_assay_smi_df(
     refresh: bool = False,
     **kwargs: Any,
 ) -> pandas.DataFrame:
-    """Get a SMI."""
+    """Get a dataframe for bioactivties in a given assay (from :func:`get_assay_sql`)."""
     import pandas as pd
 
     if version is None:
@@ -138,7 +138,7 @@ def get_document_smi_df(
     refresh: bool = False,
     **kwargs: Any,
 ) -> pandas.DataFrame:
-    """Get a SMI."""
+    """Get bioactivties in a given document (from :func:`get_document_molecule_sql`)."""
     import pandas as pd
 
     if version is None:
@@ -163,7 +163,7 @@ def write_document_smi_file(
     sep: str = ",",
     **kwargs: Any,
 ) -> None:
-    """Write SMI file for the given document."""
+    """Write SMI file for bioactivities in the given document."""
     df = get_document_smi_df(document_chembl_id=document_chembl_id, version=version, **kwargs)
     df.to_csv(path, sep=sep, index=False, header=False)
 

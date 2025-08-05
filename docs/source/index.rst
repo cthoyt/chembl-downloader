@@ -11,6 +11,8 @@ ChEMBL Downloader |release| Documentation
     sdf
     fingerprints
     reference
+    queries
+    extras
     configuration
     cli
 

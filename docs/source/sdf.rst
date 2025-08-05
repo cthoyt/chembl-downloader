@@ -29,9 +29,9 @@ substructure search
 Iterate over SMILES
 -------------------
 
-This example uses the :func:`chembl_downloader.supplier` method and RDKit to get
-SMILES strings from molecules in ChEMBL's SDF file. If you want direct access to the
-RDKit molecule objects, use :func:`chembl_downloader.supplier`.
+This example uses the :func:`chembl_downloader.supplier` method and RDKit to get SMILES
+strings from molecules in ChEMBL's SDF file. If you want direct access to the RDKit
+molecule objects, use :func:`chembl_downloader.supplier`.
 
 .. code-block:: python
 

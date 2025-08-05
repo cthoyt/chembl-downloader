@@ -41,6 +41,7 @@ WHERE molecule_dictionary.pref_name IS NOT NULL
 #: This query returns five examples from the molecule dictionary table
 ID_NAME_QUERY_EXAMPLE = ID_NAME_QUERY + "\nLIMIT 5"
 
+#: A SQL query for all activities
 ACTIVITIES_QUERY = """\
 SELECT
     COMPOUND_STRUCTURES.canonical_smiles,
@@ -138,6 +139,7 @@ def get_target_sql(
     ).strip()
 
 
+#: A SQL query for all drug-indication relationships
 DRUG_INDICATIONS_SQL = """\
 SELECT
     MOLECULE_DICTIONARY.chembl_id,
@@ -152,7 +154,7 @@ FROM MOLECULE_DICTIONARY
 JOIN DRUG_INDICATION ON MOLECULE_DICTIONARY.molregno == DRUG_INDICATION.molregno
 """
 
-#: A query for ChEMBL molecules that are unmapped to ChEBI
+#: A SQL query for ChEMBL molecules that are unmapped to ChEBI
 CHEBI_UNMAPPED_SQL = """\
 SELECT
     chembl_id,

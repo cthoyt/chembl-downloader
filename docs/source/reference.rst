@@ -1,5 +1,5 @@
 Reference
 =========
 
-.. automodule:: chembl_downloader
-    :members:
+.. automodapi:: chembl_downloader
+    :no-heading:
