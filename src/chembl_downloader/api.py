@@ -17,6 +17,7 @@ from typing import TYPE_CHECKING, Any, Literal, NamedTuple, overload
 from xml.etree import ElementTree
 
 import pystow
+from pystow.utils import open_tarfile
 from tqdm import tqdm
 
 if TYPE_CHECKING:
@@ -273,6 +274,12 @@ def download_extract_sqlite(
         return rv
 
 
+def _get_tar_info(tar) :
+    for tar_info in tar:
+        if tar_info.name.endswith(".db"):
+            return tar_info
+
+
 def _find_sqlite_file(directory: str | Path) -> Path | None:
     # Since the structure of the zip changes from version to version,
     # it's better to just walk through the unarchived folders recursively
@@ -306,9 +313,17 @@ def connect(
             with closing(conn.cursor()) as cursor:
                 cursor.execute(...)
     """
-    path = download_extract_sqlite(version=version, prefix=prefix, return_version=False)
-    with closing(sqlite3.connect(path.as_posix())) as conn:
-        yield conn
+    _ = download_extract_sqlite(version=version, prefix=prefix, return_version=False)
+
+    path = download_sqlite(version=version, prefix=prefix, return_version=False)
+    with tarfile.open(path) as tar:
+        member = _get_tar_info(tar)
+        file = tar.extractfile(member)
+        if file is None:
+            raise
+        with closing(sqlite3.connect(file)) as conn:
+            yield conn
+
 
 
 @contextmanager
