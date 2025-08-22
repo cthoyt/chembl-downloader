@@ -54,6 +54,7 @@ __all__ = [
     "iterate_smiles",
     "latest",
     "query",
+    "query_one",
     "supplier",
     "versions",
 ]
@@ -355,8 +356,8 @@ def query(
 
     Example: .. code-block:: python
 
-        import chembl_downloader from chembl_downloader.queries import
-        ID_NAME_QUERY_EXAMPLE
+        import chembl_downloader
+        from chembl_downloader.queries import ID_NAME_QUERY_EXAMPLE
 
         df = chembl_downloader.query(ID_NAME_QUERY_EXAMPLE)
     """
@@ -364,6 +365,35 @@ def query(
 
     with connect(version=version, prefix=prefix) as con:
         return pd.read_sql(sql, con=con, **kwargs)
+
+
+def query_one(
+    sql: str,
+    version: VersionHint | None = None,
+    *,
+    prefix: Sequence[str] | None = None,
+    **kwargs: Any,
+) -> Any:
+    """Ensure the data is available, run the query, then extract the result.
+
+    :param sql: A SQL query string or table name
+    :param version: The version number of ChEMBL to get. If none specified, uses
+        :func:`latest` to look up the latest.
+    :param prefix: The directory inside :mod:`pystow` to use
+    :param kwargs: keyword arguments to pass through to :func:`pandas.read_sql`, such as
+        ``index_col``.
+
+    :returns: A dataframe
+
+    Example: .. code-block:: python
+
+        import chembl_downloader
+
+        sql = "SELECT COUNT(activity_id) FROM activities"
+        count: int = chembl_downloader.query_one(sql)
+    """
+    df = query(sql, version=version, prefix=prefix, **kwargs)
+    return df[df.columns[0]][0]
 
 
 # docstr-coverage:excused `overload`
