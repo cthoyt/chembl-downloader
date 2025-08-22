@@ -13,9 +13,8 @@ import tarfile
 from collections.abc import Generator, Iterable, Sequence
 from contextlib import closing, contextmanager
 from pathlib import Path
-from typing import TYPE_CHECKING, Any, Literal, NamedTuple, overload
+from typing import TYPE_CHECKING, Any, Literal, NamedTuple, TypeAlias, overload
 from xml.etree import ElementTree
-from typing_extensions import TypeAlias
 
 import pystow
 from tqdm import tqdm
@@ -28,6 +27,7 @@ if TYPE_CHECKING:
     import rdkit.Chem.rdSubstructLibrary
 
 __all__ = [
+    "VersionHint",
     "VersionPathPair",
     "chemfp_load_fps",
     "connect",
@@ -57,7 +57,6 @@ __all__ = [
     "query",
     "supplier",
     "versions",
-    "VersionHint",
 ]
 
 logger = logging.getLogger(__name__)
@@ -80,7 +79,7 @@ class VersionPathPair(NamedTuple):
 
 def _removeprefix(s: str, prefix: str) -> str:
     if s.startswith(prefix):
-        return s[len(prefix):]
+        return s[len(prefix) :]
     return s
 
 
@@ -159,7 +158,14 @@ def _download_helper(
     raise ValueError(f"could not find {filename} in data for ChEMBL {fmt_version} in {base}")
 
 
-def _clean_version(version: VersionHint) -> tuple[str, str]:
+class VersionFlavors(NamedTuple):
+    """A pair of format version and regular version."""
+
+    fmt_version: str
+    version: str
+
+
+def _clean_version(version: VersionHint) -> VersionFlavors:
     if isinstance(version, int):
         # versions 1-9 are left padded with a zero
         version = f"{version:02}"
@@ -168,7 +174,7 @@ def _clean_version(version: VersionHint) -> tuple[str, str]:
     # for versions < 10 it's important to left pad with a zero
     fmt_version = version.replace(".", "_").zfill(2)
 
-    return fmt_version, version
+    return VersionFlavors(fmt_version, version)
 
 
 # docstr-coverage:excused `overload`
@@ -258,6 +264,7 @@ def download_extract_sqlite(
         directories
     """
     if version is not None:
+        version = _clean_version(version).version
         _directory = pystow.join(*(prefix or PYSTOW_PARTS), version)
         if _directory.is_dir():
             rv = _find_sqlite_file(_directory)
@@ -756,6 +763,8 @@ def get_substructure_library(
 
     if version is None:
         version = latest()
+
+    version = _clean_version(version).version
 
     path = pystow.join(*(prefix or PYSTOW_PARTS), version, name="ssslib.pkl")
     if path.is_file():

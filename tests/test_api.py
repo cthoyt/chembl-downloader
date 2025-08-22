@@ -4,7 +4,7 @@ import unittest
 from textwrap import dedent
 
 import chembl_downloader
-from chembl_downloader.api import _clean_version
+from chembl_downloader.api import VersionFlavors, VersionHint, _clean_version
 
 
 class TestApi(unittest.TestCase):
@@ -12,16 +12,17 @@ class TestApi(unittest.TestCase):
 
     def test_clean_version(self) -> None:
         """Test cleaning the version."""
-        for input_version, (expected_version, expected_fmt_version) in [
+        cases: list[tuple[VersionHint, VersionFlavors]] = [
             # single digit
-            ("1", ("01", "1")),
-            (1, ("01", "1")),
+            ("1", VersionFlavors("01", "1")),
+            (1, VersionFlavors("01", "1")),
             # double-digit
-            ("35", ("35", "35")),
-            (35, ("35", "35")),
+            ("35", VersionFlavors("35", "35")),
+            (35, VersionFlavors("35", "35")),
             # point
-            ("22.1", ("22_1", "22.1")),
-        ]:
+            ("22.1", VersionFlavors("22_1", "22.1")),
+        ]
+        for input_version, (expected_version, expected_fmt_version) in cases:
             with self.subTest():
                 fmt_version, version = _clean_version(input_version)
                 self.assertEqual(expected_fmt_version, fmt_version, msg="incorrect format version")
