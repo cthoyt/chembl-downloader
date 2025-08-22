@@ -369,12 +369,15 @@ def query(
 
 def query_one(
     sql: str,
-    version: VersionHint | None = None,
+    version: str | None = None,
     *,
     prefix: Sequence[str] | None = None,
     **kwargs: Any,
 ) -> Any:
     """Ensure the data is available, run the query, then extract the result.
+
+    Similar to :func:`query`, but automatically unpacks the value, assuming
+    that only one record is returned with just a single column.
 
     :param sql: A SQL query string or table name
     :param version: The version number of ChEMBL to get. If none specified, uses
@@ -383,7 +386,7 @@ def query_one(
     :param kwargs: keyword arguments to pass through to :func:`pandas.read_sql`, such as
         ``index_col``.
 
-    :returns: A dataframe
+    :returns: A value (int, str, etc.) from the database.
 
     Example: .. code-block:: python
 
