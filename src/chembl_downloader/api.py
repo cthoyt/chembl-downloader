@@ -15,6 +15,7 @@ from contextlib import closing, contextmanager
 from pathlib import Path
 from typing import TYPE_CHECKING, Any, Literal, NamedTuple, overload
 from xml.etree import ElementTree
+from typing_extensions import TypeAlias
 
 import pystow
 from tqdm import tqdm
@@ -56,6 +57,7 @@ __all__ = [
     "query",
     "supplier",
     "versions",
+    "VersionHint",
 ]
 
 logger = logging.getLogger(__name__)
@@ -64,6 +66,9 @@ logger = logging.getLogger(__name__)
 PYSTOW_PARTS = ["chembl"]
 RELEASE_PREFIX = "* Release:"
 DATE_PREFIX = "* Date:"
+
+#: A hint for a version, which can either be an integer or string
+VersionHint: TypeAlias = str | int
 
 
 class VersionPathPair(NamedTuple):
@@ -75,7 +80,7 @@ class VersionPathPair(NamedTuple):
 
 def _removeprefix(s: str, prefix: str) -> str:
     if s.startswith(prefix):
-        return s[len(prefix) :]
+        return s[len(prefix):]
     return s
 
 
@@ -107,7 +112,7 @@ def versions() -> list[str]:
 
 def _download_helper(
     suffix: str,
-    version: str | None = None,
+    version: VersionHint | None = None,
     prefix: Sequence[str] | None = None,
     *,
     return_version: bool,
@@ -132,9 +137,7 @@ def _download_helper(
     if version is None:
         version = latest()
 
-    # for versions 22.1 and 24.1, it's important to canonicalize the version number
-    # for versions < 10 it's important to left pad with a zero
-    fmt_version = version.replace(".", "_").zfill(2)
+    fmt_version, version = _clean_version(version)
 
     base = f"ftp://ftp.ebi.ac.uk/pub/databases/chembl/ChEMBLdb/releases/chembl_{fmt_version}"
     if filename_repeats_version:
@@ -156,10 +159,22 @@ def _download_helper(
     raise ValueError(f"could not find {filename} in data for ChEMBL {fmt_version} in {base}")
 
 
+def _clean_version(version: VersionHint) -> tuple[str, str]:
+    if isinstance(version, int):
+        # versions 1-9 are left padded with a zero
+        version = f"{version:02}"
+
+    # for versions 22.1 and 24.1, it's important to canonicalize the version number
+    # for versions < 10 it's important to left pad with a zero
+    fmt_version = version.replace(".", "_").zfill(2)
+
+    return fmt_version, version
+
+
 # docstr-coverage:excused `overload`
 @overload
 def download_sqlite(
-    version: str | None = ...,
+    version: VersionHint | None = ...,
     *,
     prefix: Sequence[str] | None = ...,
     return_version: Literal[True] = ...,
@@ -169,7 +184,7 @@ def download_sqlite(
 # docstr-coverage:excused `overload`
 @overload
 def download_sqlite(
-    version: str | None = ...,
+    version: VersionHint | None = ...,
     *,
     prefix: Sequence[str] | None = ...,
     return_version: Literal[False] = ...,
@@ -177,7 +192,7 @@ def download_sqlite(
 
 
 def download_sqlite(
-    version: str | None = None,
+    version: VersionHint | None = None,
     *,
     prefix: Sequence[str] | None = None,
     return_version: bool = False,
@@ -204,7 +219,7 @@ def download_sqlite(
 # docstr-coverage:excused `overload`
 @overload
 def download_extract_sqlite(
-    version: str | None = ...,
+    version: VersionHint | None = ...,
     *,
     prefix: Sequence[str] | None = ...,
     return_version: Literal[True] = ...,
@@ -214,7 +229,7 @@ def download_extract_sqlite(
 # docstr-coverage:excused `overload`
 @overload
 def download_extract_sqlite(
-    version: str | None = ...,
+    version: VersionHint | None = ...,
     *,
     prefix: Sequence[str] | None = ...,
     return_version: Literal[False] = ...,
@@ -222,7 +237,7 @@ def download_extract_sqlite(
 
 
 def download_extract_sqlite(
-    version: str | None = None,
+    version: VersionHint | None = None,
     *,
     prefix: Sequence[str] | None = None,
     return_version: bool = False,
@@ -288,7 +303,7 @@ def _find_sqlite_file(directory: str | Path) -> Path | None:
 
 @contextmanager
 def connect(
-    version: str | None = None, *, prefix: Sequence[str] | None = None
+    version: VersionHint | None = None, *, prefix: Sequence[str] | None = None
 ) -> Generator[sqlite3.Connection, None, None]:
     """Ensure and connect to the database.
 
@@ -313,7 +328,7 @@ def connect(
 
 @contextmanager
 def cursor(
-    version: str | None = None, *, prefix: Sequence[str] | None = None
+    version: VersionHint | None = None, *, prefix: Sequence[str] | None = None
 ) -> Generator[sqlite3.Cursor]:
     """Ensure, connect, and get a cursor from the database to the database.
 
@@ -337,7 +352,7 @@ def cursor(
 
 def query(
     sql: str,
-    version: str | None = None,
+    version: VersionHint | None = None,
     *,
     prefix: Sequence[str] | None = None,
     **kwargs: Any,
@@ -369,7 +384,7 @@ def query(
 # docstr-coverage:excused `overload`
 @overload
 def download_fps(
-    version: str | None = ...,
+    version: VersionHint | None = ...,
     *,
     prefix: Sequence[str] | None = ...,
     return_version: Literal[True] = ...,
@@ -379,7 +394,7 @@ def download_fps(
 # docstr-coverage:excused `overload`
 @overload
 def download_fps(
-    version: str | None = ...,
+    version: VersionHint | None = ...,
     *,
     prefix: Sequence[str] | None = ...,
     return_version: Literal[False] = ...,
@@ -387,7 +402,7 @@ def download_fps(
 
 
 def download_fps(
-    version: str | None = None,
+    version: VersionHint | None = None,
     *,
     prefix: Sequence[str] | None = None,
     return_version: bool = False,
@@ -411,7 +426,7 @@ def download_fps(
 
 
 def chemfp_load_fps(
-    version: str | None = None, *, prefix: Sequence[str] | None = None, **kwargs: Any
+    version: VersionHint | None = None, *, prefix: Sequence[str] | None = None, **kwargs: Any
 ) -> chemfp.arena.FingerprintArena:
     """Download and open the ChEMBL fingerprints via :func:`chemfp.load_fingerprints`.
 
@@ -430,7 +445,7 @@ def chemfp_load_fps(
 
 
 def iterate_fps(
-    version: str | None = None,
+    version: VersionHint | None = None,
     *,
     prefix: Sequence[str] | None = None,
     identifier_format: Literal["local", "curie"] = "local",
@@ -471,7 +486,7 @@ def iterate_fps(
 # docstr-coverage:excused `overload`
 @overload
 def download_chemreps(
-    version: str | None = ...,
+    version: VersionHint | None = ...,
     *,
     prefix: Sequence[str] | None = ...,
     return_version: Literal[True] = True,
@@ -481,7 +496,7 @@ def download_chemreps(
 # docstr-coverage:excused `overload`
 @overload
 def download_chemreps(
-    version: str | None = ...,
+    version: VersionHint | None = ...,
     *,
     prefix: Sequence[str] | None = ...,
     return_version: Literal[False] = False,
@@ -489,7 +504,7 @@ def download_chemreps(
 
 
 def download_chemreps(
-    version: str | None = None,
+    version: VersionHint | None = None,
     *,
     prefix: Sequence[str] | None = None,
     return_version: bool = False,
@@ -524,7 +539,7 @@ def download_chemreps(
 
 
 def get_chemreps_df(
-    version: str | None = None, *, prefix: Sequence[str] | None = None
+    version: VersionHint | None = None, *, prefix: Sequence[str] | None = None
 ) -> pandas.DataFrame:
     """Download and parse the latest ChEMBL chemical representations file.
 
@@ -545,7 +560,7 @@ def get_chemreps_df(
 # docstr-coverage:excused `overload`
 @overload
 def download_sdf(
-    version: str | None = ...,
+    version: VersionHint | None = ...,
     *,
     prefix: Sequence[str] | None = ...,
     return_version: Literal[True] = ...,
@@ -555,7 +570,7 @@ def download_sdf(
 # docstr-coverage:excused `overload`
 @overload
 def download_sdf(
-    version: str | None = ...,
+    version: VersionHint | None = ...,
     *,
     prefix: Sequence[str] | None = ...,
     return_version: Literal[False] = ...,
@@ -563,7 +578,7 @@ def download_sdf(
 
 
 def download_sdf(
-    version: str | None = None,
+    version: VersionHint | None = None,
     *,
     prefix: Sequence[str] | None = None,
     return_version: bool = False,
@@ -587,7 +602,7 @@ def download_sdf(
 # docstr-coverage:excused `overload`
 @overload
 def download_monomer_library(
-    version: str | None = ...,
+    version: VersionHint | None = ...,
     *,
     prefix: Sequence[str] | None = ...,
     return_version: Literal[True] = ...,
@@ -597,7 +612,7 @@ def download_monomer_library(
 # docstr-coverage:excused `overload`
 @overload
 def download_monomer_library(
-    version: str | None = ...,
+    version: VersionHint | None = ...,
     *,
     prefix: Sequence[str] | None = ...,
     return_version: Literal[False] = ...,
@@ -605,7 +620,7 @@ def download_monomer_library(
 
 
 def download_monomer_library(
-    version: str | None = None,
+    version: VersionHint | None = None,
     *,
     prefix: Sequence[str] | None = None,
     return_version: bool = False,
@@ -631,7 +646,7 @@ def download_monomer_library(
 
 
 def get_monomer_library_root(
-    version: str | None = None,
+    version: VersionHint | None = None,
     *,
     prefix: Sequence[str] | None = None,
 ) -> ElementTree.Element:
@@ -650,7 +665,7 @@ def get_monomer_library_root(
 
 @contextmanager
 def supplier(
-    version: str | None = None,
+    version: VersionHint | None = None,
     *,
     prefix: Sequence[str] | None = None,
     **kwargs: Any,
@@ -690,7 +705,7 @@ def supplier(
 
 
 def iterate_smiles(
-    version: str | None = None,
+    version: VersionHint | None = None,
     *,
     prefix: Sequence[str] | None = None,
     **kwargs: Any,
@@ -708,7 +723,7 @@ def iterate_smiles(
 
 
 def get_substructure_library(
-    version: str | None = None,
+    version: VersionHint | None = None,
     *,
     max_heavy: int = 75,
     prefix: Sequence[str] | None = None,
@@ -772,7 +787,7 @@ def get_substructure_library(
 # docstr-coverage:excused `overload`
 @overload
 def download_readme(
-    version: str | None = ...,
+    version: VersionHint | None = ...,
     *,
     prefix: Sequence[str] | None = ...,
     return_version: Literal[True] = ...,
@@ -782,7 +797,7 @@ def download_readme(
 # docstr-coverage:excused `overload`
 @overload
 def download_readme(
-    version: str | None = ...,
+    version: VersionHint | None = ...,
     *,
     prefix: Sequence[str] | None = ...,
     return_version: Literal[False] = ...,
@@ -790,7 +805,7 @@ def download_readme(
 
 
 def download_readme(
-    version: str | None = None,
+    version: VersionHint | None = None,
     *,
     prefix: Sequence[str] | None = None,
     return_version: bool = False,
@@ -833,7 +848,7 @@ def get_date(version: str, **kwargs: Any) -> str:
 # docstr-coverage:excused `overload`
 @overload
 def download_uniprot_mapping(
-    version: str | None = ...,
+    version: VersionHint | None = ...,
     *,
     prefix: Sequence[str] | None = ...,
     return_version: Literal[False] = ...,
@@ -843,7 +858,7 @@ def download_uniprot_mapping(
 # docstr-coverage:excused `overload`
 @overload
 def download_uniprot_mapping(
-    version: str | None = ...,
+    version: VersionHint | None = ...,
     *,
     prefix: Sequence[str] | None = ...,
     return_version: Literal[True] = ...,
@@ -851,7 +866,7 @@ def download_uniprot_mapping(
 
 
 def download_uniprot_mapping(
-    version: str | None = None,
+    version: VersionHint | None = None,
     *,
     prefix: Sequence[str] | None = None,
     return_version: bool = False,
@@ -877,7 +892,7 @@ def download_uniprot_mapping(
 
 
 def get_uniprot_mapping_df(
-    version: str | None = None,
+    version: VersionHint | None = None,
     *,
     prefix: Sequence[str] | None = None,
 ) -> pandas.DataFrame:
