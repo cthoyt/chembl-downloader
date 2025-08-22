@@ -142,19 +142,27 @@ def _download_helper(
         filename = f"chembl_{fmt_version}{suffix}"
     else:
         filename = suffix
+
+    if prefix is None:
+        prefix = PYSTOW_PARTS
+
+    module = pystow.module(*prefix, fmt_version)
+
     for url in [
         f"{base}/{filename}",
         f"{base}/archived/{filename}",
     ]:
         try:
-            path = pystow.ensure(*(prefix or PYSTOW_PARTS), fmt_version, url=url)
+            path = module.ensure(url=url)
         except OSError:
             continue
         if return_version:
             return VersionPathPair(version, path)
         else:
             return path
-    raise ValueError(f"could not find {filename} in data for ChEMBL {fmt_version} in {base}")
+    raise ValueError(
+        f"could not find {filename} in data for ChEMBL {fmt_version} in {base} with PyStow module at {module.base}"
+    )
 
 
 # docstr-coverage:excused `overload`
@@ -244,7 +252,9 @@ def download_extract_sqlite(
         directories
     """
     if version is not None:
-        _directory = pystow.join(*(prefix or PYSTOW_PARTS), version)
+        if prefix is None:
+            prefix = PYSTOW_PARTS
+        _directory = pystow.join(*prefix, version)
         if _directory.is_dir():
             rv = _find_sqlite_file(_directory)
             if rv:
