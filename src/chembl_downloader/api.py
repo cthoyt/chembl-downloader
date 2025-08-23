@@ -142,7 +142,7 @@ def _download_helper(
     else:
         filename = suffix
 
-    base = f"ftp://{_CHEMBL_HOST}/chembl_{version_info.fmt_version}"
+    base = f"https://{_CHEMBL_HOST}/chembl_{version_info.fmt_version}"
     urls = [
         f"{base}/{filename}",
         f"{base}/archived/{filename}",
