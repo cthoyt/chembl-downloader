@@ -12,8 +12,50 @@ from pystow.constants import PYSTOW_HOME_ENVVAR
 from pystow.utils import mock_envvar, open_tarfile
 
 import chembl_downloader
+from chembl_downloader.api import (
+    VersionHint,
+    _download_helper,
+    _ensure_version_helper,
+    _VersionFlavorsHelper,
+)
 
 TV = "26"
+
+
+class TestUtils(unittest.TestCase):
+    """Test utilities."""
+
+    def test_download_error(self) -> None:
+        """Test erroring on missing file."""
+        with self.assertRaises(ValueError):
+            _download_helper("missing.tsv.gz", return_version=False)
+
+    def test_clean_version(self) -> None:
+        """Test cleaning the version."""
+        with self.assertRaises(TypeError):
+            _ensure_version_helper(object())  # type:ignore
+
+        cases: list[tuple[VersionHint, _VersionFlavorsHelper]] = [
+            # single digit
+            ("1", _VersionFlavorsHelper("01", "1")),
+            ("01", _VersionFlavorsHelper("01", "1")),
+            (1, _VersionFlavorsHelper("01", "1")),
+            # double-digit
+            ("35", _VersionFlavorsHelper("35", "35")),
+            (35, _VersionFlavorsHelper("35", "35")),
+            # point
+            ("22.1", _VersionFlavorsHelper("22_1", "22.1")),
+            (22.1, _VersionFlavorsHelper("22_1", "22.1")),
+        ]
+        for input_version, expected in cases:
+            with self.subTest():
+                actual = _ensure_version_helper(input_version)
+                self.assertEqual(
+                    expected.fmt_version, actual.fmt_version, msg="incorrect format version"
+                )
+                self.assertEqual(
+                    expected.version, actual.version, msg="incorrect normalized version"
+                )
 
 
 class TestApi(unittest.TestCase):

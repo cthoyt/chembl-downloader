@@ -11,7 +11,7 @@ import tarfile
 from collections.abc import Generator, Iterable, Sequence
 from contextlib import closing, contextmanager
 from pathlib import Path
-from typing import TYPE_CHECKING, Any, Literal, NamedTuple, overload
+from typing import TYPE_CHECKING, Any, Literal, NamedTuple, TypeAlias, overload
 from xml.etree import ElementTree
 
 import pystow
@@ -27,6 +27,7 @@ if TYPE_CHECKING:
     from numpy.typing import NDArray
 
 __all__ = [
+    "VersionHint",
     "VersionPathPair",
     "chemfp_load_fps",
     "connect",
@@ -65,6 +66,9 @@ logger = logging.getLogger(__name__)
 PYSTOW_PARTS = ["chembl"]
 RELEASE_PREFIX = "* Release:"
 DATE_PREFIX = "* Date:"
+
+#: A hint for a version, which can either be an integer, string, or float (for minor versions)
+VersionHint: TypeAlias = str | int | float
 
 
 class VersionPathPair(NamedTuple):
@@ -107,9 +111,12 @@ def versions() -> list[str]:
     return sorted(version_list, reverse=True)
 
 
+_CHEMBL_HOST = "ftp.ebi.ac.uk/pub/databases/chembl/ChEMBLdb/releases"
+
+
 def _download_helper(
     suffix: str,
-    version: str | None = None,
+    version: VersionHint | None = None,
     prefix: Sequence[str] | None = None,
     *,
     return_version: bool,
@@ -131,46 +138,93 @@ def _download_helper(
 
     :raises ValueError: If file could not be downloaded
     """
-    if version is None:
-        version = latest()
+    version_info = _get_version_info(version, prefix=prefix)
 
-    # for versions 22.1 and 24.1, it's important to canonicalize the version number
-    # for versions < 10 it's important to left pad with a zero
-    fmt_version = version.replace(".", "_").zfill(2)
-
-    base = f"ftp://ftp.ebi.ac.uk/pub/databases/chembl/ChEMBLdb/releases/chembl_{fmt_version}"
     if filename_repeats_version:
-        filename = f"chembl_{fmt_version}{suffix}"
+        filename = f"chembl_{version_info.fmt_version}{suffix}"
     else:
         filename = suffix
 
-    if prefix is None:
-        prefix = PYSTOW_PARTS
-
-    module = pystow.module(*prefix, fmt_version)
-
-    for url in [
+    base = f"ftp://{_CHEMBL_HOST}/chembl_{version_info.fmt_version}"
+    urls = [
         f"{base}/{filename}",
         f"{base}/archived/{filename}",
-    ]:
+    ]
+    for url in urls:
         try:
-            path = module.ensure(url=url)
+            path = version_info.module.ensure(url=url)
         except OSError:
             continue
         if return_version:
-            return VersionPathPair(version, path)
+            return VersionPathPair(version_info.version, path)
         else:
             return path
-    raise ValueError(
-        f"could not find {filename} in data for ChEMBL {fmt_version} in {base} "
-        f"with PyStow module at {module.base}"
-    )
+
+    urls_fmt = "\n".join(f"   - {url}" for url in urls)
+    raise ValueError(f"""\
+
+[ChEMBL v{version_info.fmt_version}] could not ensure {filename}
+
+1. It wasn't already cached in the PyStow directory:
+   {version_info.module.base}
+
+2. It couldn't be downloaded from any of the following URLs:
+{urls_fmt}
+    """)
+
+
+class VersionInfo(NamedTuple):
+    """A pair of format version and regular version."""
+
+    fmt_version: str
+    version: str
+    module: pystow.Module
+
+
+def _get_version_info(version: VersionHint | None, prefix: Sequence[str] | None) -> VersionInfo:
+    flavor = _ensure_version_helper(version)
+    if prefix is None:
+        # it's important that this is a None check so it's possible
+        # to pass an empty list
+        prefix = PYSTOW_PARTS
+    module = pystow.module(*prefix, flavor.version)
+    return VersionInfo(flavor.fmt_version, flavor.version, module)
+
+
+class _VersionFlavorsHelper(NamedTuple):
+    """A pair of format version and regular version."""
+
+    fmt_version: str
+    version: str
+
+
+def _ensure_version_helper(version: VersionHint | None) -> _VersionFlavorsHelper:
+    if version is None:
+        version = latest()
+    if isinstance(version, int):
+        # versions 1-9 are left padded with a zero
+        fmt_version = f"{version:02}"
+        version = str(version)
+    elif isinstance(version, str):
+        # remove all leading zeros
+        version = version.lstrip("0")
+
+        # for versions 22.1 and 24.1, it's important to canonicalize the version number
+        # for versions < 10 it's important to left pad with a zero
+        fmt_version = version.replace(".", "_").zfill(2)
+    elif isinstance(version, float):
+        version = str(version)
+        fmt_version = version.replace(".", "_")
+    else:
+        raise TypeError(f"invalid type for version: {version}")
+
+    return _VersionFlavorsHelper(fmt_version, version)
 
 
 # docstr-coverage:excused `overload`
 @overload
 def download_sqlite(
-    version: str | None = ...,
+    version: VersionHint | None = ...,
     *,
     prefix: Sequence[str] | None = ...,
     return_version: Literal[True] = ...,
@@ -180,7 +234,7 @@ def download_sqlite(
 # docstr-coverage:excused `overload`
 @overload
 def download_sqlite(
-    version: str | None = ...,
+    version: VersionHint | None = ...,
     *,
     prefix: Sequence[str] | None = ...,
     return_version: Literal[False] = ...,
@@ -188,7 +242,7 @@ def download_sqlite(
 
 
 def download_sqlite(
-    version: str | None = None,
+    version: VersionHint | None = None,
     *,
     prefix: Sequence[str] | None = None,
     return_version: bool = False,
@@ -215,7 +269,7 @@ def download_sqlite(
 # docstr-coverage:excused `overload`
 @overload
 def download_extract_sqlite(
-    version: str | None = ...,
+    version: VersionHint | None = ...,
     *,
     prefix: Sequence[str] | None = ...,
     return_version: Literal[True] = ...,
@@ -225,7 +279,7 @@ def download_extract_sqlite(
 # docstr-coverage:excused `overload`
 @overload
 def download_extract_sqlite(
-    version: str | None = ...,
+    version: VersionHint | None = ...,
     *,
     prefix: Sequence[str] | None = ...,
     return_version: Literal[False] = ...,
@@ -233,7 +287,7 @@ def download_extract_sqlite(
 
 
 def download_extract_sqlite(
-    version: str | None = None,
+    version: VersionHint | None = None,
     *,
     prefix: Sequence[str] | None = None,
     return_version: bool = False,
@@ -254,14 +308,13 @@ def download_extract_sqlite(
         directories
     """
     if version is not None:
-        if prefix is None:
-            prefix = PYSTOW_PARTS
-        _directory = pystow.join(*prefix, version)
+        version_info = _get_version_info(version, prefix)
+        _directory = version_info.module.base
         if _directory.is_dir():
             rv = _find_sqlite_file(_directory)
             if rv:
                 if return_version:
-                    return VersionPathPair(version, rv)
+                    return VersionPathPair(version_info.version, rv)
                 return rv
 
     version, path = download_sqlite(version=version, prefix=prefix, return_version=True)
@@ -301,7 +354,7 @@ def _find_sqlite_file(directory: str | Path) -> Path | None:
 
 @contextmanager
 def connect(
-    version: str | None = None, *, prefix: Sequence[str] | None = None
+    version: VersionHint | None = None, *, prefix: Sequence[str] | None = None
 ) -> Generator[sqlite3.Connection, None, None]:
     """Ensure and connect to the database.
 
@@ -326,7 +379,7 @@ def connect(
 
 @contextmanager
 def cursor(
-    version: str | None = None, *, prefix: Sequence[str] | None = None
+    version: VersionHint | None = None, *, prefix: Sequence[str] | None = None
 ) -> Generator[sqlite3.Cursor]:
     """Ensure, connect, and get a cursor from the database to the database.
 
@@ -350,7 +403,7 @@ def cursor(
 
 def query(
     sql: str,
-    version: str | None = None,
+    version: VersionHint | None = None,
     *,
     prefix: Sequence[str] | None = None,
     **kwargs: Any,
@@ -381,7 +434,7 @@ def query(
 
 def query_scalar(
     sql: str,
-    version: str | None = None,
+    version: VersionHint | None = None,
     *,
     prefix: Sequence[str] | None = None,
     **kwargs: Any,
@@ -408,13 +461,13 @@ def query_scalar(
         count: int = chembl_downloader.query_one(sql)
     """
     df = query(sql, version=version, prefix=prefix, **kwargs)
-    return df[df.columns[0]][0]
+    return df[df.columns[0]][0].item()
 
 
 # docstr-coverage:excused `overload`
 @overload
 def download_fps(
-    version: str | None = ...,
+    version: VersionHint | None = ...,
     *,
     prefix: Sequence[str] | None = ...,
     return_version: Literal[True] = ...,
@@ -424,7 +477,7 @@ def download_fps(
 # docstr-coverage:excused `overload`
 @overload
 def download_fps(
-    version: str | None = ...,
+    version: VersionHint | None = ...,
     *,
     prefix: Sequence[str] | None = ...,
     return_version: Literal[False] = ...,
@@ -432,7 +485,7 @@ def download_fps(
 
 
 def download_fps(
-    version: str | None = None,
+    version: VersionHint | None = None,
     *,
     prefix: Sequence[str] | None = None,
     return_version: bool = False,
@@ -456,7 +509,7 @@ def download_fps(
 
 
 def chemfp_load_fps(
-    version: str | None = None, *, prefix: Sequence[str] | None = None, **kwargs: Any
+    version: VersionHint | None = None, *, prefix: Sequence[str] | None = None, **kwargs: Any
 ) -> chemfp.arena.FingerprintArena:
     """Download and open the ChEMBL fingerprints via :func:`chemfp.load_fingerprints`.
 
@@ -475,7 +528,7 @@ def chemfp_load_fps(
 
 
 def iterate_fps(
-    version: str | None = None,
+    version: VersionHint | None = None,
     *,
     prefix: Sequence[str] | None = None,
     identifier_format: Literal["local", "curie"] = "local",
@@ -516,7 +569,7 @@ def iterate_fps(
 # docstr-coverage:excused `overload`
 @overload
 def download_chemreps(
-    version: str | None = ...,
+    version: VersionHint | None = ...,
     *,
     prefix: Sequence[str] | None = ...,
     return_version: Literal[True] = True,
@@ -526,7 +579,7 @@ def download_chemreps(
 # docstr-coverage:excused `overload`
 @overload
 def download_chemreps(
-    version: str | None = ...,
+    version: VersionHint | None = ...,
     *,
     prefix: Sequence[str] | None = ...,
     return_version: Literal[False] = False,
@@ -534,7 +587,7 @@ def download_chemreps(
 
 
 def download_chemreps(
-    version: str | None = None,
+    version: VersionHint | None = None,
     *,
     prefix: Sequence[str] | None = None,
     return_version: bool = False,
@@ -569,7 +622,7 @@ def download_chemreps(
 
 
 def get_chemreps_df(
-    version: str | None = None, *, prefix: Sequence[str] | None = None
+    version: VersionHint | None = None, *, prefix: Sequence[str] | None = None
 ) -> pandas.DataFrame:
     """Download and parse the latest ChEMBL chemical representations file.
 
@@ -590,7 +643,7 @@ def get_chemreps_df(
 # docstr-coverage:excused `overload`
 @overload
 def download_sdf(
-    version: str | None = ...,
+    version: VersionHint | None = ...,
     *,
     prefix: Sequence[str] | None = ...,
     return_version: Literal[True] = ...,
@@ -600,7 +653,7 @@ def download_sdf(
 # docstr-coverage:excused `overload`
 @overload
 def download_sdf(
-    version: str | None = ...,
+    version: VersionHint | None = ...,
     *,
     prefix: Sequence[str] | None = ...,
     return_version: Literal[False] = ...,
@@ -608,7 +661,7 @@ def download_sdf(
 
 
 def download_sdf(
-    version: str | None = None,
+    version: VersionHint | None = None,
     *,
     prefix: Sequence[str] | None = None,
     return_version: bool = False,
@@ -632,7 +685,7 @@ def download_sdf(
 # docstr-coverage:excused `overload`
 @overload
 def download_monomer_library(
-    version: str | None = ...,
+    version: VersionHint | None = ...,
     *,
     prefix: Sequence[str] | None = ...,
     return_version: Literal[True] = ...,
@@ -642,7 +695,7 @@ def download_monomer_library(
 # docstr-coverage:excused `overload`
 @overload
 def download_monomer_library(
-    version: str | None = ...,
+    version: VersionHint | None = ...,
     *,
     prefix: Sequence[str] | None = ...,
     return_version: Literal[False] = ...,
@@ -650,7 +703,7 @@ def download_monomer_library(
 
 
 def download_monomer_library(
-    version: str | None = None,
+    version: VersionHint | None = None,
     *,
     prefix: Sequence[str] | None = None,
     return_version: bool = False,
@@ -676,7 +729,7 @@ def download_monomer_library(
 
 
 def get_monomer_library_root(
-    version: str | None = None,
+    version: VersionHint | None = None,
     *,
     prefix: Sequence[str] | None = None,
 ) -> ElementTree.Element:
@@ -695,7 +748,7 @@ def get_monomer_library_root(
 
 @contextmanager
 def supplier(
-    version: str | None = None,
+    version: VersionHint | None = None,
     *,
     prefix: Sequence[str] | None = None,
     **kwargs: Any,
@@ -735,7 +788,7 @@ def supplier(
 
 
 def iterate_smiles(
-    version: str | None = None,
+    version: VersionHint | None = None,
     *,
     prefix: Sequence[str] | None = None,
     **kwargs: Any,
@@ -753,7 +806,7 @@ def iterate_smiles(
 
 
 def get_substructure_library(
-    version: str | None = None,
+    version: VersionHint | None = None,
     *,
     max_heavy: int = 75,
     prefix: Sequence[str] | None = None,
@@ -784,10 +837,9 @@ def get_substructure_library(
         TautomerPatternHolder,
     )
 
-    if version is None:
-        version = latest()
+    version_info = _get_version_info(version, prefix)
 
-    path = pystow.join(*(prefix or PYSTOW_PARTS), version, name="ssslib.pkl")
+    path = version_info.module.join(name="ssslib.pkl")
     if path.is_file():
         logger.info("loading substructure library from pickle: %s", path)
         with path.open("rb") as file:
@@ -797,7 +849,7 @@ def get_substructure_library(
     tautomer_pattern_holder = TautomerPatternHolder()
     key_from_prop_holder = KeyFromPropHolder()
     library = SubstructLibrary(molecule_holder, tautomer_pattern_holder, key_from_prop_holder)
-    with supplier(version=version, prefix=prefix, **kwargs) as suppl:
+    with supplier(version=version_info.version, prefix=prefix, **kwargs) as suppl:
         for mol in tqdm(
             suppl,
             unit="molecule",
@@ -817,7 +869,7 @@ def get_substructure_library(
 # docstr-coverage:excused `overload`
 @overload
 def download_readme(
-    version: str | None = ...,
+    version: VersionHint | None = ...,
     *,
     prefix: Sequence[str] | None = ...,
     return_version: Literal[True] = ...,
@@ -827,7 +879,7 @@ def download_readme(
 # docstr-coverage:excused `overload`
 @overload
 def download_readme(
-    version: str | None = ...,
+    version: VersionHint | None = ...,
     *,
     prefix: Sequence[str] | None = ...,
     return_version: Literal[False] = ...,
@@ -835,7 +887,7 @@ def download_readme(
 
 
 def download_readme(
-    version: str | None = None,
+    version: VersionHint | None = None,
     *,
     prefix: Sequence[str] | None = None,
     return_version: bool = False,
@@ -878,7 +930,7 @@ def get_date(version: str, **kwargs: Any) -> str:
 # docstr-coverage:excused `overload`
 @overload
 def download_uniprot_mapping(
-    version: str | None = ...,
+    version: VersionHint | None = ...,
     *,
     prefix: Sequence[str] | None = ...,
     return_version: Literal[False] = ...,
@@ -888,7 +940,7 @@ def download_uniprot_mapping(
 # docstr-coverage:excused `overload`
 @overload
 def download_uniprot_mapping(
-    version: str | None = ...,
+    version: VersionHint | None = ...,
     *,
     prefix: Sequence[str] | None = ...,
     return_version: Literal[True] = ...,
@@ -896,7 +948,7 @@ def download_uniprot_mapping(
 
 
 def download_uniprot_mapping(
-    version: str | None = None,
+    version: VersionHint | None = None,
     *,
     prefix: Sequence[str] | None = None,
     return_version: bool = False,
@@ -922,7 +974,7 @@ def download_uniprot_mapping(
 
 
 def get_uniprot_mapping_df(
-    version: str | None = None,
+    version: VersionHint | None = None,
     *,
     prefix: Sequence[str] | None = None,
 ) -> pandas.DataFrame:
