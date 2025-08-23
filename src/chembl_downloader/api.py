@@ -133,14 +133,13 @@ def _download_helper(
 
     :raises ValueError: If file could not be downloaded
     """
-    if version is None:
-        version = latest()
+    flavors = _clean_ensure_version(version, prefix)
 
-    fmt_version, version = _clean_version(version)
-
-    base = f"ftp://ftp.ebi.ac.uk/pub/databases/chembl/ChEMBLdb/releases/chembl_{fmt_version}"
+    base = (
+        f"ftp://ftp.ebi.ac.uk/pub/databases/chembl/ChEMBLdb/releases/chembl_{flavors.fmt_version}"
+    )
     if filename_repeats_version:
-        filename = f"chembl_{fmt_version}{suffix}"
+        filename = f"chembl_{flavors.fmt_version}{suffix}"
     else:
         filename = suffix
     for url in [
@@ -148,14 +147,16 @@ def _download_helper(
         f"{base}/archived/{filename}",
     ]:
         try:
-            path = pystow.ensure(*(prefix or PYSTOW_PARTS), fmt_version, url=url)
+            path = flavors.module.ensure(url=url)
         except OSError:
             continue
         if return_version:
             return VersionPathPair(version, path)
         else:
             return path
-    raise ValueError(f"could not find {filename} in data for ChEMBL {fmt_version} in {base}")
+    raise ValueError(
+        f"could not find {filename} in data for ChEMBL {flavors.fmt_version} in {base}"
+    )
 
 
 class VersionFlavors(NamedTuple):
@@ -165,16 +166,36 @@ class VersionFlavors(NamedTuple):
     version: str
 
 
-def _clean_version(version: VersionHint) -> VersionFlavors:
+class VersionFlavors2(NamedTuple):
+    """A pair of format version and regular version."""
+
+    fmt_version: str
+    version: str
+    module: pystow.Module
+
+
+def _clean_ensure_version(version: VersionHint | None) -> VersionFlavors:
     if isinstance(version, int):
         # versions 1-9 are left padded with a zero
-        version = f"{version:02}"
+        fmt_version = f"{version:02}"
+        version = str(version)
+    else:
+        if version is None:
+            version = latest()
 
-    # for versions 22.1 and 24.1, it's important to canonicalize the version number
-    # for versions < 10 it's important to left pad with a zero
-    fmt_version = version.replace(".", "_").zfill(2)
+        # for versions 22.1 and 24.1, it's important to canonicalize the version number
+        # for versions < 10 it's important to left pad with a zero
+        fmt_version = version.replace(".", "_").zfill(2)
 
     return VersionFlavors(fmt_version, version)
+
+
+def _clean_ensure_version_2(
+    version: VersionHint | None, prefix: Sequence[str] | None
+) -> VersionFlavors2:
+    flavor = _clean_ensure_version(version)
+    module = pystow.ensure(*(prefix or PYSTOW_PARTS), flavor.version)
+    return VersionFlavors2(flavor.fmt_version, flavor.version, module)
 
 
 # docstr-coverage:excused `overload`
@@ -264,7 +285,7 @@ def download_extract_sqlite(
         directories
     """
     if version is not None:
-        version = _clean_version(version).version
+        version = _clean_ensure_version(version).version
         _directory = pystow.join(*(prefix or PYSTOW_PARTS), version)
         if _directory.is_dir():
             rv = _find_sqlite_file(_directory)
@@ -761,12 +782,9 @@ def get_substructure_library(
         TautomerPatternHolder,
     )
 
-    if version is None:
-        version = latest()
+    flavors = _clean_ensure_version(version, prefix)
 
-    version = _clean_version(version).version
-
-    path = pystow.join(*(prefix or PYSTOW_PARTS), version, name="ssslib.pkl")
+    path = flavors.module.join(name="ssslib.pkl")
     if path.is_file():
         logger.info("loading substructure library from pickle: %s", path)
         with path.open("rb") as file:
@@ -776,7 +794,7 @@ def get_substructure_library(
     tautomer_pattern_holder = TautomerPatternHolder()
     key_from_prop_holder = KeyFromPropHolder()
     library = SubstructLibrary(molecule_holder, tautomer_pattern_holder, key_from_prop_holder)
-    with supplier(version=version, prefix=prefix, **kwargs) as suppl:
+    with supplier(version=flavors.version, prefix=prefix, **kwargs) as suppl:
         for mol in tqdm(
             suppl,
             unit="molecule",

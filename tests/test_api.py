@@ -4,7 +4,7 @@ import unittest
 from textwrap import dedent
 
 import chembl_downloader
-from chembl_downloader.api import VersionFlavors, VersionHint, _clean_version
+from chembl_downloader.api import VersionFlavors, VersionHint, _clean_ensure_version
 
 
 class TestApi(unittest.TestCase):
@@ -22,11 +22,15 @@ class TestApi(unittest.TestCase):
             # point
             ("22.1", VersionFlavors("22_1", "22.1")),
         ]
-        for input_version, (expected_version, expected_fmt_version) in cases:
+        for input_version, expected in cases:
             with self.subTest():
-                fmt_version, version = _clean_version(input_version)
-                self.assertEqual(expected_fmt_version, fmt_version, msg="incorrect format version")
-                self.assertEqual(expected_version, version, msg="incorrect normalized version")
+                actual = _clean_ensure_version(input_version)
+                self.assertEqual(
+                    expected.fmt_version, actual.fmt_version, msg="incorrect format version"
+                )
+                self.assertEqual(
+                    expected.version, actual.version, msg="incorrect normalized version"
+                )
 
     def test_latest_version(self) -> None:
         """Test getting the latest version."""
