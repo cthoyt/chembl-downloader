@@ -54,7 +54,7 @@ __all__ = [
     "iterate_smiles",
     "latest",
     "query",
-    "query_one",
+    "query_scalar",
     "supplier",
     "versions",
 ]
@@ -378,7 +378,7 @@ def query(
         return pd.read_sql(sql, con=con, **kwargs)
 
 
-def query_one(
+def query_scalar(
     sql: str,
     version: str | None = None,
     *,

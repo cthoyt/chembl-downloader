@@ -11,7 +11,7 @@ from .api import (
     get_date,
     get_substructure_library,
     query,
-    query_one,
+    query_scalar,
     versions,
 )
 from .queries import ACTIVITIES_QUERY, ID_NAME_QUERY
@@ -42,7 +42,7 @@ def download(version: str | None) -> None:
 def test(version: str | None) -> None:
     """Run test queries."""
     click.secho("\n\nNumber of Activities\n", fg="green")
-    count = query_one("SELECT COUNT(activity_id) FROM activities", version=version)
+    count = query_scalar("SELECT COUNT(activity_id) FROM activities", version=version)
     click.echo(f"{count:,}\n")
 
     click.secho("ID to Name Query\n", fg="green")
@@ -88,7 +88,7 @@ def _count_compounds(version: str) -> str:
     from .queries import COUNT_QUERY_SQL
 
     try:
-        total_compounds = query_one(COUNT_QUERY_SQL, version=version)
+        total_compounds = query_scalar(COUNT_QUERY_SQL, version=version)
     except Exception:
         return "-"
     return f"{total_compounds:,}"

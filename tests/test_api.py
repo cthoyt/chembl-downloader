@@ -47,12 +47,12 @@ class TestApi(unittest.TestCase):
         """Tear down the test case."""
         self.directory_obj.cleanup()
 
-    def test_query_one(self) -> None:
+    def test_query_scalar(self) -> None:
         """Test querying."""
         with mock_envvar(PYSTOW_HOME_ENVVAR, self.directory.as_posix()):
             self.assertEqual(
                 3,
-                chembl_downloader.query_one(
+                chembl_downloader.query_scalar(
                     "SELECT COUNT(activity_id) FROM activities",
                     prefix=[],
                     version=TV,
