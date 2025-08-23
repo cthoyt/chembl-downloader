@@ -58,6 +58,7 @@ __all__ = [
     "latest",
     "query",
     "query_scalar",
+    "summarize",
     "supplier",
     "versions",
 ]

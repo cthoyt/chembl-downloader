@@ -24,6 +24,7 @@ from .api import (
     latest,
     query,
     query_scalar,
+    summarize,
     supplier,
     versions,
 )
@@ -52,6 +53,7 @@ __all__ = [
     "queries",
     "query",
     "query_scalar",
+    "summarize",
     "supplier",
     "versions",
 ]
