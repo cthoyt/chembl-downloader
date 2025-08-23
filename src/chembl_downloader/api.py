@@ -1036,8 +1036,19 @@ def summarize(
     return SummaryTuple(
         version=version_info.version,
         date=get_date(version=version_info),
-        compounds=cast(int, query_scalar(queries.COUNT_COMPOUNDS_SQL, version=version)),
-        assays=cast(int, query_scalar(queries.COUNT_ASSAYS_SQL, version=version)),
-        activities=cast(int, query_scalar(queries.COUNT_ACTIVITIES_SQL, version=version)),
-        named_compounds=cast(int, query_scalar(queries.COUNT_NAMED_COMPOUNDS_SQL, version=version)),
+        compounds=_count(queries.COUNT_COMPOUNDS_SQL, version_info=version_info),
+        assays=_count(queries.COUNT_ASSAYS_SQL, version_info=version_info),
+        activities=_count(queries.COUNT_ACTIVITIES_SQL, version_info=version_info),
+        named_compounds=_count(queries.COUNT_NAMED_COMPOUNDS_SQL, version_info=version_info),
     )
+
+
+def _count(sql: str, version_info: VersionInfo) -> int:
+    import pandas.errors
+
+    try:
+        rv = query_scalar(sql, version=version_info)
+    except pandas.errors.DatabaseError:
+        return 0
+    else:
+        return cast(int, rv)

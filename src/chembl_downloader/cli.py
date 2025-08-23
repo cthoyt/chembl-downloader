@@ -92,7 +92,6 @@ def history() -> None:
         sys.exit(1)
 
     versions_: list[VersionHint] = list(versions())
-    versions_ = [1, 22.1, 35]
     rows = [summarize(version) for version in tqdm(versions_)]
     columns = SummaryTuple._fields
 
