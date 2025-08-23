@@ -47,12 +47,12 @@ def download(version: str | None) -> None:
 @verbose_option  # type:ignore
 def test(version: str | None) -> None:
     """Run test queries."""
-    click.secho("Number of Compounds", fg="green")
-    count = query_scalar(COUNT_COMPOUNDS_SQL, version=version)
+    click.secho("Number of Activities", fg="green")
+    count = query_scalar(COUNT_ACTIVITIES_SQL, version=version)
     click.echo(f"{count:,}")
 
-    click.secho("\nNumber of Activities", fg="green")
-    count = query_scalar(COUNT_ACTIVITIES_SQL, version=version)
+    click.secho("\nNumber of Compounds", fg="green")
+    count = query_scalar(COUNT_COMPOUNDS_SQL, version=version)
     click.echo(f"{count:,}")
 
     click.secho("\nNumber of Assays", fg="green")

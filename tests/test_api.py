@@ -22,15 +22,20 @@ class TestUtils(unittest.TestCase):
 
     def test_clean_version(self) -> None:
         """Test cleaning the version."""
+        with self.assertRaises(TypeError):
+            _ensure_version_helper(object())  # type:ignore
+
         cases: list[tuple[VersionHint, _VersionFlavorsHelper]] = [
             # single digit
             ("1", _VersionFlavorsHelper("01", "1")),
+            ("01", _VersionFlavorsHelper("01", "1")),
             (1, _VersionFlavorsHelper("01", "1")),
             # double-digit
             ("35", _VersionFlavorsHelper("35", "35")),
             (35, _VersionFlavorsHelper("35", "35")),
             # point
             ("22.1", _VersionFlavorsHelper("22_1", "22.1")),
+            (22.1, _VersionFlavorsHelper("22_1", "22.1")),
         ]
         for input_version, expected in cases:
             with self.subTest():

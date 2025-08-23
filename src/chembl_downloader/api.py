@@ -68,8 +68,8 @@ PYSTOW_PARTS = ["chembl"]
 RELEASE_PREFIX = "* Release:"
 DATE_PREFIX = "* Date:"
 
-#: A hint for a version, which can either be an integer or string
-VersionHint: TypeAlias = str | int
+#: A hint for a version, which can either be an integer, string, or float (for minor versions)
+VersionHint: TypeAlias = str | int | float
 
 
 class VersionPathPair(NamedTuple):
@@ -187,13 +187,18 @@ def _ensure_version_helper(version: VersionHint | None) -> _VersionFlavorsHelper
         # versions 1-9 are left padded with a zero
         fmt_version = f"{version:02}"
         version = str(version)
-    else:
+    elif isinstance(version, str):
         if version is None:
             version = latest()
 
         # for versions 22.1 and 24.1, it's important to canonicalize the version number
         # for versions < 10 it's important to left pad with a zero
         fmt_version = version.replace(".", "_").zfill(2)
+    elif isinstance(version, float):
+        version = str(version)
+        fmt_version = version.replace(".", "_")
+    else:
+        raise TypeError(f"invalid type for version: {version}")
 
     return _VersionFlavorsHelper(fmt_version, version)
 
