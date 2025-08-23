@@ -8,7 +8,6 @@ from tqdm import tqdm
 
 from .api import (
     SummaryTuple,
-    VersionInfo,
     _get_version_info,
     download_extract_sqlite,
     download_readme,
@@ -96,7 +95,7 @@ def history(delete_old: bool) -> None:
         sys.exit(1)
 
     latest_version_info = latest(full=True)
-    versions_: list[str] = versions()
+    versions_: list[str] = versions(full=False)
 
     output_path = pystow.join("chembl", name="summary.tsv")
     columns = SummaryTuple._fields
@@ -106,7 +105,7 @@ def history(delete_old: bool) -> None:
 
         rows.append(summarize(version_info))
         if delete_old and version_info.version != latest_version_info.version:
-            tqdm.write(f"[v{version_info}] cleaning up")
+            tqdm.write(f"[v{version_info.version}] cleaning up")
 
             download_readme(version=version_info, return_version=False).unlink()
             db_path = download_extract_sqlite(version=version_info, return_version=False)
