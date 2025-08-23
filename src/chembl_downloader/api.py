@@ -270,6 +270,7 @@ def download_extract_sqlite(
     *,
     prefix: Sequence[str] | None = ...,
     return_version: Literal[True] = ...,
+    retain: bool = ...,
 ) -> VersionPathPair: ...
 
 
@@ -280,6 +281,7 @@ def download_extract_sqlite(
     *,
     prefix: Sequence[str] | None = ...,
     return_version: Literal[False] = ...,
+    retain: bool = ...,
 ) -> Path: ...
 
 
@@ -328,7 +330,7 @@ def download_extract_sqlite(
             tar_path.unlink()
 
     if return_version:
-        return VersionPathPair(version, rv)
+        return VersionPathPair(version_info.version, rv)
     else:
         return rv
 
