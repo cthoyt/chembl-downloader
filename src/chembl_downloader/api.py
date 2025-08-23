@@ -161,7 +161,8 @@ def _download_helper(
         else:
             return path
     raise ValueError(
-        f"could not find {filename} in data for ChEMBL {fmt_version} in {base} with PyStow module at {module.base}"
+        f"could not find {filename} in data for ChEMBL {fmt_version} in {base} "
+        f"with PyStow module at {module.base}"
     )
 
 
