@@ -78,12 +78,6 @@ class VersionPathPair(NamedTuple):
     path: Path
 
 
-def _removeprefix(s: str, prefix: str) -> str:
-    if s.startswith(prefix):
-        return s[len(prefix) :]
-    return s
-
-
 LATEST_README_URL = "https://ftp.ebi.ac.uk/pub/databases/chembl/ChEMBLdb/latest/README"
 
 
@@ -99,7 +93,10 @@ def latest() -> str:
     for line in res.iter_lines(decode_unicode=True):
         line = line.decode("utf8")
         if line.startswith(RELEASE_PREFIX):
-            return _removeprefix(_removeprefix(line, RELEASE_PREFIX).strip(), "chembl_")
+            line = line.removeprefix(RELEASE_PREFIX)
+            line = line.strip()
+            line = line.removeprefix("chembl_")
+            return line
     raise ValueError("could not find latest ChEMBL version")
 
 
@@ -912,14 +909,13 @@ def download_readme(
     )
 
 
-def get_date(version: str, **kwargs: Any) -> str:
+def get_date(version: VersionHint | None = None, **kwargs: Any) -> str:
     """Get the date of a given version."""
     path = download_readme(version=version, return_version=False, **kwargs)
     try:
-        date_p = _removeprefix(
-            next(line for line in path.read_text().splitlines() if line.startswith("* Date:")),
-            DATE_PREFIX,
-        ).lstrip()
+        date_p = next(line for line in path.read_text().splitlines() if line.startswith(DATE_PREFIX))
+        date_p = date_p.removeprefix(DATE_PREFIX)
+        date_p = date_p.lstrip()
     except StopIteration:
         return ""  # happens on 22.1 and 24.1
     else:

@@ -108,6 +108,10 @@ class TestApi(unittest.TestCase):
                 cursor.execute("SELECT COUNT(activity_id) FROM activities")
                 self.assertEqual(3, cursor.fetchone()[0])
 
+    def test_get_date(self) -> None:
+        """Test getting the date."""
+        self.assertEqual("2024-12-01", chembl_downloader.get_date(version="35"))
+
     def test_latest_version(self) -> None:
         """Test getting the latest version."""
         latest_version = chembl_downloader.latest()
