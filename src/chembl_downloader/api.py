@@ -204,7 +204,7 @@ class _VersionFlavorsHelper(NamedTuple):
 def _ensure_version_helper(version: VersionHint | None) -> _VersionFlavorsHelper:
     if version is None:
         version = latest()
-    elif isinstance(version, int):
+    if isinstance(version, int):
         # versions 1-9 are left padded with a zero
         fmt_version = f"{version:02}"
         version = str(version)
