@@ -1054,8 +1054,5 @@ def _count(sql: str, version_info: VersionInfo) -> int:
         return cast(int, rv)
 
 
-def delete(
-    version: VersionHint | None = None, *, prefix: Sequence[str] | None = None
-) -> None:
-    version_info = _get_version_info(version, prefix)
-    print(f'deleting {version_info.module.base}')
+def delete(version: VersionHint | None = None, *, prefix: Sequence[str] | None = None) -> None:
+    _get_version_info(version, prefix)
