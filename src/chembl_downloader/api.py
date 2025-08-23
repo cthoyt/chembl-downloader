@@ -143,10 +143,11 @@ def _download_helper(
     else:
         filename = suffix
 
-    for url in [
+    urls = [
         f"{base}/{filename}",
         f"{base}/archived/{filename}",
-    ]:
+    ]
+    for url in urls:
         try:
             path = version_info.module.ensure(url=url)
         except OSError:
@@ -156,8 +157,9 @@ def _download_helper(
         else:
             return path
     raise ValueError(
-        f"could not find {filename} in data for ChEMBL {version_info.fmt_version} in {base} "
-        f"with PyStow module at {version_info.module.base}"
+        f"[{version_info.fmt_version}] could not find {filename} at any of the following URLs:"
+        f"\n\n{urls}"
+        f"\busing PyStow module at {version_info.module.base}"
     )
 
 
@@ -183,14 +185,13 @@ class _VersionFlavorsHelper(NamedTuple):
 
 
 def _ensure_version_helper(version: VersionHint | None) -> _VersionFlavorsHelper:
+    if version is None:
+        version = latest()
     if isinstance(version, int):
         # versions 1-9 are left padded with a zero
         fmt_version = f"{version:02}"
         version = str(version)
     elif isinstance(version, str):
-        if version is None:
-            version = latest()
-
         # remove all leading zeros
         version = version.lstrip("0")
 

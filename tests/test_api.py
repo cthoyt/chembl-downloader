@@ -12,13 +12,23 @@ from pystow.constants import PYSTOW_HOME_ENVVAR
 from pystow.utils import mock_envvar, open_tarfile
 
 import chembl_downloader
-from chembl_downloader.api import VersionHint, _ensure_version_helper, _VersionFlavorsHelper
+from chembl_downloader.api import (
+    VersionHint,
+    _download_helper,
+    _ensure_version_helper,
+    _VersionFlavorsHelper,
+)
 
 TV = "26"
 
 
 class TestUtils(unittest.TestCase):
     """Test utilities."""
+
+    def test_download_error(self) -> None:
+        """Test erroring on missing file."""
+        with self.assertRaises(ValueError):
+            _download_helper("missing.tsv.gz", return_version=False)
 
     def test_clean_version(self) -> None:
         """Test cleaning the version."""
