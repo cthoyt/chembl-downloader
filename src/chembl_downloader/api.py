@@ -1057,7 +1057,3 @@ def _count(sql: str, version_info: VersionInfo) -> int:
         return 0
     else:
         return cast(int, rv)
-
-
-def delete(version: VersionHint | None = None, *, prefix: Sequence[str] | None = None) -> None:
-    _get_version_info(version, prefix)

@@ -9,8 +9,8 @@ from tqdm import tqdm
 from .api import (
     SummaryTuple,
     VersionHint,
-    delete,
     download_extract_sqlite,
+    download_readme,
     get_substructure_library,
     latest,
     query,
@@ -96,12 +96,20 @@ def history(delete_old: bool) -> None:
 
     latest_ = latest()
     versions_: list[VersionHint] = list(versions())
-    versions_ = [1, 3, 6, 10, 19, 20, 22.1, 35]
     rows = []
     for version in tqdm(versions_):
         rows.append(summarize(version))
         if delete_old and version != latest_:
-            delete(version)
+            tqdm.write(f"[v{version}] cleaning up")
+
+            download_readme(version=version, return_version=False).unlink()
+            db_path = download_extract_sqlite(version=version, return_version=False)
+            db_path.unlink()
+
+            # if the parent directory is empty, remove it too
+            version_directory = db_path.parent
+            if not any(version_directory.iterdir()):
+                version_directory.rmdir()
 
     columns = SummaryTuple._fields
 
