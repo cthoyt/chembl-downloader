@@ -25,6 +25,7 @@ if TYPE_CHECKING:
     import pandas
     import rdkit.Chem
     import rdkit.Chem.rdSubstructLibrary
+    from numpy.typing import NDArray
 
 __all__ = [
     "VersionPathPair",
@@ -478,7 +479,7 @@ def iterate_fps(
     *,
     prefix: Sequence[str] | None = None,
     identifier_format: Literal["local", "curie"] = "local",
-) -> Iterable[tuple[str, numpy.ndarray]]:
+) -> Iterable[tuple[str, NDArray[numpy.uint8]]]:
     """Download and open the ChEMBL fingerprints via RDKit/Numpy.
 
     :param version: The version number of ChEMBL to get. If none specified, uses
