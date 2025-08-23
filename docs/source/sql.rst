@@ -89,3 +89,17 @@ any downstream use.
     configurations. One of the powerful but understated tools in RDKit is the
     [rdkit.Chem.PandasTools](https://rdkit.org/docs/source/rdkit.Chem.PandasTools.html)
     module.
+
+Querying for a Scalar
+---------------------
+
+For SQL queries that return a scalar result, you can use
+:func:`chembl_downloader.query_scalar`. In the following example, this gets a summary
+count over the number of activities in the database.
+
+.. code-block:: python
+
+    import chembl_downloader
+
+    sql = "SELECT COUNT(activity_id) FROM activities"
+    count: int = chembl_downloader.query_scalar(sql)
