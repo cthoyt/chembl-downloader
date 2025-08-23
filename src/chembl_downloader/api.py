@@ -191,6 +191,9 @@ def _ensure_version_helper(version: VersionHint | None) -> _VersionFlavorsHelper
         if version is None:
             version = latest()
 
+        # remove all leading zeros
+        version = version.lstrip("0")
+
         # for versions 22.1 and 24.1, it's important to canonicalize the version number
         # for versions < 10 it's important to left pad with a zero
         fmt_version = version.replace(".", "_").zfill(2)
