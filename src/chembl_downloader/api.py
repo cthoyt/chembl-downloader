@@ -135,13 +135,11 @@ def _download_helper(
 
     :raises ValueError: If file could not be downloaded
     """
-    flavors = _get_version_info(version, prefix=prefix)
+    version_info = _get_version_info(version, prefix=prefix)
 
-    base = (
-        f"ftp://ftp.ebi.ac.uk/pub/databases/chembl/ChEMBLdb/releases/chembl_{flavors.fmt_version}"
-    )
+    base = f"ftp://ftp.ebi.ac.uk/pub/databases/chembl/ChEMBLdb/releases/chembl_{version_info.fmt_version}"
     if filename_repeats_version:
-        filename = f"chembl_{flavors.fmt_version}{suffix}"
+        filename = f"chembl_{version_info.fmt_version}{suffix}"
     else:
         filename = suffix
 
@@ -150,16 +148,16 @@ def _download_helper(
         f"{base}/archived/{filename}",
     ]:
         try:
-            path = flavors.module.ensure(url=url)
+            path = version_info.module.ensure(url=url)
         except OSError:
             continue
         if return_version:
-            return VersionPathPair(flavors.version, path)
+            return VersionPathPair(version_info.version, path)
         else:
             return path
     raise ValueError(
-        f"could not find {filename} in data for ChEMBL {flavors.fmt_version} in {base} "
-        f"with PyStow module at {flavors.module.base}"
+        f"could not find {filename} in data for ChEMBL {version_info.fmt_version} in {base} "
+        f"with PyStow module at {version_info.module.base}"
     )
 
 
