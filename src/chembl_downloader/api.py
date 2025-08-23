@@ -180,7 +180,7 @@ def _download_helper(
 
 
 def _get_version_info(version: VersionHint | None, prefix: Sequence[str] | None) -> VersionInfo:
-    if isinstance(version, VersionHint):
+    if isinstance(version, VersionInfo):
         return version
 
     flavor = _ensure_version_helper(version)
