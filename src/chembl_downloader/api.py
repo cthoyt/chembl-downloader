@@ -13,7 +13,6 @@ import tarfile
 from collections.abc import Generator, Iterable, Sequence
 from contextlib import closing, contextmanager
 from pathlib import Path
-from textwrap import dedent
 from typing import TYPE_CHECKING, Any, Literal, NamedTuple, TypeAlias, overload
 from xml.etree import ElementTree
 
@@ -111,7 +110,9 @@ def versions() -> list[str]:
     version_list.extend(["22_1", "24_1"])
     return sorted(version_list, reverse=True)
 
+
 _CHEMBL_HOST = "ftp.ebi.ac.uk/pub/databases/chembl/ChEMBLdb/releases"
+
 
 def _download_helper(
     suffix: str,
