@@ -111,6 +111,7 @@ def versions() -> list[str]:
     version_list.extend(["22_1", "24_1"])
     return sorted(version_list, reverse=True)
 
+_CHEMBL_HOST = "ftp.ebi.ac.uk/pub/databases/chembl/ChEMBLdb/releases"
 
 def _download_helper(
     suffix: str,
@@ -138,12 +139,12 @@ def _download_helper(
     """
     version_info = _get_version_info(version, prefix=prefix)
 
-    base = f"ftp://ftp.ebi.ac.uk/pub/databases/chembl/ChEMBLdb/releases/chembl_{version_info.fmt_version}"
     if filename_repeats_version:
         filename = f"chembl_{version_info.fmt_version}{suffix}"
     else:
         filename = suffix
 
+    base = f"ftp://{_CHEMBL_HOST}/chembl_{version_info.fmt_version}"
     urls = [
         f"{base}/{filename}",
         f"{base}/archived/{filename}",
@@ -158,15 +159,17 @@ def _download_helper(
         else:
             return path
 
-    urls_fmt = "\n".join(f"- {url}" for url in urls)
-    raise ValueError(
-        dedent(f"""\
-        [ChEMBL v{version_info.fmt_version}] could not ensure {filename}
+    urls_fmt = "\n".join(f"   - {url}" for url in urls)
+    raise ValueError(f"""\
 
-        1. It wasn't already cached in the PyStow directory {version_info.module.base}
-        2. It couldn't be downloaded from any of the following URLs:\n{urls_fmt}
-        """)
-    )
+[ChEMBL v{version_info.fmt_version}] could not ensure {filename}
+
+1. It wasn't already cached in the PyStow directory:
+   {version_info.module.base}
+
+2. It couldn't be downloaded from any of the following URLs:
+{urls_fmt}
+    """)
 
 
 class VersionInfo(NamedTuple):
