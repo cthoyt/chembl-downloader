@@ -9,8 +9,10 @@ from tqdm import tqdm
 from .api import (
     SummaryTuple,
     VersionHint,
+    delete,
     download_extract_sqlite,
     get_substructure_library,
+    latest,
     query,
     query_scalar,
     summarize,
@@ -79,7 +81,8 @@ def substructure(version: str | None) -> None:
 
 
 @main.command()
-def history() -> None:
+@click.option("--delete-old", is_flag=True)
+def history(delete_old: bool) -> None:
     """Generate a history command."""
     import csv
 
@@ -91,8 +94,15 @@ def history() -> None:
         click.secho("Could not import `tabulate`. Please run `python -m pip install tabulate`")
         sys.exit(1)
 
+    latest_ = latest()
     versions_: list[VersionHint] = list(versions())
-    rows = [summarize(version) for version in tqdm(versions_)]
+    versions_ = [1, 19, 20, 22.1, 35]
+    rows = []
+    for version in tqdm(versions_):
+        rows.append(summarize(version))
+        if delete_old and version != latest_:
+            delete(version)
+
     columns = SummaryTuple._fields
 
     with pystow.join("chembl", name="summary.tsv").open("w") as file:
