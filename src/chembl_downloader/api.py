@@ -179,7 +179,11 @@ class VersionInfo(NamedTuple):
 
 def _get_version_info(version: VersionHint | None, prefix: Sequence[str] | None) -> VersionInfo:
     flavor = _ensure_version_helper(version)
-    module = pystow.module(*(prefix or PYSTOW_PARTS), flavor.version)
+    if prefix is None:
+        # it's important that this is a None check so it's possible
+        # to pass an empty list
+        prefix = PYSTOW_PARTS
+    module = pystow.module(*prefix, flavor.version)
     return VersionInfo(flavor.fmt_version, flavor.version, module)
 
 
