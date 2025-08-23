@@ -7,11 +7,13 @@ from more_click import verbose_option
 from tqdm import tqdm
 
 from .api import (
+    SummaryTuple,
+    VersionHint,
     download_extract_sqlite,
-    get_date,
     get_substructure_library,
     query,
     query_scalar,
+    summarize,
     versions,
 )
 from .queries import (
@@ -20,7 +22,6 @@ from .queries import (
     COUNT_ASSAYS_SQL,
     COUNT_COMPOUNDS_SQL,
     ID_NAME_QUERY,
-    COUNT_QUERY_SQL,
 )
 
 __all__ = [
@@ -80,8 +81,9 @@ def substructure(version: str | None) -> None:
 @main.command()
 def history() -> None:
     """Generate a history command."""
-    import pystow
     import csv
+
+    import pystow
 
     try:
         from tabulate import tabulate
@@ -89,12 +91,10 @@ def history() -> None:
         click.secho("Could not import `tabulate`. Please run `python -m pip install tabulate`")
         sys.exit(1)
 
-    rows = []
-    for version in tqdm(versions()):
-        row = version, get_date(version=version), _count_compounds(version=version)
-        rows.append(row)
-
-    columns = ["ChEMBL Version", "Release Date", "Total Named Compounds *from SQLite*"]
+    versions_: list[VersionHint] = list(versions())
+    versions_ = [1, 22.1, 35]
+    rows = [summarize(version) for version in tqdm(versions_)]
+    columns = SummaryTuple._fields
 
     with pystow.join("chembl", name="summary.tsv").open("w") as file:
         writer = csv.writer(file, delimiter="\t")
@@ -106,11 +106,9 @@ def history() -> None:
             rows,
             tablefmt="github",
             headers=columns,
+            intfmt=",",
         )
     )
-
-
-
 
 
 if __name__ == "__main__":

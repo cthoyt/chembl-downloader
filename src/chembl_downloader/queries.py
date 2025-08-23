@@ -14,6 +14,7 @@ __all__ = [
     "COUNT_ACTIVITIES_SQL",
     "COUNT_ASSAYS_SQL",
     "COUNT_COMPOUNDS_SQL",
+    "COUNT_NAMED_COMPOUNDS_SQL",
     "COUNT_QUERY_SQL",
     "DRUG_INDICATIONS_SQL",
     "ID_NAME_QUERY",
@@ -170,12 +171,15 @@ WHERE
 """
 
 #: Return the count of molecules
-COUNT_QUERY_SQL = """\
+COUNT_NAMED_COMPOUNDS_SQL = """\
 SELECT COUNT(MOLECULE_DICTIONARY.chembl_id) as count
 FROM MOLECULE_DICTIONARY
 JOIN COMPOUND_STRUCTURES ON MOLECULE_DICTIONARY.molregno == COMPOUND_STRUCTURES.molregno
 WHERE molecule_dictionary.pref_name IS NOT NULL
 """
+
+#: Old name
+COUNT_QUERY_SQL = COUNT_NAMED_COMPOUNDS_SQL
 
 
 def get_document_molecule_sql(document_chembl_id: str) -> str:

@@ -11,12 +11,14 @@ import tarfile
 from collections.abc import Generator, Iterable, Sequence
 from contextlib import closing, contextmanager
 from pathlib import Path
-from typing import TYPE_CHECKING, Any, Literal, NamedTuple, TypeAlias, overload
+from typing import TYPE_CHECKING, Any, Literal, NamedTuple, TypeAlias, cast, overload
 from xml.etree import ElementTree
-from queries import COUNT_QUERY_SQL
+
 import pystow
 import requests
 from tqdm import tqdm
+
+from . import queries
 
 if TYPE_CHECKING:
     import chemfp.arena
@@ -66,6 +68,15 @@ logger = logging.getLogger(__name__)
 PYSTOW_PARTS = ["chembl"]
 RELEASE_PREFIX = "* Release:"
 DATE_PREFIX = "* Date:"
+
+
+class VersionInfo(NamedTuple):
+    """A pair of format version and regular version."""
+
+    fmt_version: str
+    version: str
+    module: pystow.Module
+
 
 #: A hint for a version, which can either be an integer, string, or float (for minor versions)
 VersionHint: TypeAlias = str | int | float | "VersionInfo"
@@ -168,14 +179,6 @@ def _download_helper(
 2. It couldn't be downloaded from any of the following URLs:
 {urls_fmt}
     """)
-
-
-class VersionInfo(NamedTuple):
-    """A pair of format version and regular version."""
-
-    fmt_version: str
-    version: str
-    module: pystow.Module
 
 
 def _get_version_info(version: VersionHint | None, prefix: Sequence[str] | None) -> VersionInfo:
@@ -1014,25 +1017,27 @@ def get_uniprot_mapping_df(
     return df
 
 
-class Summary(NamedTuple):
+class SummaryTuple(NamedTuple):
+    """A summary tuple."""
+
     version: str
     date: str
     compounds: int
-    named_compunds: int
+    assays: int
+    activities: int
+    named_compounds: int
 
-def summarize(version, prefix):
+
+def summarize(
+    version: VersionHint | None = None, *, prefix: Sequence[str] | None = None
+) -> SummaryTuple:
+    """Get a summary for a given version of ChEMBL."""
     version_info = _get_version_info(version, prefix)
-    return Summary(
-        version_info.version,
-        get_date(version=version_info),
-        ...,
-        _count_compounds(version=version_info),
+    return SummaryTuple(
+        version=version_info.version,
+        date=get_date(version=version_info),
+        compounds=cast(int, query_scalar(queries.COUNT_COMPOUNDS_SQL, version=version)),
+        assays=cast(int, query_scalar(queries.COUNT_ASSAYS_SQL, version=version)),
+        activities=cast(int, query_scalar(queries.COUNT_ACTIVITIES_SQL, version=version)),
+        named_compounds=cast(int, query_scalar(queries.COUNT_NAMED_COMPOUNDS_SQL, version=version)),
     )
-
-def _count_compounds(version: str) -> int:
-    """Test downloader for specific ChEMBL version."""
-    try:
-        total_compounds = query_scalar(COUNT_QUERY_SQL, version=version)
-    except Exception:
-        return "-"
-    return total_compounds
