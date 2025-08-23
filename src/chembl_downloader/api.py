@@ -913,7 +913,9 @@ def get_date(version: VersionHint | None = None, **kwargs: Any) -> str:
     """Get the date of a given version."""
     path = download_readme(version=version, return_version=False, **kwargs)
     try:
-        date_p = next(line for line in path.read_text().splitlines() if line.startswith(DATE_PREFIX))
+        date_p = next(
+            line for line in path.read_text().splitlines() if line.startswith(DATE_PREFIX)
+        )
         date_p = date_p.removeprefix(DATE_PREFIX)
         date_p = date_p.lstrip()
     except StopIteration:
