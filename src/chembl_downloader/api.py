@@ -135,7 +135,7 @@ def _download_helper(
 
     :raises ValueError: If file could not be downloaded
     """
-    flavors = _clean_ensure_version_2(version, prefix=prefix)
+    flavors = _get_version_info(version, prefix=prefix)
 
     base = (
         f"ftp://ftp.ebi.ac.uk/pub/databases/chembl/ChEMBLdb/releases/chembl_{flavors.fmt_version}"
@@ -163,14 +163,7 @@ def _download_helper(
     )
 
 
-class VersionFlavors(NamedTuple):
-    """A pair of format version and regular version."""
-
-    fmt_version: str
-    version: str
-
-
-class VersionFlavors2(NamedTuple):
+class VersionInfo(NamedTuple):
     """A pair of format version and regular version."""
 
     fmt_version: str
@@ -178,7 +171,20 @@ class VersionFlavors2(NamedTuple):
     module: pystow.Module
 
 
-def _clean_ensure_version(version: VersionHint | None) -> VersionFlavors:
+def _get_version_info(version: VersionHint | None, prefix: Sequence[str] | None) -> VersionInfo:
+    flavor = _ensure_version_helper(version)
+    module = pystow.module(*(prefix or PYSTOW_PARTS), flavor.version)
+    return VersionInfo(flavor.fmt_version, flavor.version, module)
+
+
+class _VersionFlavorsHelper(NamedTuple):
+    """A pair of format version and regular version."""
+
+    fmt_version: str
+    version: str
+
+
+def _ensure_version_helper(version: VersionHint | None) -> _VersionFlavorsHelper:
     if isinstance(version, int):
         # versions 1-9 are left padded with a zero
         fmt_version = f"{version:02}"
@@ -191,15 +197,7 @@ def _clean_ensure_version(version: VersionHint | None) -> VersionFlavors:
         # for versions < 10 it's important to left pad with a zero
         fmt_version = version.replace(".", "_").zfill(2)
 
-    return VersionFlavors(fmt_version, version)
-
-
-def _clean_ensure_version_2(
-    version: VersionHint | None, prefix: Sequence[str] | None
-) -> VersionFlavors2:
-    flavor = _clean_ensure_version(version)
-    module = pystow.module(*(prefix or PYSTOW_PARTS), flavor.version)
-    return VersionFlavors2(flavor.fmt_version, flavor.version, module)
+    return _VersionFlavorsHelper(fmt_version, version)
 
 
 # docstr-coverage:excused `overload`
@@ -289,13 +287,13 @@ def download_extract_sqlite(
         directories
     """
     if version is not None:
-        flavors = _clean_ensure_version_2(version, prefix)
-        _directory = flavors.module.base
+        version_info = _get_version_info(version, prefix)
+        _directory = version_info.module.base
         if _directory.is_dir():
             rv = _find_sqlite_file(_directory)
             if rv:
                 if return_version:
-                    return VersionPathPair(flavors.version, rv)
+                    return VersionPathPair(version_info.version, rv)
                 return rv
 
     version, path = download_sqlite(version=version, prefix=prefix, return_version=True)
@@ -818,9 +816,9 @@ def get_substructure_library(
         TautomerPatternHolder,
     )
 
-    flavors = _clean_ensure_version_2(version, prefix)
+    version_info = _get_version_info(version, prefix)
 
-    path = flavors.module.join(name="ssslib.pkl")
+    path = version_info.module.join(name="ssslib.pkl")
     if path.is_file():
         logger.info("loading substructure library from pickle: %s", path)
         with path.open("rb") as file:
@@ -830,7 +828,7 @@ def get_substructure_library(
     tautomer_pattern_holder = TautomerPatternHolder()
     key_from_prop_holder = KeyFromPropHolder()
     library = SubstructLibrary(molecule_holder, tautomer_pattern_holder, key_from_prop_holder)
-    with supplier(version=flavors.version, prefix=prefix, **kwargs) as suppl:
+    with supplier(version=version_info.version, prefix=prefix, **kwargs) as suppl:
         for mol in tqdm(
             suppl,
             unit="molecule",

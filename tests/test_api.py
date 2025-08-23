@@ -12,7 +12,7 @@ from pystow.constants import PYSTOW_HOME_ENVVAR
 from pystow.utils import mock_envvar, open_tarfile
 
 import chembl_downloader
-from chembl_downloader.api import VersionFlavors, VersionHint, _clean_ensure_version
+from chembl_downloader.api import VersionHint, _ensure_version_helper, _VersionFlavorsHelper
 
 TV = "26"
 
@@ -22,19 +22,19 @@ class TestUtils(unittest.TestCase):
 
     def test_clean_version(self) -> None:
         """Test cleaning the version."""
-        cases: list[tuple[VersionHint, VersionFlavors]] = [
+        cases: list[tuple[VersionHint, _VersionFlavorsHelper]] = [
             # single digit
-            ("1", VersionFlavors("01", "1")),
-            (1, VersionFlavors("01", "1")),
+            ("1", _VersionFlavorsHelper("01", "1")),
+            (1, _VersionFlavorsHelper("01", "1")),
             # double-digit
-            ("35", VersionFlavors("35", "35")),
-            (35, VersionFlavors("35", "35")),
+            ("35", _VersionFlavorsHelper("35", "35")),
+            (35, _VersionFlavorsHelper("35", "35")),
             # point
-            ("22.1", VersionFlavors("22_1", "22.1")),
+            ("22.1", _VersionFlavorsHelper("22_1", "22.1")),
         ]
         for input_version, expected in cases:
             with self.subTest():
-                actual = _clean_ensure_version(input_version)
+                actual = _ensure_version_helper(input_version)
                 self.assertEqual(
                     expected.fmt_version, actual.fmt_version, msg="incorrect format version"
                 )
