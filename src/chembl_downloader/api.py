@@ -184,6 +184,7 @@ def _download_helper(
 def _get_version_info(version: VersionHint | None, prefix: Sequence[str] | None) -> VersionInfo:
     if isinstance(version, VersionInfo):
         return version
+
     flavor = _ensure_version_helper(version)
     if prefix is None:
         # it's important that this is a None check so it's possible
@@ -319,10 +320,7 @@ def download_extract_sqlite(
     rv = version_info.module.join(name=name)
 
     if not rv.is_file():
-        # TODO make all versions accept VersionInfo
-        tar_path = download_sqlite(
-            version=version_info.version, prefix=prefix, return_version=False
-        )
+        tar_path = download_sqlite(version=version_info, prefix=prefix, return_version=False)
         with tarfile.open(tar_path, mode="r", encoding="utf-8") as tar_file:
             tar_info = _get_tar_info(tar_file)
             if tar_info is None:
@@ -858,7 +856,7 @@ def get_substructure_library(
     tautomer_pattern_holder = TautomerPatternHolder()
     key_from_prop_holder = KeyFromPropHolder()
     library = SubstructLibrary(molecule_holder, tautomer_pattern_holder, key_from_prop_holder)
-    with supplier(version=version_info.version, prefix=prefix, **kwargs) as suppl:
+    with supplier(version=version_info, prefix=prefix, **kwargs) as suppl:
         for mol in tqdm(
             suppl,
             unit="molecule",
