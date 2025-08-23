@@ -79,7 +79,7 @@ class VersionInfo(NamedTuple):
 
 
 #: A hint for a version, which can either be an integer, string, or float (for minor versions)
-VersionHint: TypeAlias = str | int | float | "VersionInfo"
+VersionHint: TypeAlias = str | int | float | VersionInfo
 
 
 class VersionPathPair(NamedTuple):
