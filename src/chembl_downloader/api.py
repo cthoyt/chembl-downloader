@@ -447,7 +447,7 @@ def query_scalar(
         count: int = chembl_downloader.query_one(sql)
     """
     df = query(sql, version=version, prefix=prefix, **kwargs)
-    return df[df.columns[0]][0]
+    return df[df.columns[0]][0].item()
 
 
 # docstr-coverage:excused `overload`
