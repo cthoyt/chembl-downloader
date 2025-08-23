@@ -14,7 +14,13 @@ from .api import (
     query_scalar,
     versions,
 )
-from .queries import ACTIVITIES_QUERY, ID_NAME_QUERY
+from .queries import (
+    ACTIVITIES_QUERY,
+    COUNT_ACTIVITIES_SQL,
+    COUNT_ASSAYS_SQL,
+    COUNT_COMPOUNDS_SQL,
+    ID_NAME_QUERY,
+)
 
 __all__ = [
     "main",
@@ -41,15 +47,23 @@ def download(version: str | None) -> None:
 @verbose_option  # type:ignore
 def test(version: str | None) -> None:
     """Run test queries."""
-    click.secho("\n\nNumber of Activities\n", fg="green")
-    count = query_scalar("SELECT COUNT(activity_id) FROM activities", version=version)
+    click.secho("Number of Compounds", fg="green")
+    count = query_scalar(COUNT_COMPOUNDS_SQL, version=version)
+    click.echo(f"{count:,}")
+
+    click.secho("\nNumber of Activities", fg="green")
+    count = query_scalar(COUNT_ACTIVITIES_SQL, version=version)
+    click.echo(f"{count:,}")
+
+    click.secho("\nNumber of Assays", fg="green")
+    count = query_scalar(COUNT_ASSAYS_SQL, version=version)
     click.echo(f"{count:,}\n")
 
     click.secho("ID to Name Query\n", fg="green")
     df = query(ID_NAME_QUERY + "\nLIMIT 5", version=version)
     click.echo(df.to_markdown(index=False))
 
-    click.secho("\n\nActivity Query\n", fg="green")
+    click.secho("\nActivity Query\n", fg="green")
     df = query(ACTIVITIES_QUERY + "\nLIMIT 5", version=version)
     click.echo(df.to_markdown(index=False))
 
