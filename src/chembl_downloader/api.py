@@ -420,7 +420,7 @@ def query(
 
 def query_scalar(
     sql: str,
-    version: str | None = None,
+    version: VersionHint | None = None,
     *,
     prefix: Sequence[str] | None = None,
     **kwargs: Any,
