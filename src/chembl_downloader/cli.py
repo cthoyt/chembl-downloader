@@ -20,6 +20,7 @@ from .queries import (
     COUNT_ASSAYS_SQL,
     COUNT_COMPOUNDS_SQL,
     ID_NAME_QUERY,
+    COUNT_QUERY_SQL,
 )
 
 __all__ = [
@@ -79,33 +80,37 @@ def substructure(version: str | None) -> None:
 @main.command()
 def history() -> None:
     """Generate a history command."""
+    import pystow
+    import csv
+
     try:
         from tabulate import tabulate
     except ImportError:
         click.secho("Could not import `tabulate`. Please run `python -m pip install tabulate`")
         sys.exit(1)
-    rows = [
-        (version, get_date(version=version), _count_compounds(version=version))
-        for version in tqdm(versions())
-    ]
+
+    rows = []
+    for version in tqdm(versions()):
+        row = version, get_date(version=version), _count_compounds(version=version)
+        rows.append(row)
+
+    columns = ["ChEMBL Version", "Release Date", "Total Named Compounds *from SQLite*"]
+
+    with pystow.join("chembl", name="summary.tsv").open("w") as file:
+        writer = csv.writer(file, delimiter="\t")
+        writer.writerow(columns)
+        writer.writerows(rows)
+
     click.echo(
         tabulate(
             rows,
             tablefmt="github",
-            headers=["ChEMBL Version", "Release Date", "Total Named Compounds *from SQLite*"],
+            headers=columns,
         )
     )
 
 
-def _count_compounds(version: str) -> str:
-    """Test downloader for specific ChEMBL version."""
-    from .queries import COUNT_QUERY_SQL
 
-    try:
-        total_compounds = query_scalar(COUNT_QUERY_SQL, version=version)
-    except Exception:
-        return "-"
-    return f"{total_compounds:,}"
 
 
 if __name__ == "__main__":

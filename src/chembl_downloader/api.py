@@ -13,7 +13,7 @@ from contextlib import closing, contextmanager
 from pathlib import Path
 from typing import TYPE_CHECKING, Any, Literal, NamedTuple, TypeAlias, overload
 from xml.etree import ElementTree
-
+from queries import COUNT_QUERY_SQL
 import pystow
 import requests
 from tqdm import tqdm
@@ -68,7 +68,7 @@ RELEASE_PREFIX = "* Release:"
 DATE_PREFIX = "* Date:"
 
 #: A hint for a version, which can either be an integer, string, or float (for minor versions)
-VersionHint: TypeAlias = str | int | float
+VersionHint: TypeAlias = str | int | float | "VersionInfo"
 
 
 class VersionPathPair(NamedTuple):
@@ -179,6 +179,8 @@ class VersionInfo(NamedTuple):
 
 
 def _get_version_info(version: VersionHint | None, prefix: Sequence[str] | None) -> VersionInfo:
+    if isinstance(version, VersionInfo):
+        return version
     flavor = _ensure_version_helper(version)
     if prefix is None:
         # it's important that this is a None check so it's possible
@@ -198,7 +200,7 @@ class _VersionFlavorsHelper(NamedTuple):
 def _ensure_version_helper(version: VersionHint | None) -> _VersionFlavorsHelper:
     if version is None:
         version = latest()
-    if isinstance(version, int):
+    elif isinstance(version, int):
         # versions 1-9 are left padded with a zero
         fmt_version = f"{version:02}"
         version = str(version)
@@ -1010,3 +1012,27 @@ def get_uniprot_mapping_df(
         names=["uniprot_id", "chembl_target_id", "name", "type"],
     )
     return df
+
+
+class Summary(NamedTuple):
+    version: str
+    date: str
+    compounds: int
+    named_compunds: int
+
+def summarize(version, prefix):
+    version_info = _get_version_info(version, prefix)
+    return Summary(
+        version_info.version,
+        get_date(version=version_info),
+        ...,
+        _count_compounds(version=version_info),
+    )
+
+def _count_compounds(version: str) -> int:
+    """Test downloader for specific ChEMBL version."""
+    try:
+        total_compounds = query_scalar(COUNT_QUERY_SQL, version=version)
+    except Exception:
+        return "-"
+    return total_compounds
