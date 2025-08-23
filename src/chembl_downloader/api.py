@@ -13,6 +13,7 @@ import tarfile
 from collections.abc import Generator, Iterable, Sequence
 from contextlib import closing, contextmanager
 from pathlib import Path
+from textwrap import dedent
 from typing import TYPE_CHECKING, Any, Literal, NamedTuple, TypeAlias, overload
 from xml.etree import ElementTree
 
@@ -156,10 +157,15 @@ def _download_helper(
             return VersionPathPair(version_info.version, path)
         else:
             return path
+
+    urls_fmt = "\n".join(f"- {url}" for url in urls)
     raise ValueError(
-        f"[{version_info.fmt_version}] could not find {filename} at any of the following URLs:"
-        f"\n\n{urls}"
-        f"\busing PyStow module at {version_info.module.base}"
+        dedent(f"""\
+        [ChEMBL v{version_info.fmt_version}] could not ensure {filename}
+
+        1. It wasn't already cached in the PyStow directory {version_info.module.base}
+        2. It couldn't be downloaded from any of the following URLs:\n{urls_fmt}
+        """)
     )
 
 
