@@ -387,8 +387,8 @@ def query_scalar(
 ) -> Any:
     """Ensure the data is available, run the query, then extract the result.
 
-    Similar to :func:`query`, but automatically unpacks the value, assuming
-    that only one record is returned with just a single column.
+    Similar to :func:`query`, but automatically unpacks the value, assuming that only
+    one record is returned with just a single column.
 
     :param sql: A SQL query string or table name
     :param version: The version number of ChEMBL to get. If none specified, uses
