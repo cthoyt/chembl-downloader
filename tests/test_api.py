@@ -25,8 +25,12 @@ class TestApi(unittest.TestCase):
         columns = ["activity_id"]
         self.directory_obj = tempfile.TemporaryDirectory()
         self.directory = Path(self.directory_obj.name)
+
+        self.version_directory = self.directory.joinpath(TV)
+        self.version_directory.mkdir(exist_ok=True)
+
         data_path = self.directory.joinpath("test.db")
-        self.tarfile_path = self.directory.joinpath(f"chembl_{TV}_sqlite.tar.gz")
+        self.tarfile_path = self.version_directory.joinpath(f"chembl_{TV}_sqlite.tar.gz")
 
         df = pd.DataFrame(rows, columns=columns)
         with sqlite3.connect(data_path) as conn:
@@ -46,10 +50,13 @@ class TestApi(unittest.TestCase):
     def test_query(self) -> None:
         """Test querying."""
         with mock_envvar(PYSTOW_HOME_ENVVAR, self.directory.as_posix()):
-            chembl_downloader.query_one(
-                "SELECT COUNT(activity_id) FROM activities",
-                prefix=[],
-                version=TV,
+            self.assertEqual(
+                3,
+                chembl_downloader.query_one(
+                    "SELECT COUNT(activity_id) FROM activities",
+                    prefix=[],
+                    version=TV,
+                ),
             )
 
     def test_latest_version(self) -> None:
