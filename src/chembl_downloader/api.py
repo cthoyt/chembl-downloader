@@ -25,6 +25,7 @@ if TYPE_CHECKING:
     import pandas
     import rdkit.Chem
     import rdkit.Chem.rdSubstructLibrary
+    from numpy.typing import NDArray
 
 __all__ = [
     "VersionHint",
@@ -55,6 +56,7 @@ __all__ = [
     "iterate_smiles",
     "latest",
     "query",
+    "query_scalar",
     "supplier",
     "versions",
 ]
@@ -133,7 +135,7 @@ def _download_helper(
 
     :raises ValueError: If file could not be downloaded
     """
-    flavors = _clean_ensure_version(version, prefix)
+    flavors = _clean_ensure_version(version)
 
     base = (
         f"ftp://ftp.ebi.ac.uk/pub/databases/chembl/ChEMBLdb/releases/chembl_{flavors.fmt_version}"
@@ -142,12 +144,18 @@ def _download_helper(
         filename = f"chembl_{flavors.fmt_version}{suffix}"
     else:
         filename = suffix
+
+    if prefix is None:
+        prefix = PYSTOW_PARTS
+
+    module = pystow.module(*prefix, flavors.fmt_version)
+
     for url in [
         f"{base}/{filename}",
         f"{base}/archived/{filename}",
     ]:
         try:
-            path = flavors.module.ensure(url=url)
+            path = module.ensure(url=url)
         except OSError:
             continue
         if return_version:
@@ -155,7 +163,8 @@ def _download_helper(
         else:
             return path
     raise ValueError(
-        f"could not find {filename} in data for ChEMBL {flavors.fmt_version} in {base}"
+        f"could not find {filename} in data for ChEMBL {flavors.fmt_version} in {base} "
+        f"with PyStow module at {module.base}"
     )
 
 
@@ -286,7 +295,9 @@ def download_extract_sqlite(
     """
     if version is not None:
         version = _clean_ensure_version(version).version
-        _directory = pystow.join(*(prefix or PYSTOW_PARTS), version)
+        if prefix is None:
+            prefix = PYSTOW_PARTS
+        _directory = pystow.join(*prefix, version)
         if _directory.is_dir():
             rv = _find_sqlite_file(_directory)
             if rv:
@@ -398,8 +409,8 @@ def query(
 
     Example: .. code-block:: python
 
-        import chembl_downloader from chembl_downloader.queries import
-        ID_NAME_QUERY_EXAMPLE
+        import chembl_downloader
+        from chembl_downloader.queries import ID_NAME_QUERY_EXAMPLE
 
         df = chembl_downloader.query(ID_NAME_QUERY_EXAMPLE)
     """
@@ -407,6 +418,38 @@ def query(
 
     with connect(version=version, prefix=prefix) as con:
         return pd.read_sql(sql, con=con, **kwargs)
+
+
+def query_scalar(
+    sql: str,
+    version: str | None = None,
+    *,
+    prefix: Sequence[str] | None = None,
+    **kwargs: Any,
+) -> Any:
+    """Ensure the data is available, run the query, then extract the result.
+
+    Similar to :func:`query`, but automatically unpacks the value, assuming that only
+    one record is returned with just a single column.
+
+    :param sql: A SQL query string or table name
+    :param version: The version number of ChEMBL to get. If none specified, uses
+        :func:`latest` to look up the latest.
+    :param prefix: The directory inside :mod:`pystow` to use
+    :param kwargs: keyword arguments to pass through to :func:`pandas.read_sql`, such as
+        ``index_col``.
+
+    :returns: A value (int, str, etc.) from the database.
+
+    Example: .. code-block:: python
+
+        import chembl_downloader
+
+        sql = "SELECT COUNT(activity_id) FROM activities"
+        count: int = chembl_downloader.query_one(sql)
+    """
+    df = query(sql, version=version, prefix=prefix, **kwargs)
+    return df[df.columns[0]][0]
 
 
 # docstr-coverage:excused `overload`
@@ -477,7 +520,7 @@ def iterate_fps(
     *,
     prefix: Sequence[str] | None = None,
     identifier_format: Literal["local", "curie"] = "local",
-) -> Iterable[tuple[str, numpy.ndarray]]:
+) -> Iterable[tuple[str, NDArray[numpy.uint8]]]:
     """Download and open the ChEMBL fingerprints via RDKit/Numpy.
 
     :param version: The version number of ChEMBL to get. If none specified, uses

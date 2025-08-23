@@ -11,6 +11,10 @@ if TYPE_CHECKING:
 __all__ = [
     "ACTIVITIES_QUERY",
     "CHEBI_UNMAPPED_SQL",
+    "COUNT_ACTIVITIES_SQL",
+    "COUNT_ASSAYS_SQL",
+    "COUNT_COMPOUNDS_SQL",
+    "COUNT_QUERY_SQL",
     "DRUG_INDICATIONS_SQL",
     "ID_NAME_QUERY",
     # Functions
@@ -191,3 +195,13 @@ def get_document_molecule_sql(document_chembl_id: str) -> str:
             WHERE DOCS.chembl_id = '{document_chembl_id}'
         """  # noqa: S608
     )
+
+
+#: Count the number of activity records
+COUNT_ACTIVITIES_SQL = "SELECT COUNT(*) from activities"
+
+#: Count the number of assay records
+COUNT_ASSAYS_SQL = "SELECT COUNT(*) from assays"
+
+#: Count the number of compound records
+COUNT_COMPOUNDS_SQL = "SELECT COUNT(*) from molecule_dictionary"

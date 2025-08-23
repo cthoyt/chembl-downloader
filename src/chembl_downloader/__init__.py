@@ -23,6 +23,7 @@ from .api import (
     iterate_smiles,
     latest,
     query,
+    query_scalar,
     supplier,
     versions,
 )
@@ -50,6 +51,7 @@ __all__ = [
     "latest",
     "queries",
     "query",
+    "query_scalar",
     "supplier",
     "versions",
 ]
