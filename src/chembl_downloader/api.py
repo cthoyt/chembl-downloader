@@ -304,36 +304,33 @@ def download_extract_sqlite(
     :raises FileNotFoundError: If no database file could be found in the extracted
         directories
     """
-    if version is not None:
-        version_info = _get_version_info(version, prefix)
-        _directory = version_info.module.base
-        if _directory.is_dir():
-            rv = _find_sqlite_file(_directory)
-            if rv:
-                if return_version:
-                    return VersionPathPair(version_info.version, rv)
-                return rv
+    version_info = _get_version_info(version, prefix)
 
-    version, path = download_sqlite(version=version, prefix=prefix, return_version=True)
+    name = f"chembl_{version_info.fmt_version}_sqlite.tar.gz"
+    rv = version_info.module.join(name=name)
 
-    # Extraction will be done in the same directory as the download.
-    # All ChEMBL SQLite dumps have the same internal folder structure,
-    # so assume there's going to be a directory here
-    directory = path.parent.joinpath("data")
-    if not directory.is_dir():
-        logger.info("unarchiving %s to %s", path, directory)
-        with tarfile.open(path, mode="r", encoding="utf-8") as tar_file:
-            tar_file.extractall(directory)  # noqa:S202
-    else:
-        logger.debug("did not re-unarchive %s to %s", path, directory)
+    if not rv.is_file():
+        # TODO make all versions accept VersionInfo
+        tar_path = download_sqlite(version=version_info.version, prefix=prefix, return_version=False)
+        with tarfile.open(tar_path, mode="r", encoding="utf-8") as tar_file:
+            tar_info = _get_tar_info(tar_file)
+            if tar_info is None:
+                raise FileNotFoundError("could not find a .db file in the ChEMBL archive")
+            logger.info("unarchiving %s", tar_path)
+            tar_file.extract(tar_info, rv)
 
-    rv = _find_sqlite_file(directory)
-    if rv is None:
-        raise FileNotFoundError("could not find a .db file in the ChEMBL archive")
-    elif return_version:
+    if return_version:
         return VersionPathPair(version, rv)
     else:
         return rv
+
+
+def _get_tar_info(tar_file: tarfile.TarFile) -> tarfile.TarInfo | None:
+    """Walk an archive and find a file with the ``.db`` extension."""
+    for tar_info in tar_file:
+        if tar_info.name.endswith(".db"):
+            return tar_info
+    return None
 
 
 def _find_sqlite_file(directory: str | Path) -> Path | None:
