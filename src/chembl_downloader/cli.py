@@ -96,7 +96,7 @@ def history(delete_old: bool) -> None:
 
     latest_ = latest()
     versions_: list[VersionHint] = list(versions())
-    versions_ = [1, 19, 20, 22.1, 35]
+    versions_ = [1, 3, 6, 10, 19, 20, 22.1, 35]
     rows = []
     for version in tqdm(versions_):
         rows.append(summarize(version))
