@@ -9,6 +9,7 @@ from tqdm import tqdm
 from .api import (
     SummaryTuple,
     VersionInfo,
+    _get_version_info,
     download_extract_sqlite,
     download_readme,
     get_substructure_library,
@@ -95,10 +96,14 @@ def history(delete_old: bool) -> None:
         sys.exit(1)
 
     latest_version_info = latest(full=True)
-    version_infos: list[VersionInfo] = versions(full=True)
+    versions_: list[str] = versions()
 
+    output_path = pystow.join("chembl", name="summary.tsv")
+    columns = SummaryTuple._fields
     rows = []
-    for version_info in tqdm(version_infos):
+    for version in tqdm(versions_, desc="Summarizing ChEMBL over time", unit="versions"):
+        version_info = _get_version_info(version)
+
         rows.append(summarize(version_info))
         if delete_old and version_info.version != latest_version_info.version:
             tqdm.write(f"[v{version_info}] cleaning up")
@@ -112,12 +117,11 @@ def history(delete_old: bool) -> None:
             if not any(version_directory.iterdir()):
                 version_directory.rmdir()
 
-    columns = SummaryTuple._fields
-
-    with pystow.join("chembl", name="summary.tsv").open("w") as file:
-        writer = csv.writer(file, delimiter="\t")
-        writer.writerow(columns)
-        writer.writerows(rows)
+        # write on every iteration to make monitoring possible
+        with output_path.open("w") as file:
+            writer = csv.writer(file, delimiter="\t")
+            writer.writerow(columns)
+            writer.writerows(rows)
 
     click.echo(
         tabulate(
