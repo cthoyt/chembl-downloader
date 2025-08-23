@@ -38,16 +38,16 @@ class TestApi(unittest.TestCase):
 
         inner_path = f"data/chembl_{TV}/chembl_{TV}_sqlite/chembl_{TV}.db"
         with (
-            open_tarfile(self.tarfile_path, inner_path, operation="write") as file,
-            data_path.open("rb") as f2,
+            open_tarfile(self.tarfile_path, inner_path, operation="write") as inner_tarfile,
+            data_path.open("rb") as source_file,
         ):
-            shutil.copyfileobj(f2, file)
+            shutil.copyfileobj(source_file, inner_tarfile)
 
     def tearDown(self) -> None:
         """Tear down the test case."""
         self.directory_obj.cleanup()
 
-    def test_query(self) -> None:
+    def test_query_one(self) -> None:
         """Test querying."""
         with mock_envvar(PYSTOW_HOME_ENVVAR, self.directory.as_posix()):
             self.assertEqual(
@@ -58,6 +58,13 @@ class TestApi(unittest.TestCase):
                     version=TV,
                 ),
             )
+
+    def test_cursor(self) -> None:
+        """Test querying via a cursor."""
+        with mock_envvar(PYSTOW_HOME_ENVVAR, self.directory.as_posix()):
+            with chembl_downloader.cursor(prefix=[], version=TV) as cursor:
+                cursor.execute("SELECT COUNT(activity_id) FROM activities")
+                self.assertEqual(3, cursor.fetchone()[0])
 
     def test_latest_version(self) -> None:
         """Test getting the latest version."""

@@ -55,7 +55,7 @@ dependencies = [
     "tqdm", # progress bars
     "click",
     "more_click",
-    "pystow",
+    "pystow>=0.7.6",
     "typing-extensions",
 ]
 
