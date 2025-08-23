@@ -8,7 +8,7 @@ from tqdm import tqdm
 
 from .api import (
     SummaryTuple,
-    VersionHint,
+    VersionInfo,
     download_extract_sqlite,
     download_readme,
     get_substructure_library,
@@ -94,16 +94,17 @@ def history(delete_old: bool) -> None:
         click.secho("Could not import `tabulate`. Please run `python -m pip install tabulate`")
         sys.exit(1)
 
-    latest_ = latest()
-    versions_: list[VersionHint] = list(versions())
-    rows = []
-    for version in tqdm(versions_):
-        rows.append(summarize(version))
-        if delete_old and version != latest_:
-            tqdm.write(f"[v{version}] cleaning up")
+    latest_version_info = latest(full=True)
+    version_infos: list[VersionInfo] = versions(full=True)
 
-            download_readme(version=version, return_version=False).unlink()
-            db_path = download_extract_sqlite(version=version, return_version=False)
+    rows = []
+    for version_info in tqdm(version_infos):
+        rows.append(summarize(version_info))
+        if delete_old and version_info.version != latest_version_info.version:
+            tqdm.write(f"[v{version_info}] cleaning up")
+
+            download_readme(version=version_info, return_version=False).unlink()
+            db_path = download_extract_sqlite(version=version_info, return_version=False)
             db_path.unlink()
 
             # if the parent directory is empty, remove it too

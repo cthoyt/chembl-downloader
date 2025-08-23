@@ -93,7 +93,17 @@ class VersionPathPair(NamedTuple):
 LATEST_README_URL = "https://ftp.ebi.ac.uk/pub/databases/chembl/ChEMBLdb/latest/README"
 
 
-def latest() -> str:
+# docstr-coverage:excused `overload`
+@overload
+def latest(*, full: Literal[True] = True, prefix: Sequence[str] | None = ...) -> VersionInfo: ...
+
+
+# docstr-coverage:excused `overload`
+@overload
+def latest(*, full: Literal[False] = False, prefix: Sequence[str] | None = ...) -> str: ...
+
+
+def latest(*, full: bool = False, prefix: Sequence[str] | None = None) -> str | VersionInfo:
     """Get the latest version of ChEMBL as a string.
 
     :returns: The latest version string of ChEMBL
@@ -108,16 +118,37 @@ def latest() -> str:
             line = line.removeprefix(RELEASE_PREFIX)
             line = line.strip()
             line = line.removeprefix("chembl_")
-            return line
+            if not full:
+                return line
+            return _get_version_info(line, prefix=prefix)
+
     raise ValueError("could not find latest ChEMBL version")
 
 
-def versions() -> list[str]:
+# docstr-coverage:excused `overload`
+@overload
+def versions(
+    *, full: Literal[True] = ..., prefix: Sequence[str] | None = ...
+) -> list[VersionInfo]: ...
+
+
+# docstr-coverage:excused `overload`
+@overload
+def versions(*, full: Literal[False] = ..., prefix: Sequence[str] | None = ...) -> list[str]: ...
+
+
+def versions(
+    *, full: bool = False, prefix: Sequence[str] | None = None
+) -> list[str] | list[VersionInfo]:
     """Get all versions of ChEMBL."""
-    version_list = [str(i).zfill(2) for i in range(1, int(latest()) + 1)]
+    latest_version_info = latest(full=True, prefix=prefix)
+    rv = [str(i).zfill(2) for i in range(1, int(latest_version_info.version) + 1)]
     # Side version in ChEMBL
-    version_list.extend(["22_1", "24_1"])
-    return sorted(version_list, reverse=True)
+    rv.extend(["22_1", "24_1"])
+    rv = sorted(rv, reverse=True)
+    if not full:
+        return rv
+    return [_get_version_info(version, prefix) for version in rv]
 
 
 _CHEMBL_HOST = "ftp.ebi.ac.uk/pub/databases/chembl/ChEMBLdb/releases"
@@ -182,7 +213,9 @@ def _download_helper(
     """)
 
 
-def _get_version_info(version: VersionHint | None, prefix: Sequence[str] | None) -> VersionInfo:
+def _get_version_info(
+    version: VersionHint | None, prefix: Sequence[str] | None = None
+) -> VersionInfo:
     if isinstance(version, VersionInfo):
         return version
 
