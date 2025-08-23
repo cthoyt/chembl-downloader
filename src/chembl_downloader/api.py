@@ -90,8 +90,8 @@ def latest() -> str:
     """
     res = requests.get(LATEST_README_URL, timeout=5)
     res.raise_for_status()
-    for line in res.iter_lines(decode_unicode=True):
-        line = line.decode("utf8")
+    for line_binary in res.iter_lines(decode_unicode=True):
+        line: str = line_binary.decode("utf8")
         if line.startswith(RELEASE_PREFIX):
             line = line.removeprefix(RELEASE_PREFIX)
             line = line.strip()
