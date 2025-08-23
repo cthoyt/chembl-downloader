@@ -135,7 +135,7 @@ def _download_helper(
 
     :raises ValueError: If file could not be downloaded
     """
-    flavors = _clean_ensure_version(version)
+    flavors = _clean_ensure_version_2(version, prefix=prefix)
 
     base = (
         f"ftp://ftp.ebi.ac.uk/pub/databases/chembl/ChEMBLdb/releases/chembl_{flavors.fmt_version}"
@@ -145,26 +145,21 @@ def _download_helper(
     else:
         filename = suffix
 
-    if prefix is None:
-        prefix = PYSTOW_PARTS
-
-    module = pystow.module(*prefix, flavors.fmt_version)
-
     for url in [
         f"{base}/{filename}",
         f"{base}/archived/{filename}",
     ]:
         try:
-            path = module.ensure(url=url)
+            path = flavors.module.ensure(url=url)
         except OSError:
             continue
         if return_version:
-            return VersionPathPair(version, path)
+            return VersionPathPair(flavors.version, path)
         else:
             return path
     raise ValueError(
         f"could not find {filename} in data for ChEMBL {flavors.fmt_version} in {base} "
-        f"with PyStow module at {module.base}"
+        f"with PyStow module at {flavors.module.base}"
     )
 
 
@@ -203,7 +198,7 @@ def _clean_ensure_version_2(
     version: VersionHint | None, prefix: Sequence[str] | None
 ) -> VersionFlavors2:
     flavor = _clean_ensure_version(version)
-    module = pystow.ensure(*(prefix or PYSTOW_PARTS), flavor.version)
+    module = pystow.module(*(prefix or PYSTOW_PARTS), flavor.version)
     return VersionFlavors2(flavor.fmt_version, flavor.version, module)
 
 
@@ -294,15 +289,13 @@ def download_extract_sqlite(
         directories
     """
     if version is not None:
-        version = _clean_ensure_version(version).version
-        if prefix is None:
-            prefix = PYSTOW_PARTS
-        _directory = pystow.join(*prefix, version)
+        flavors = _clean_ensure_version_2(version, prefix)
+        _directory = flavors.module.base
         if _directory.is_dir():
             rv = _find_sqlite_file(_directory)
             if rv:
                 if return_version:
-                    return VersionPathPair(version, rv)
+                    return VersionPathPair(flavors.version, rv)
                 return rv
 
     version, path = download_sqlite(version=version, prefix=prefix, return_version=True)
@@ -825,7 +818,7 @@ def get_substructure_library(
         TautomerPatternHolder,
     )
 
-    flavors = _clean_ensure_version(version, prefix)
+    flavors = _clean_ensure_version_2(version, prefix)
 
     path = flavors.module.join(name="ssslib.pkl")
     if path.is_file():
