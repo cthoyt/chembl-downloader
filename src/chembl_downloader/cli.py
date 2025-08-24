@@ -97,7 +97,7 @@ def history(delete_old: bool) -> None:
     latest_version_info = latest(full=True)
     versions_: list[str] = versions(full=False)
 
-    output_path = pystow.join("chembl", name="summary.tsv")
+    summary_path = pystow.join("chembl", name="summary.tsv")
     columns = SummaryTuple._fields
     rows = []
     for version in tqdm(versions_, desc="Summarizing ChEMBL over time", unit="versions"):
@@ -117,7 +117,7 @@ def history(delete_old: bool) -> None:
                 version_directory.rmdir()
 
         # write on every iteration to make monitoring possible
-        with output_path.open("w") as file:
+        with summary_path.open("w") as file:
             writer = csv.writer(file, delimiter="\t")
             writer.writerow(columns)
             writer.writerows(rows)
@@ -130,6 +130,48 @@ def history(delete_old: bool) -> None:
             intfmt=",",
         )
     )
+
+
+@main.command()
+def history_draw() -> None:
+    """Draw charts after running the ``history`` CLI command."""
+    import matplotlib.pyplot as plt
+    import pandas as pd
+    import pystow
+    import seaborn as sns
+    from humanize import intcomma
+
+    count_columns = ["compounds", "assays", "activities", "named_compounds"]
+
+    summary_path = pystow.join("chembl", name="summary.tsv")
+    df = pd.read_csv(summary_path, sep="\t")[::-1]
+
+    # do this before parsing dates because it looks nicer
+    chart_markdown_path = pystow.join("chembl", name="summary.md")
+    df_copy = df.copy()
+    for column in count_columns:
+        df_copy[column] = df_copy[column].map(intcomma)
+    df_copy.to_markdown(chart_markdown_path, tablefmt="github", index=False)
+
+    df["date"] = pd.to_datetime(df["date"])
+
+    fig, axes = plt.subplots(2, 2, figsize=(10, 5))
+    for column, ax in zip(count_columns, axes.ravel(), strict=False):
+        sns.lineplot(df, x="date", y=column, ax=ax)
+        ax.set_xlabel("")
+        ax.set_ylabel("")
+        ax.set_title(column.replace("_", " ").title())
+        ax.set_yscale("log")
+
+    fig.suptitle("ChEMBL Statistics over Time")
+    fig.tight_layout()
+
+    chart_png_path = pystow.join("chembl", name="summary.png")
+    chart_svg_path = pystow.join("chembl", name="summary.svg")
+    fig.savefig(chart_png_path, dpi=450)
+    fig.savefig(chart_svg_path)
+
+    click.echo(f"output chart to {chart_png_path}")
 
 
 if __name__ == "__main__":

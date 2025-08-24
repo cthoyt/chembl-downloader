@@ -953,15 +953,26 @@ def download_readme(
     )
 
 
-def get_date(version: VersionHint | None = None, **kwargs: Any) -> str:
+# manually encoded versions that can't be directly looked up
+DATE_FIX = {"22": "2016-09-28", "24": "2018-05-01"}
+
+
+def get_date(
+    version: VersionHint | None = None, *, prefix: Sequence[str] | None = None, **kwargs: Any
+) -> str:
     """Get the date of a given version."""
-    path = download_readme(version=version, return_version=False, **kwargs)
+    version_info = _get_version_info(version, prefix=prefix)
+    if version_info.version in DATE_FIX:
+        return DATE_FIX[version_info.version]
+
+    path = download_readme(version=version_info, return_version=False, **kwargs)
     try:
         date_p = next(
             line for line in path.read_text().splitlines() if line.startswith(DATE_PREFIX)
         )
         date_p = date_p.removeprefix(DATE_PREFIX)
         date_p = date_p.lstrip()
+        date_p = date_p.replace(" ", "")  # for v14, which has a typo
     except StopIteration:
         return ""  # happens on 22.1 and 24.1
     else:
