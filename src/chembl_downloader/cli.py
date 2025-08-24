@@ -1,5 +1,7 @@
 """CLI for :mod:`chembl_downloader`."""
 
+from pathlib import Path
+
 import click
 from more_click import verbose_option
 from tqdm import tqdm
@@ -124,10 +126,15 @@ def history_draw() -> None:
     import seaborn as sns
     from humanize import intcomma
 
+    here = Path(__file__).parent.resolve()
+    data_dir = here.parent.parent.joinpath("docs", "_data")
+
     count_columns = ["compounds", "assays", "activities", "named_compounds"]
 
     summary_path = pystow.join("chembl", name="summary.tsv")
     df = pd.read_csv(summary_path, sep="\t")
+    if data_dir:
+        df.to_csv(data_dir.joinpath("summary.tsv"), sep="\t", index=False)
 
     # do this before parsing dates because it looks nicer
     chart_markdown_path = pystow.join("chembl", name="summary.md")
@@ -138,13 +145,12 @@ def history_draw() -> None:
 
     df["date"] = pd.to_datetime(df["date"])
 
-    fig, axes = plt.subplots(2, 2, figsize=(10, 5))
+    fig, axes = plt.subplots(2, 2, figsize=(10, 5), sharex=True)
     for column, ax in zip(count_columns, axes.ravel(), strict=False):
-        sns.lineplot(df, x="date", y=column, ax=ax)
+        sns.lineplot(df[df[column] > 0], x="date", y=column, ax=ax)
         ax.set_xlabel("")
         ax.set_ylabel("")
         ax.set_title(column.replace("_", " ").title())
-        ax.set_yscale("log")
 
     fig.suptitle("ChEMBL Statistics over Time")
     fig.tight_layout()
@@ -153,6 +159,8 @@ def history_draw() -> None:
     chart_svg_path = pystow.join("chembl", name="summary.svg")
     fig.savefig(chart_png_path, dpi=450)
     fig.savefig(chart_svg_path)
+    if data_dir:
+        fig.savefig(data_dir.joinpath("summary.svg"))
 
     click.echo(f"output chart to {chart_png_path}")
 
