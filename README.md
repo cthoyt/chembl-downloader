@@ -303,7 +303,8 @@ See
 caveats in the SQLite dumps of the first few versions, see discussion
 [here](https://github.com/cthoyt/chembl-downloader/issues/20)). The following
 table can be generated with
-`chembl_downloader history && chembl_downloader history-draw`.
+`chembl_downloader history && chembl_downloader history-draw`. These data can be
+found as a TSV in [docs/\_data/summary.tsv](docs/_data/summary.tsv).
 
 | Version | Date       | Compounds |    Assays | Activities | Named Compounds |
 | ------- | ---------- | --------: | --------: | ---------: | --------------: |
@@ -344,6 +345,10 @@ table can be generated with
 | 3       | 2010-04-30 |         0 |   432,022 |  2,490,742 |               0 |
 | 2       | 2009-12-07 |         0 |   416,284 |  2,404,622 |               0 |
 | 1       | 2009-10-28 |         0 |   329,250 |  1,936,969 |               0 |
+
+Or, as a chart:
+
+![](docs/_data/summary.svg)
 
 ## 👐 Contributing
 
