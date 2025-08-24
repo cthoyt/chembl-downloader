@@ -1,7 +1,5 @@
 """CLI for :mod:`chembl_downloader`."""
 
-import sys
-
 import click
 from more_click import verbose_option
 from tqdm import tqdm
@@ -88,12 +86,6 @@ def history(delete_old: bool) -> None:
 
     import pystow
 
-    try:
-        from tabulate import tabulate
-    except ImportError:
-        click.secho("Could not import `tabulate`. Please run `python -m pip install tabulate`")
-        sys.exit(1)
-
     latest_version_info = latest(full=True)
     versions_: list[str] = versions(full=False)
 
@@ -122,15 +114,6 @@ def history(delete_old: bool) -> None:
             writer.writerow(columns)
             writer.writerows(rows)
 
-    click.echo(
-        tabulate(
-            rows,
-            tablefmt="github",
-            headers=columns,
-            intfmt=",",
-        )
-    )
-
 
 @main.command()
 def history_draw() -> None:
@@ -144,7 +127,7 @@ def history_draw() -> None:
     count_columns = ["compounds", "assays", "activities", "named_compounds"]
 
     summary_path = pystow.join("chembl", name="summary.tsv")
-    df = pd.read_csv(summary_path, sep="\t")[::-1]
+    df = pd.read_csv(summary_path, sep="\t")
 
     # do this before parsing dates because it looks nicer
     chart_markdown_path = pystow.join("chembl", name="summary.md")
