@@ -299,12 +299,12 @@ See
 
 ## Statistics and Compatibility
 
-`chembl-downloader` is compatible with all versions of ChEMBL. However, some
-files are not available for all versions. For example, the SQLite version of the
-database was first added in release 21 (2015-02-12).
+`chembl-downloader` is compatible with all versions of ChEMBL. The following
+chart can be generated with
+`chembl_downloader history && chembl_downloader history-draw`.
 
 | Version | Date       | Compounds |    Assays | Activities | Named Compounds |
-|---------|------------|----------:|----------:|-----------:|----------------:|
+| ------- | ---------- | --------: | --------: | ---------: | --------------: |
 | 35      | 2024-12-01 | 2,496,335 | 1,740,546 | 21,123,501 |          42,231 |
 | 34      | 2024-03-28 | 2,431,025 | 1,644,390 | 20,772,701 |          42,387 |
 | 33      | 2023-05-31 | 2,399,743 | 1,610,596 | 20,334,684 |          41,923 |
