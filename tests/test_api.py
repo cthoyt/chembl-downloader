@@ -111,6 +111,10 @@ class TestApi(unittest.TestCase):
     def test_get_date(self) -> None:
         """Test getting the date."""
         self.assertEqual("2024-12-01", chembl_downloader.get_date(version="35"))
+        # fixes
+        self.assertEqual("2012-07-18", chembl_downloader.get_date(version="14"))
+        # dictionary lookup
+        self.assertEqual("2016-09-28", chembl_downloader.get_date(version="22"))
 
     def test_latest_version(self) -> None:
         """Test getting the latest version."""

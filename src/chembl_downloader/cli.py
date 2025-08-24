@@ -1,17 +1,19 @@
 """CLI for :mod:`chembl_downloader`."""
 
-import sys
-
 import click
 from more_click import verbose_option
 from tqdm import tqdm
 
 from .api import (
+    SummaryTuple,
+    _get_version_info,
     download_extract_sqlite,
-    get_date,
+    download_readme,
     get_substructure_library,
+    latest,
     query,
     query_scalar,
+    summarize,
     versions,
 )
 from .queries import (
@@ -77,35 +79,82 @@ def substructure(version: str | None) -> None:
 
 
 @main.command()
-def history() -> None:
+@click.option("--delete-old", is_flag=True)
+def history(delete_old: bool) -> None:
     """Generate a history command."""
-    try:
-        from tabulate import tabulate
-    except ImportError:
-        click.secho("Could not import `tabulate`. Please run `python -m pip install tabulate`")
-        sys.exit(1)
-    rows = [
-        (version, get_date(version=version), _count_compounds(version=version))
-        for version in tqdm(versions())
-    ]
-    click.echo(
-        tabulate(
-            rows,
-            tablefmt="github",
-            headers=["ChEMBL Version", "Release Date", "Total Named Compounds *from SQLite*"],
-        )
-    )
+    import csv
+
+    import pystow
+
+    latest_version_info = latest(full=True)
+    versions_: list[str] = versions(full=False)
+
+    summary_path = pystow.join("chembl", name="summary.tsv")
+    columns = SummaryTuple._fields
+    rows = []
+    for version in tqdm(versions_, desc="Summarizing ChEMBL over time", unit="versions"):
+        version_info = _get_version_info(version)
+
+        rows.append(summarize(version_info))
+        if delete_old and version_info.version != latest_version_info.version:
+            tqdm.write(f"[v{version_info.version}] cleaning up")
+
+            download_readme(version=version_info, return_version=False).unlink()
+            db_path = download_extract_sqlite(version=version_info, return_version=False)
+            db_path.unlink()
+
+            # if the parent directory is empty, remove it too
+            version_directory = db_path.parent
+            if not any(version_directory.iterdir()):
+                version_directory.rmdir()
+
+        # write on every iteration to make monitoring possible
+        with summary_path.open("w") as file:
+            writer = csv.writer(file, delimiter="\t")
+            writer.writerow(columns)
+            writer.writerows(rows)
 
 
-def _count_compounds(version: str) -> str:
-    """Test downloader for specific ChEMBL version."""
-    from .queries import COUNT_QUERY_SQL
+@main.command()
+def history_draw() -> None:
+    """Draw charts after running the ``history`` CLI command."""
+    import matplotlib.pyplot as plt
+    import pandas as pd
+    import pystow
+    import seaborn as sns
+    from humanize import intcomma
 
-    try:
-        total_compounds = query_scalar(COUNT_QUERY_SQL, version=version)
-    except Exception:
-        return "-"
-    return f"{total_compounds:,}"
+    count_columns = ["compounds", "assays", "activities", "named_compounds"]
+
+    summary_path = pystow.join("chembl", name="summary.tsv")
+    df = pd.read_csv(summary_path, sep="\t")
+
+    # do this before parsing dates because it looks nicer
+    chart_markdown_path = pystow.join("chembl", name="summary.md")
+    df_copy = df.copy()
+    for column in count_columns:
+        df_copy[column] = df_copy[column].map(intcomma)
+    df_copy.to_markdown(chart_markdown_path, tablefmt="github", index=False)
+
+    df["date"] = pd.to_datetime(df["date"])
+
+    fig, axes = plt.subplots(2, 2, figsize=(10, 5))
+    for column, ax in zip(count_columns, axes.ravel(), strict=False):
+        sns.lineplot(df, x="date", y=column, ax=ax)
+        ax.set_xlabel("")
+        ax.set_ylabel("")
+        ax.set_title(column.replace("_", " ").title())
+        ax.set_yscale("log")
+
+    fig.suptitle("ChEMBL Statistics over Time")
+    fig.tight_layout()
+
+    chart_png_path = pystow.join("chembl", name="summary.png")
+    chart_svg_path = pystow.join("chembl", name="summary.svg")
+    fig.savefig(chart_png_path, dpi=450)
+    fig.savefig(chart_svg_path)
+
+    click.echo(f"output chart to {chart_png_path}")
 
 
 if __name__ == "__main__":

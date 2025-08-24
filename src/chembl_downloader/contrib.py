@@ -2,13 +2,13 @@
 
 from __future__ import annotations
 
+from collections.abc import Sequence
 from pathlib import Path
 from typing import TYPE_CHECKING, Any, Literal
 
 import click
-import pystow
 
-from chembl_downloader.api import latest, query
+from chembl_downloader.api import VersionHint, _get_version_info, query
 from chembl_downloader.queries import (
     get_assay_sql,
     get_document_molecule_sql,
@@ -31,7 +31,8 @@ __all__ = [
 def get_target_smi_df(
     target_id: str,
     *,
-    version: str | None = None,
+    version: VersionHint | None = None,
+    prefix: Sequence[str] | None = None,
     refresh: bool = False,
     standard_relation: str | None = None,
     standard_type: str | None = None,
@@ -60,10 +61,9 @@ def get_target_smi_df(
     """
     import pandas as pd
 
-    if version is None:
-        version = latest()
+    version_info = _get_version_info(version=version, prefix=prefix)
 
-    path = pystow.join("chembl", version, "targets", name=f"{target_id}.smi")
+    path = version_info.module.join("targets", name=f"{target_id}.smi")
     if path.is_file() and not refresh:
         df = pd.read_csv(path)
     else:
@@ -73,7 +73,7 @@ def get_target_smi_df(
             standard_type=standard_type,
             **kwargs,
         )
-        df = query(sql=sql, version=version)
+        df = query(sql=sql, version=version_info)
         df.to_csv(path, index=False)
 
     if aggregate is not None:
@@ -92,64 +92,76 @@ def get_target_smi_df(
 
 
 def write_target_smi_file(
-    target_id: str, path: Path, *, version: str | None = None, sep: str = ",", **kwargs: Any
+    target_id: str,
+    path: Path,
+    *,
+    version: VersionHint | None = None,
+    prefix: Sequence[str] | None = None,
+    sep: str = ",",
+    **kwargs: Any,
 ) -> None:
     """Write SMI file for the given target."""
-    df = get_target_smi_df(target_id=target_id, version=version, **kwargs)
+    df = get_target_smi_df(target_id=target_id, version=version, prefix=prefix, **kwargs)
     df.to_csv(path, sep=sep, index=False, header=False)
 
 
 def get_assay_smi_df(
     assay_chembl_id: str,
     *,
-    version: str | None = None,
+    version: VersionHint | None = None,
+    prefix: Sequence[str] | None = None,
     refresh: bool = False,
     **kwargs: Any,
 ) -> pandas.DataFrame:
     """Get a dataframe for bioactivties in a given assay (from :func:`get_assay_sql`)."""
     import pandas as pd
 
-    if version is None:
-        version = latest()
+    version_info = _get_version_info(version=version, prefix=prefix)
 
-    path = pystow.join("chembl", version, "assays", name=f"{assay_chembl_id}.smi")
+    path = version_info.module.join("assays", name=f"{assay_chembl_id}.smi")
     if path.is_file() and not refresh:
         df = pd.read_csv(path)
     else:
         sql = get_assay_sql(assay_chembl_id)
-        df = query(sql=sql, version=version, **kwargs)
+        df = query(sql=sql, version=version_info, **kwargs)
         df.to_csv(path, index=False)
 
     return df
 
 
 def write_assay_smi_file(
-    assay_chembl_id: str, path: Path, *, version: str | None = None, sep: str = ",", **kwargs: Any
+    assay_chembl_id: str,
+    path: Path,
+    *,
+    version: VersionHint | None = None,
+    prefix: Sequence[str] | None = None,
+    sep: str = ",",
+    **kwargs: Any,
 ) -> None:
     """Write SMI file for the given assay."""
-    df = get_assay_smi_df(assay_chembl_id=assay_chembl_id, version=version, **kwargs)
+    df = get_assay_smi_df(assay_chembl_id=assay_chembl_id, version=version, prefix=prefix, **kwargs)
     df.to_csv(path, sep=sep, index=False, header=False)
 
 
 def get_document_smi_df(
     document_chembl_id: str,
     *,
-    version: str | None = None,
+    version: VersionHint | None = None,
+    prefix: Sequence[str] | None = None,
     refresh: bool = False,
     **kwargs: Any,
 ) -> pandas.DataFrame:
     """Get bioactivties in a given document (from :func:`get_document_molecule_sql`)."""
     import pandas as pd
 
-    if version is None:
-        version = latest()
+    version_info = _get_version_info(version=version, prefix=prefix)
 
-    path = pystow.join("chembl", version, "documents", name=f"{document_chembl_id}.smi")
+    path = version_info.module.join("documents", name=f"{document_chembl_id}.smi")
     if path.is_file() and not refresh:
         df = pd.read_csv(path)
     else:
         sql = get_document_molecule_sql(document_chembl_id)
-        df = query(sql=sql, version=version, **kwargs)
+        df = query(sql=sql, version=version_info, **kwargs)
         df.to_csv(path, index=False)
 
     return df
@@ -159,12 +171,15 @@ def write_document_smi_file(
     document_chembl_id: str,
     path: Path,
     *,
-    version: str | None = None,
+    version: VersionHint | None = None,
+    prefix: Sequence[str] | None = None,
     sep: str = ",",
     **kwargs: Any,
 ) -> None:
     """Write SMI file for bioactivities in the given document."""
-    df = get_document_smi_df(document_chembl_id=document_chembl_id, version=version, **kwargs)
+    df = get_document_smi_df(
+        document_chembl_id=document_chembl_id, version=version, prefix=prefix, **kwargs
+    )
     df.to_csv(path, sep=sep, index=False, header=False)
 
 

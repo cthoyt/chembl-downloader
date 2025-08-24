@@ -11,12 +11,14 @@ import tarfile
 from collections.abc import Generator, Iterable, Sequence
 from contextlib import closing, contextmanager
 from pathlib import Path
-from typing import TYPE_CHECKING, Any, Literal, NamedTuple, TypeAlias, overload
+from typing import TYPE_CHECKING, Any, Literal, NamedTuple, TypeAlias, cast, overload
 from xml.etree import ElementTree
 
 import pystow
 import requests
 from tqdm import tqdm
+
+from . import queries
 
 if TYPE_CHECKING:
     import chemfp.arena
@@ -56,6 +58,7 @@ __all__ = [
     "latest",
     "query",
     "query_scalar",
+    "summarize",
     "supplier",
     "versions",
 ]
@@ -90,7 +93,17 @@ class VersionPathPair(NamedTuple):
 LATEST_README_URL = "https://ftp.ebi.ac.uk/pub/databases/chembl/ChEMBLdb/latest/README"
 
 
-def latest() -> str:
+# docstr-coverage:excused `overload`
+@overload
+def latest(*, full: Literal[True] = True, prefix: Sequence[str] | None = ...) -> VersionInfo: ...
+
+
+# docstr-coverage:excused `overload`
+@overload
+def latest(*, full: Literal[False] = False, prefix: Sequence[str] | None = ...) -> str: ...
+
+
+def latest(*, full: bool = False, prefix: Sequence[str] | None = None) -> str | VersionInfo:
     """Get the latest version of ChEMBL as a string.
 
     :returns: The latest version string of ChEMBL
@@ -105,16 +118,37 @@ def latest() -> str:
             line = line.removeprefix(RELEASE_PREFIX)
             line = line.strip()
             line = line.removeprefix("chembl_")
-            return line
+            if not full:
+                return line
+            return _get_version_info(line, prefix=prefix)
+
     raise ValueError("could not find latest ChEMBL version")
 
 
-def versions() -> list[str]:
+# docstr-coverage:excused `overload`
+@overload
+def versions(
+    *, full: Literal[True] = ..., prefix: Sequence[str] | None = ...
+) -> list[VersionInfo]: ...
+
+
+# docstr-coverage:excused `overload`
+@overload
+def versions(*, full: Literal[False] = ..., prefix: Sequence[str] | None = ...) -> list[str]: ...
+
+
+def versions(
+    *, full: bool = False, prefix: Sequence[str] | None = None
+) -> list[str] | list[VersionInfo]:
     """Get all versions of ChEMBL."""
-    version_list = [str(i).zfill(2) for i in range(1, int(latest()) + 1)]
+    latest_version_info = latest(full=True, prefix=prefix)
+    rv = [str(i).zfill(2) for i in range(1, int(latest_version_info.version) + 1)]
     # Side version in ChEMBL
-    version_list.extend(["22_1", "24_1"])
-    return sorted(version_list, reverse=True)
+    rv.extend(["22_1", "24_1"])
+    rv = sorted(rv, reverse=True)
+    if not full:
+        return rv
+    return [_get_version_info(version, prefix) for version in rv]
 
 
 _CHEMBL_HOST = "ftp.ebi.ac.uk/pub/databases/chembl/ChEMBLdb/releases"
@@ -179,7 +213,9 @@ def _download_helper(
     """)
 
 
-def _get_version_info(version: VersionHint | None, prefix: Sequence[str] | None) -> VersionInfo:
+def _get_version_info(
+    version: VersionHint | None, prefix: Sequence[str] | None = None
+) -> VersionInfo:
     if isinstance(version, VersionInfo):
         return version
 
@@ -917,15 +953,26 @@ def download_readme(
     )
 
 
-def get_date(version: VersionHint | None = None, **kwargs: Any) -> str:
+# manually encoded versions that can't be directly looked up
+DATE_FIX = {"22": "2016-09-28", "24": "2018-05-01"}
+
+
+def get_date(
+    version: VersionHint | None = None, *, prefix: Sequence[str] | None = None, **kwargs: Any
+) -> str:
     """Get the date of a given version."""
-    path = download_readme(version=version, return_version=False, **kwargs)
+    version_info = _get_version_info(version, prefix=prefix)
+    if version_info.version in DATE_FIX:
+        return DATE_FIX[version_info.version]
+
+    path = download_readme(version=version_info, return_version=False, **kwargs)
     try:
         date_p = next(
             line for line in path.read_text().splitlines() if line.startswith(DATE_PREFIX)
         )
         date_p = date_p.removeprefix(DATE_PREFIX)
         date_p = date_p.lstrip()
+        date_p = date_p.replace(" ", "")  # for v14, which has a typo
     except StopIteration:
         return ""  # happens on 22.1 and 24.1
     else:
@@ -1018,3 +1065,40 @@ def get_uniprot_mapping_df(
         names=["uniprot_id", "chembl_target_id", "name", "type"],
     )
     return df
+
+
+class SummaryTuple(NamedTuple):
+    """A summary tuple."""
+
+    version: str
+    date: str
+    compounds: int
+    assays: int
+    activities: int
+    named_compounds: int
+
+
+def summarize(
+    version: VersionHint | None = None, *, prefix: Sequence[str] | None = None
+) -> SummaryTuple:
+    """Get a summary for a given version of ChEMBL."""
+    version_info = _get_version_info(version, prefix)
+    return SummaryTuple(
+        version=version_info.version,
+        date=get_date(version=version_info),
+        compounds=_count(queries.COUNT_COMPOUNDS_SQL, version_info=version_info),
+        assays=_count(queries.COUNT_ASSAYS_SQL, version_info=version_info),
+        activities=_count(queries.COUNT_ACTIVITIES_SQL, version_info=version_info),
+        named_compounds=_count(queries.COUNT_NAMED_COMPOUNDS_SQL, version_info=version_info),
+    )
+
+
+def _count(sql: str, version_info: VersionInfo) -> int:
+    import pandas.errors
+
+    try:
+        rv = query_scalar(sql, version=version_info)
+    except pandas.errors.DatabaseError:
+        return 0
+    else:
+        return cast(int, rv)
