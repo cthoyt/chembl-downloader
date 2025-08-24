@@ -299,8 +299,10 @@ See
 
 ## Statistics and Compatibility
 
-`chembl-downloader` is compatible with all versions of ChEMBL. The following
-chart can be generated with
+`chembl-downloader` is compatible with all versions of ChEMBL (with a few
+caveats in the SQLite dumps of the first few versions, see discussion
+[here](https://github.com/cthoyt/chembl-downloader/issues/20)). The following
+table can be generated with
 `chembl_downloader history && chembl_downloader history-draw`.
 
 | Version | Date       | Compounds |    Assays | Activities | Named Compounds |
