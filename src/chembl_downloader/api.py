@@ -78,6 +78,9 @@ class VersionInfo(NamedTuple):
     version: str
     module: pystow.Module
 
+    def _pre_10(self) -> bool:
+        return float(self.version) < 10
+
 
 #: A hint for a version, which can either be an integer, string, or float (for minor versions)
 VersionHint: TypeAlias = str | int | float | VersionInfo
@@ -1076,6 +1079,14 @@ class SummaryTuple(NamedTuple):
     assays: int
     activities: int
     named_compounds: int
+    documents: int
+    targets: int
+    cells: int
+    tissues: int
+    drug_warnings: int
+    drug_indications: int
+    drug_mechanisms: int
+    # TODO count drugs
 
 
 def summarize(
@@ -1083,22 +1094,33 @@ def summarize(
 ) -> SummaryTuple:
     """Get a summary for a given version of ChEMBL."""
     version_info = _get_version_info(version, prefix)
+
+    if version_info._pre_10():
+        compound_sql = "SELECT COUNT(*) from compounds"
+    else:
+        compound_sql = queries.COUNT_COMPOUNDS_SQL
+
     return SummaryTuple(
         version=version_info.version,
         date=get_date(version=version_info),
-        compounds=_count(queries.COUNT_COMPOUNDS_SQL, version_info=version_info),
+        compounds=_count(compound_sql, version_info=version_info),
         assays=_count(queries.COUNT_ASSAYS_SQL, version_info=version_info),
         activities=_count(queries.COUNT_ACTIVITIES_SQL, version_info=version_info),
         named_compounds=_count(queries.COUNT_NAMED_COMPOUNDS_SQL, version_info=version_info),
+        documents=_count(queries.COUNT_DOCUMENTS_SQL, version_info=version_info),
+        targets=_count(queries.COUNT_TARGETS_SQL, version_info=version_info),
+        cells=_count(queries.COUNT_CELLS_SQL, version_info=version_info),
+        tissues=_count(queries.COUNT_TISSUES_SQL, version_info=version_info),
+        drug_warnings=_count(queries.COUNT_DRUG_WARNINGS_SQL, version_info=version_info),
+        drug_indications=_count(queries.COUNT_DRUG_INDICATIONS_SQL, version_info=version_info),
+        drug_mechanisms=_count(queries.COUNT_DRUG_MECHANISMS_SQL, version_info=version_info),
     )
 
 
 def _count(sql: str, version_info: VersionInfo) -> int:
-    import pandas.errors
-
     try:
         rv = query_scalar(sql, version=version_info)
-    except pandas.errors.DatabaseError:
+    except OSError:  # pandas.errors.DatabaseError
         return 0
     else:
         return cast(int, rv)

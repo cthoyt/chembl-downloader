@@ -209,3 +209,24 @@ COUNT_ASSAYS_SQL = "SELECT COUNT(*) from assays"
 
 #: Count the number of compound records
 COUNT_COMPOUNDS_SQL = "SELECT COUNT(*) from molecule_dictionary"
+
+#: Count the number of documents
+COUNT_DOCUMENTS_SQL = "SELECT COUNT(*) from docs"
+
+#: Count the number of targets
+COUNT_TARGETS_SQL = "SELECT COUNT(*) from target_dictionary"
+
+#: Count the number of targets
+COUNT_CELLS_SQL = "SELECT COUNT(*) from cell_dictionary"
+
+#: Count the number of tissues
+COUNT_TISSUES_SQL = "SELECT COUNT(*) from tissue_dictionary"
+
+#: Count the number of drug warnings
+COUNT_DRUG_WARNINGS_SQL = "SELECT COUNT(*) from drug_warning"
+
+#: Count the number of drug indications
+COUNT_DRUG_INDICATIONS_SQL = "SELECT COUNT(*) from drug_indication"
+
+#: Count the number of drug indications
+COUNT_DRUG_MECHANISMS_SQL = "SELECT COUNT(*) from drug_mechanism"

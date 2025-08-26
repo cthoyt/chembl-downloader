@@ -14,15 +14,10 @@ from .api import (
     get_substructure_library,
     latest,
     query,
-    query_scalar,
     summarize,
-    versions,
 )
 from .queries import (
     ACTIVITIES_QUERY,
-    COUNT_ACTIVITIES_SQL,
-    COUNT_ASSAYS_SQL,
-    COUNT_COMPOUNDS_SQL,
     ID_NAME_QUERY,
 )
 
@@ -51,25 +46,34 @@ def download(version: str | None) -> None:
 @verbose_option  # type:ignore
 def test(version: str | None) -> None:
     """Run test queries."""
+    summary = summarize(version=version)
+
     click.secho("Number of Activities", fg="green")
-    count = query_scalar(COUNT_ACTIVITIES_SQL, version=version)
-    click.echo(f"{count:,}")
+    click.echo(f"{summary.activities:,}")
 
     click.secho("\nNumber of Compounds", fg="green")
-    count = query_scalar(COUNT_COMPOUNDS_SQL, version=version)
-    click.echo(f"{count:,}")
+    click.echo(f"{summary.compounds:,}")
 
     click.secho("\nNumber of Assays", fg="green")
-    count = query_scalar(COUNT_ASSAYS_SQL, version=version)
-    click.echo(f"{count:,}\n")
+    click.echo(f"{summary.assays:,}\n")
 
-    click.secho("ID to Name Query\n", fg="green")
-    df = query(ID_NAME_QUERY + "\nLIMIT 5", version=version)
-    click.echo(df.to_markdown(index=False))
+    click.echo(str(summary))
 
-    click.secho("\nActivity Query\n", fg="green")
-    df = query(ACTIVITIES_QUERY + "\nLIMIT 5", version=version)
-    click.echo(df.to_markdown(index=False))
+    click.secho("ID to Name Query", fg="green")
+    try:
+        df = query(ID_NAME_QUERY + "\nLIMIT 5", version=version)
+    except OSError:
+        click.secho("failed", fg="red")
+    else:
+        click.echo("\n" + df.to_markdown(index=False))
+
+    click.secho("\nActivity Query", fg="green")
+    try:
+        df = query(ACTIVITIES_QUERY + "\nLIMIT 5", version=version)
+    except OSError:
+        click.secho("failed", fg="red")
+    else:
+        click.echo("\n" + df.to_markdown(index=False))
 
 
 @main.command()
@@ -129,7 +133,7 @@ def history_draw() -> None:
     here = Path(__file__).parent.resolve()
     data_dir = here.parent.parent.joinpath("docs", "_data")
 
-    count_columns = ["compounds", "assays", "activities", "named_compounds"]
+    count_columns = SummaryTuple._fields[2:]
 
     summary_path = pystow.join("chembl", name="summary.tsv")
     df = pd.read_csv(summary_path, sep="\t")
@@ -155,14 +159,29 @@ def history_draw() -> None:
     fig.suptitle("ChEMBL Statistics over Time")
     fig.tight_layout()
 
-    chart_png_path = pystow.join("chembl", name="summary.png")
-    chart_svg_path = pystow.join("chembl", name="summary.svg")
-    fig.savefig(chart_png_path, dpi=450)
-    fig.savefig(chart_svg_path)
+    chart_stub = pystow.join("chembl", name="summary")
+    fig.savefig(chart_stub.with_suffix(".png"), dpi=450)
+    fig.savefig(chart_stub.with_suffix(".svg"))
     if data_dir:
         fig.savefig(data_dir.joinpath("summary.svg"))
 
-    click.echo(f"output chart to {chart_png_path}")
+    click.echo(f"output chart to {chart_stub}.svg")
+
+    df_diff = df.set_index("version").diff().reset_index()
+
+    fig, axes = plt.subplots(2, 2, figsize=(15, 5), sharex=True)
+    for column, ax in zip(count_columns, axes.ravel(), strict=False):
+        sns.lineplot(
+            df_diff[df_diff[column].notna() & (df_diff[column] > 0)], x="version", y=column, ax=ax
+        )
+        ax.set_xlabel("Version")
+        ax.set_ylabel("")
+        ax.set_title(column.replace("_", " ").title())
+    chart_diff_stub = pystow.join("chembl", name="summary-diff")
+    fig.savefig(chart_diff_stub.with_suffix(".png"), dpi=450)
+    fig.savefig(chart_diff_stub.with_suffix(".svg"))
+
+    # TODO take derivative
 
 
 if __name__ == "__main__":
