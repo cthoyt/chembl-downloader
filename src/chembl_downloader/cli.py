@@ -1,13 +1,17 @@
 """CLI for :mod:`chembl_downloader`."""
 
+from functools import partial
 from pathlib import Path
 
 import click
 from more_click import verbose_option
 from tqdm import tqdm
+from tqdm.contrib.concurrent import thread_map
 
 from .api import (
     SummaryTuple,
+    VersionHint,
+    VersionInfo,
     _get_version_info,
     download_extract_sqlite,
     download_readme,
@@ -17,10 +21,7 @@ from .api import (
     summarize,
     versions,
 )
-from .queries import (
-    ACTIVITIES_QUERY,
-    ID_NAME_QUERY,
-)
+from .queries import ACTIVITIES_QUERY, ID_NAME_QUERY
 
 __all__ = [
     "main",
@@ -42,11 +43,11 @@ def download(version: str | None) -> None:
     click.echo(download_extract_sqlite(version=version))
 
 
-@main.command()
+@main.command(name="summarize")
 @version_option
 @verbose_option  # type:ignore
-def test(version: str | None) -> None:
-    """Run test queries."""
+def print_summary(version: str | None) -> None:
+    """Run test queries and print results to the console."""
     summary = summarize(version=version)
 
     click.secho("Number of Activities", fg="green")
@@ -85,36 +86,53 @@ def substructure(version: str | None) -> None:
     get_substructure_library(version=version)
 
 
+TEST_VERSIONS = ["1", "19", "25", "35"]
+
+
 @main.command()
-@click.option("--delete-old", is_flag=True)
+@click.option(
+    "--delete-old",
+    is_flag=True,
+    help="Delete old versions as you go, useful if you have limited hard disk "
+    "space but also more time intensive on re-run.",
+)
+@click.option("--test", is_flag=True, help=f"Run on test versions: {', '.join(TEST_VERSIONS)}")
+@click.option(
+    "--max-workers",
+    type=int,
+    default=1,
+    help="Use threading to download/process multiple at the same time. In practice, "
+    "this doesn't work because the ChEMBL server is limited in how fast it can serve the data.",
+)
 @click.pass_context
-def history(ctx: click.Context, delete_old: bool) -> None:
-    """Generate a history command."""
+def history(ctx: click.Context, delete_old: bool, test: bool, max_workers: int) -> None:
+    """Generate a historical analysis of ChEMBL."""
     import csv
 
     import pystow
 
     latest_version_info = latest(full=True)
-    versions_: list[str] = versions(full=False)
+    if test:
+        versions_: list[str] = TEST_VERSIONS
+    else:
+        versions_ = versions(full=False)
 
     summary_path = pystow.join("chembl", name="summary.tsv")
     columns = SummaryTuple._fields
+
+    f = partial(_help_summarize, latest_version_info=latest_version_info, delete_old=delete_old)
     rows = []
-    for version in tqdm(versions_, desc="Summarizing ChEMBL over time", unit="versions"):
-        version_info = _get_version_info(version)
+    tqdm_kwargs = {
+        "desc": "Summarizing ChEMBL over time",
+        "unit": "versions",
+    }
+    if max_workers > 1:
+        row_it = thread_map(f, versions_, max_workers=2, **tqdm_kwargs)
+    else:
+        row_it = map(f, tqdm(versions_, **tqdm_kwargs))
 
-        rows.append(summarize(version_info))
-        if delete_old and version_info.version != latest_version_info.version:
-            tqdm.write(f"[v{version_info.version}] cleaning up")
-
-            download_readme(version=version_info, return_version=False).unlink()
-            db_path = download_extract_sqlite(version=version_info, return_version=False)
-            db_path.unlink()
-
-            # if the parent directory is empty, remove it too
-            version_directory = db_path.parent
-            if not any(version_directory.iterdir()):
-                version_directory.rmdir()
+    for row in row_it:
+        rows.append(row)
 
         # write on every iteration to make monitoring possible
         with summary_path.open("w") as file:
@@ -123,6 +141,30 @@ def history(ctx: click.Context, delete_old: bool) -> None:
             writer.writerows(rows)
 
     ctx.invoke(history_draw)
+
+
+def _help_summarize(
+    version: VersionHint, latest_version_info: VersionInfo, delete_old: bool
+) -> SummaryTuple:
+    version_info = _get_version_info(version)
+
+    rv = summarize(version_info)
+    if (
+        delete_old
+        and version_info.version != latest_version_info.version
+        and version_info.version not in TEST_VERSIONS
+    ):
+        tqdm.write(f"[v{version_info.version}] cleaning up")
+
+        download_readme(version=version_info, return_version=False).unlink()
+        db_path = download_extract_sqlite(version=version_info, return_version=False)
+        db_path.unlink()
+
+        # if the parent directory is empty, remove it too
+        version_directory = db_path.parent
+        if not any(version_directory.iterdir()):
+            version_directory.rmdir()
+    return rv
 
 
 @main.command()
