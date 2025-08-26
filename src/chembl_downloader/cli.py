@@ -87,7 +87,8 @@ def substructure(version: str | None) -> None:
 
 @main.command()
 @click.option("--delete-old", is_flag=True)
-def history(delete_old: bool) -> None:
+@click.pass_context
+def history(ctx: click.Context, delete_old: bool) -> None:
     """Generate a history command."""
     import csv
 
@@ -120,6 +121,8 @@ def history(delete_old: bool) -> None:
             writer = csv.writer(file, delimiter="\t")
             writer.writerow(columns)
             writer.writerows(rows)
+
+    ctx.invoke(history_draw)
 
 
 @main.command()
