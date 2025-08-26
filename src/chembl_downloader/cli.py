@@ -191,17 +191,25 @@ def history_draw() -> None:
     df_copy = df.copy()
     for column in count_columns:
         df_copy[column] = df_copy[column].map(intcomma)
+    df_copy.columns = [c.replace("_", " ").title() for c in df_copy.columns]
     df_copy.to_markdown(chart_markdown_path, tablefmt="github", index=False)
 
     df["date"] = pd.to_datetime(df["date"])
+    version_ticks = df["version"].map(lambda s: float(s.replace("_", ".")))
 
-    n_rows = len(count_columns) // 2
-    figsize = (8.5, 1.8 * n_rows + 0.5)
+    n_cols = 3
+    n_rows = (len(count_columns) + 1) // n_cols
+    figsize = (3.5 * n_cols + 0.5, 1.6 * n_rows + 0.5)
 
-    fig, axes = plt.subplots(n_rows, 2, figsize=figsize, sharex=True)
-    for column, ax in zip(count_columns, axes.ravel(), strict=False):
-        sns.lineplot(df[df[column] > 0], x="date", y=column, ax=ax)
-        ax.set_xlabel("")
+    fig, axes = plt.subplots(n_rows, n_cols, figsize=figsize, sharex=True)
+
+    first, *rest = axes.ravel()
+    sns.lineplot(df, x=version_ticks, y="date", ax=first)
+    first.set_title("Release Date")
+
+    for column, ax in zip(count_columns, rest, strict=False):
+        sns.lineplot(df[df[column] > 0], x=version_ticks, y=column, ax=ax)
+        ax.set_xlabel("Version")
         ax.set_ylabel("")
         ax.set_title(column.replace("_", " ").title())
 
@@ -213,6 +221,7 @@ def history_draw() -> None:
     fig.savefig(chart_stub.with_suffix(".svg"))
     if data_dir:
         fig.savefig(data_dir.joinpath("summary.svg"))
+    fig.clf()
 
     click.echo(f"output chart to {chart_stub}.svg")
 
@@ -221,11 +230,22 @@ def history_draw() -> None:
     for col in count_columns:
         df_diff[col] = df_diff[col].astype(int)
 
-    fig, axes = plt.subplots(n_rows, 2, figsize=figsize)
-    for column, ax in zip(count_columns, axes.ravel(), strict=False):
+    fig, axes = plt.subplots(n_rows, n_cols, figsize=figsize, sharex=True)
+    version_ticks = df_diff["version"].map(lambda s: float(s.replace("_", ".")))
+    first, *rest = axes.ravel()
+    sns.lineplot(
+        df_diff,
+        x=version_ticks,
+        y=df_diff["date"].map(lambda d: d.days),
+        ax=first,
+    )
+    first.set_title("Time Since Last Release")
+    first.set_ylabel("Days")
+
+    for column, ax in zip(count_columns, rest, strict=False):
         sns.lineplot(
             df_diff,
-            x=df_diff["version"].map(lambda s: float(s.replace("_", "."))),
+            x=version_ticks,
             y=column,
             ax=ax,
         )
