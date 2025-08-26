@@ -150,7 +150,9 @@ def history_draw() -> None:
 
     df["date"] = pd.to_datetime(df["date"])
 
-    fig, axes = plt.subplots(2, 2, figsize=(10, 5), sharex=True)
+    n_rows = len(count_columns) // 2
+
+    fig, axes = plt.subplots(n_rows, 2, figsize=(8.5, 1.8 * n_rows + 0.5), sharex=True)
     for column, ax in zip(count_columns, axes.ravel(), strict=False):
         sns.lineplot(df[df[column] > 0], x="date", y=column, ax=ax)
         ax.set_xlabel("")
