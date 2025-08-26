@@ -15,6 +15,7 @@ from .api import (
     latest,
     query,
     summarize,
+    versions,
 )
 from .queries import (
     ACTIVITIES_QUERY,

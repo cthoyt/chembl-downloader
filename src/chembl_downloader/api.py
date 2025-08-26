@@ -1076,9 +1076,9 @@ class SummaryTuple(NamedTuple):
     version: str
     date: str
     compounds: int
+    named_compounds: int
     assays: int
     activities: int
-    named_compounds: int
     documents: int
     targets: int
     cells: int
@@ -1104,9 +1104,9 @@ def summarize(
         version=version_info.version,
         date=get_date(version=version_info),
         compounds=_count(compound_sql, version_info=version_info),
+        named_compounds=_count(queries.COUNT_NAMED_COMPOUNDS_SQL, version_info=version_info),
         assays=_count(queries.COUNT_ASSAYS_SQL, version_info=version_info),
         activities=_count(queries.COUNT_ACTIVITIES_SQL, version_info=version_info),
-        named_compounds=_count(queries.COUNT_NAMED_COMPOUNDS_SQL, version_info=version_info),
         documents=_count(queries.COUNT_DOCUMENTS_SQL, version_info=version_info),
         targets=_count(queries.COUNT_TARGETS_SQL, version_info=version_info),
         cells=_count(queries.COUNT_CELLS_SQL, version_info=version_info),
