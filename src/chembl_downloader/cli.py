@@ -196,8 +196,9 @@ def history_draw() -> None:
     df["date"] = pd.to_datetime(df["date"])
 
     n_rows = len(count_columns) // 2
+    figsize = (8.5, 1.8 * n_rows + 0.5)
 
-    fig, axes = plt.subplots(n_rows, 2, figsize=(8.5, 1.8 * n_rows + 0.5), sharex=True)
+    fig, axes = plt.subplots(n_rows, 2, figsize=figsize, sharex=True)
     for column, ax in zip(count_columns, axes.ravel(), strict=False):
         sns.lineplot(df[df[column] > 0], x="date", y=column, ax=ax)
         ax.set_xlabel("")
@@ -215,21 +216,33 @@ def history_draw() -> None:
 
     click.echo(f"output chart to {chart_stub}.svg")
 
-    df_diff = df.set_index("version").diff().reset_index()
+    df_diff = df.set_index("version")[::-1].diff().reset_index()
+    df_diff = df_diff[df_diff["date"].notna()]
+    for col in count_columns:
+        df_diff[col] = df_diff[col].astype(int)
 
-    fig, axes = plt.subplots(2, 2, figsize=(15, 5), sharex=True)
+    fig, axes = plt.subplots(n_rows, 2, figsize=figsize)
     for column, ax in zip(count_columns, axes.ravel(), strict=False):
         sns.lineplot(
-            df_diff[df_diff[column].notna() & (df_diff[column] > 0)], x="version", y=column, ax=ax
+            df_diff,
+            x=df_diff["version"].map(lambda s: float(s.replace("_", "."))),
+            y=column,
+            ax=ax,
         )
         ax.set_xlabel("Version")
         ax.set_ylabel("")
+        ax.set_yscale("symlog")
         ax.set_title(column.replace("_", " ").title())
+        ax.axhline(0.0)
+
     chart_diff_stub = pystow.join("chembl", name="summary-diff")
+    fig.suptitle("ChEMBL Statistics (Discrete Derivative)")
+    fig.tight_layout()
     fig.savefig(chart_diff_stub.with_suffix(".png"), dpi=450)
     fig.savefig(chart_diff_stub.with_suffix(".svg"))
-
-    # TODO take derivative
+    if data_dir:
+        df_diff[::-1].to_csv(data_dir.joinpath("summary-diff.tsv"), sep="\t", index=False)
+        fig.savefig(data_dir.joinpath("summary-diff.svg"))
 
 
 if __name__ == "__main__":
