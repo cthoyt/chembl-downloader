@@ -78,8 +78,8 @@ class VersionInfo(NamedTuple):
     version: str
     module: pystow.Module
 
-    def _pre_10(self) -> bool:
-        return float(self.version) < 10
+    def _pre_molecule_dictionary(self) -> bool:
+        return float(self.version) < 9
 
 
 #: A hint for a version, which can either be an integer, string, or float (for minor versions)
@@ -1095,7 +1095,7 @@ def summarize(
     """Get a summary for a given version of ChEMBL."""
     version_info = _get_version_info(version, prefix)
 
-    if version_info._pre_10():
+    if version_info._pre_molecule_dictionary():
         compound_sql = "SELECT COUNT(*) from compounds"
     else:
         compound_sql = queries.COUNT_COMPOUNDS_SQL
