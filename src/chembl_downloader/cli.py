@@ -86,7 +86,7 @@ def substructure(version: str | None) -> None:
     get_substructure_library(version=version)
 
 
-TEST_VERSIONS = ["1", "19", "25", "35"]
+TEST_VERSIONS = ["1", "9", "19", "25", "35"]
 
 
 @main.command()
@@ -195,7 +195,7 @@ def history_draw() -> None:
     df_copy.to_markdown(chart_markdown_path, tablefmt="github", index=False)
 
     df["date"] = pd.to_datetime(df["date"])
-    version_ticks = df["version"].map(lambda s: float(s.replace("_", ".")))
+    version_ticks = df["version"].map(lambda s: float(str(s).replace("_", ".")))
 
     n_cols = 3
     n_rows = (len(count_columns) + 1) // n_cols
