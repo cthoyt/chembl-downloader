@@ -143,9 +143,7 @@ have used `chembl-downloader` in their associated code [@Domingo-Fernández2023;
 [PyPI](https://pypi.org/project/chembl-downloader) with the source code
 available at
 [https://github.com/cthoyt/chembl-downloader](https://github.com/cthoyt/chembl-downloader)
-archived to Zenodo at
-[doi:10.5281/zenodo.5140463](https://doi.org/10.5281/zenodo.5140463) and
-documentation available at
+and documentation available at
 [https://chembl-downloader.readthedocs.io](https://chembl-downloader.readthedocs.io).
 The repository also contains an interactive Jupyter notebook tutorial and
 notebooks for the case studies described above.
