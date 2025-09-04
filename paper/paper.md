@@ -100,14 +100,14 @@ immense variability introduced by new datapoints in later versions of ChEMBL,
 and highlight the number of additional compounds added to each of its 24
 target-specific datasets. @Landrum2024 further investigated the impact of such
 aggregation. See the corresponding
-[Jupyter notebook](https://github.com/cthoyt/chembl-downloader/blob/main/notebooks/cortes-ciriano-refresh.ipynb).
+[Jupyter notebook](https://github.com/cthoyt/chembl-downloader/blob/v0.5.2/notebooks/cortes-ciriano-refresh.ipynb).
 
 A second case study demonstrates the value of having a reproducible script for
 identifying missing identifier mappings between molecules in ChEMBL and ChEBI
 [@Hastings2016] _via_ lexical mappings produced by Gilda [@Gyori2022], which
 identified 4,266 potential mappings for curation e.g., in a workflow such as
 Biomappings [@Hoyt2022]. See the corresponding
-[Jupyter notebook](https://github.com/cthoyt/chembl-downloader/blob/main/notebooks/chebi-mappings.ipynb).
+[Jupyter notebook](https://github.com/cthoyt/chembl-downloader/blob/v0.5.2/notebooks/chebi-mappings.ipynb).
 
 A final case study demonstrates the utility of `chembl-downloader` by making
 pull requests to the code repositories corresponding to three popular
