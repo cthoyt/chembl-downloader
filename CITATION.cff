@@ -5,7 +5,7 @@ authors:
   - family-names: Hoyt
     given-names: Charles Tapley
     orcid: 0000-0003-4423-4370
-version: 0.5.2-dev
+version: 0.5.2
 url: "https://github.com/cthoyt/chembl-downloader"
 preferred-citation:
   type: article
