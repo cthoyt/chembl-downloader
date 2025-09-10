@@ -59,9 +59,9 @@ for querying and processing data in bulk due to dependency on network
 connection, remote server uptime and load, rate limits, and the need to paginate
 over results. Alternatively, bulk access is currently cumbersome for most
 potential users due to the need to download, set up, and connect to databases
-locally. Finally, third-party software (e.g.,
+locally. Finally, third-party software such as
 [Pipeline Pilot](https://web.archive.org/web/20250724192013/https://www.3ds.com/products/biovia/pipeline-pilot),
-KNIME [@Berthold2009], Galaxy [@Galaxy2024], and others reviewed by @Warr2012)
+KNIME [@Berthold2009], Galaxy [@Galaxy2024], and others reviewed by @Warr2012,
 that provide access to ChEMBL are often inflexible or inextensible due to being
 proprietary, closed source, or lacking approachable documentation.
 
