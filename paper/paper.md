@@ -54,12 +54,14 @@ ChEMBL is typically accessed through its
 through its Python client [@Davies2015], through its RDF platform [@Jupp2014],
 or in bulk through its
 [file transfer protocol (FTP) server](https://ftp.ebi.ac.uk/pub/databases/chembl/ChEMBLdb/releases).
-However, APIs and their respective wrapper libraries are not efficient for
-querying and processing data in bulk and bulk access is currently cumbersome for
-most potential users due to the need to download, set up, and connect to
-databases locally. Additional third-party software (e.g., KNIME, Pipeline Pilot)
-provide alternate access to ChEMBL, but are relatively inflexible, inextensible,
-or proprietary.
+However, APIs and their respective wrapper libraries are generally not efficient
+for querying and processing data in bulk due to dependency on network
+connection, remote server uptime and load, rate limits, and the need to paginate
+over results. Alternatively, bulk access is currently cumbersome for most
+potential users due to the need to download, set up, and connect to databases
+locally. Finally, third-party software (e.g., Pipeline Pilot, KNIME, Galaxy)
+that provide access to ChEMBL are often inflexible or inextensible due to being
+proprietary, closed source, or lacking approachable documentation.
 
 # Summary
 
