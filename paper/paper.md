@@ -23,7 +23,7 @@ authors:
     corresponding: true
 
 affiliations:
-  - name: RWTH Aachen University, Institute of Inorganic Chemistry
+  - name: RWTH Aachen University, Institute of Inorganic Chemistry, Aachen, Germany
     index: 1
     ror: 04xfq0f34
 
